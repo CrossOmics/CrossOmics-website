@@ -6,3 +6,9 @@ out
 !.env.example
 .idea/
 main.py
+
+# sibling worktrees
+CrossOmics-crossfade/
+CrossOmics-maskwipe/
+CrossOmics-flip3d/
+CrossOmics-diagonal/
