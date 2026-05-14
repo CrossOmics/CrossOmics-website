@@ -73,7 +73,7 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
 .menu-item {
   font-family: var(--serif);
   font-weight: 400;
-  font-size: clamp(40px, 5.4vw, 84px);
+  font-size: clamp(28px, 3.8vw, 59px);
   line-height: 1.05;
   letter-spacing: 0.01em;
   cursor: pointer;
