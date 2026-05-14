@@ -134,7 +134,7 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: translateX(-140px);
+  transform: translateX(-280px);
 }
 
 /* each card in the horizontal deck */
@@ -165,32 +165,33 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
 }
 .overlay > * { pointer-events: auto; }
 
+/* Labels overlaid INSIDE the active card image */
 .rot-label {
   position: absolute;
-  top: -14px;
-  right: -42px;
-  transform: rotate(90deg);
-  transform-origin: left top;
+  top: 18px;
+  left: 20px;
   font-family: var(--serif);
-  font-size: 11px;
-  letter-spacing: 0.32em;
-  color: rgba(255,255,255,0.78);
+  font-size: 10px;
+  letter-spacing: 0.34em;
+  color: rgba(255,255,255,0.95);
   white-space: nowrap;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.55);
+  z-index: 11;
 }
 
 .vertical-label {
   position: absolute;
-  top: 0;
-  right: -78px;
-  height: 100%;
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
+  top: 42px;
+  left: 20px;
+  right: 20px;
   font-family: var(--serif);
-  font-size: 30px;
-  letter-spacing: 0.06em;
-  color: rgba(255,255,255,0.92);
-  white-space: nowrap;
-  overflow: hidden;
+  font-size: 22px;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  color: #fff;
+  white-space: normal;
+  text-shadow: 0 2px 14px rgba(0,0,0,0.6);
+  z-index: 11;
 }
 
 .enter-btn {
