@@ -31,7 +31,7 @@ const TICKER = [
 function slotStyle(offset: number) {
   const map: Record<number, { x: number; y: number; scale: number; opacity: number; z: number }> = {
     [-1]: { x: -620, y:  260, scale: 0.38, opacity: 0.35, z: 2 },
-    [0]:  { x:    0, y:    0, scale: 1.5,  opacity: 1.0,  z: 5 },
+    [0]:  { x:    0, y:    0, scale: 1.8,  opacity: 1.0,  z: 5 },
     [1]:  { x:  580, y: -250, scale: 0.3,  opacity: 0.32, z: 2 }
   };
   return (
@@ -170,6 +170,9 @@ export default function Hero() {
 
                 <a className="enter-btn" href={current.href} aria-label="Enter">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                    <path d="M4 12h16M14 6l6 6-6 6" />
+                  </svg>
+                  <svg className="arrow-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                     <path d="M4 12h16M14 6l6 6-6 6" />
                   </svg>
                 </a>
