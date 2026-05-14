@@ -99,7 +99,7 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
 .menu-item {
   font-family: var(--serif);
   font-weight: 400;
-  font-size: clamp(32px, 4.4vw, 68px);
+  font-size: clamp(26px, 3.6vw, 56px);
   line-height: 1.05;
   letter-spacing: 0.01em;
   cursor: pointer;

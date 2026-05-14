@@ -78,6 +78,8 @@ export default function Hero() {
                 className={`menu-item ${i === active ? "active" : ""}`}
                 onMouseEnter={() => setActive(i)}
                 onFocus={() => setActive(i)}
+                onClick={() => router.push(m.href)}
+                onKeyDown={(e) => { if (e.key === "Enter") router.push(m.href); }}
                 tabIndex={0}
                 role="menuitem"
               >
