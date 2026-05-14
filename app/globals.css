@@ -134,6 +134,7 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
   display: flex;
   align-items: center;
   justify-content: center;
+  transform: translateX(-140px);
 }
 
 /* each card in the horizontal deck */
@@ -160,7 +161,7 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
   aspect-ratio: 3 / 4.2;
   pointer-events: none;
   z-index: 10;
-  transform: scale(1.2);
+  transform: scale(1.45);
 }
 .overlay > * { pointer-events: auto; }
 
