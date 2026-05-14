@@ -60,29 +60,17 @@ export default function Hero() {
       <header className="header">
         <div className="logo">
           <span className="logo-mark">C&amp;O</span>
-          <span className="logo-word">CROSS OMICS · DIAGONAL-PEEK</span>
+          <span className="logo-word">CROSS OMICS</span>
         </div>
         <div className="header-right">
-          <a href="#">Recruitment Information</a>
-          <div className="lang"><span className="active">EN</span><span>/</span><span>JP</span></div>
+          <a href="/news">News</a>
+          <a href="/recruitment">Recruitment</a>
           <div className="burger" aria-label="menu"><span /><span /></div>
         </div>
       </header>
 
       <section className="hero">
-        <div className="hero-bg" aria-hidden>
-          <AnimatePresence>
-            <motion.div
-              key={current.key + "-bg"}
-              className="hero-bg-img"
-              style={{ backgroundImage: `url(${current.image})` }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-            />
-          </AnimatePresence>
-        </div>
+        <div className="hero-bg hero-bg-painting" aria-hidden />
 
         <div className="menu">
           <ul className="menu-list" role="menu">
