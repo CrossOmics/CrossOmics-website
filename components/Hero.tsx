@@ -8,10 +8,10 @@ type MenuEntry = {
 };
 
 const MENU: MenuEntry[] = [
-  { key: "tutorial", label: "TUTORIAL",  vertical: "Meet Gardener-Agent", image: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1200&q=80", href: "/tutorial" },
-  { key: "research", label: "RESEARCH",  vertical: "Publications",        image: "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1200&q=80", href: "/research" },
-  { key: "value",    label: "VALUE",     vertical: "What we stand for",   image: "https://images.unsplash.com/photo-1454425064867-83bc48b40c4d?auto=format&fit=crop&w=1200&q=80", href: "/value" },
-  { key: "future",   label: "FUTURE",    vertical: "What's next",         image: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1200&q=80", href: "/future" }
+  { key: "tutorial", label: "TUTORIAL",  vertical: "Meet Gardener-Agent", image: "/bg2.png", href: "/tutorial" },
+  { key: "research", label: "RESEARCH",  vertical: "Publications",        image: "/bg3.png", href: "/research" },
+  { key: "value",    label: "VALUE",     vertical: "What we stand for",   image: "/bg4.jpg", href: "/value" },
+  { key: "future",   label: "FUTURE",    vertical: "What's next",         image: "/bg5.jpg", href: "/future" }
 ];
 
 const TICKER = [
