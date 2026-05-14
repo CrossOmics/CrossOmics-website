@@ -24,19 +24,19 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
 .header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 50;
   display: flex; align-items: center; justify-content: space-between;
-  padding: 22px 40px;
-  font-size: 12px;
-  letter-spacing: 0.12em;
+  padding: 26px 44px;
+  font-size: 16px;
+  letter-spacing: 0.14em;
 }
 .logo { display: flex; align-items: center; gap: 12px; }
 .logo-mark { font-family: var(--serif); font-size: 22px; }
-.logo-word { font-size: 10px; letter-spacing: 0.22em; opacity: 0.85; }
-.header-right { display: flex; align-items: center; gap: 28px; }
+.logo-word { font-family: var(--serif); font-size: 22px; letter-spacing: 0.18em; opacity: 0.95; }
+.header-right { display: flex; align-items: center; gap: 36px; font-size: 15px; }
 .lang { display: flex; gap: 8px; }
 .lang .active { opacity: 1; }
 .lang span { opacity: 0.55; }
 .burger {
-  width: 28px; height: 14px;
+  width: 36px; height: 18px;
   display: flex; flex-direction: column; justify-content: space-between;
   cursor: pointer;
 }
@@ -99,7 +99,7 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
 .menu-item {
   font-family: var(--serif);
   font-weight: 400;
-  font-size: clamp(22px, 3vw, 47px);
+  font-size: clamp(32px, 4.4vw, 68px);
   line-height: 1.05;
   letter-spacing: 0.01em;
   cursor: pointer;
@@ -192,7 +192,11 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
   white-space: normal;
   text-shadow: 0 2px 14px rgba(0,0,0,0.6);
   z-index: 11;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 240ms ease;
 }
+.vertical-label:hover { transform: translateX(2px); }
 
 .enter-btn {
   position: absolute;
@@ -306,20 +310,21 @@ html:has(.page), body:has(.page) { overflow-y: auto; overflow-x: hidden; backgro
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 40px;
+  padding: 24px 44px;
   background: rgba(245, 240, 230, 0.78);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  font-size: 12px;
-  letter-spacing: 0.12em;
+  font-size: 16px;
+  letter-spacing: 0.14em;
 }
 .page-header .logo { color: #1a1a1a; }
-.page-nav { display: flex; gap: 28px; }
+.page-nav { display: flex; gap: 36px; }
 .page-nav a {
   color: #1a1a1a;
   opacity: 0.78;
   transition: opacity 200ms ease;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
+  font-size: 15px;
 }
 .page-nav a:hover { opacity: 1; }
 .page-header-right { display: flex; align-items: center; gap: 24px; color: #1a1a1a; }

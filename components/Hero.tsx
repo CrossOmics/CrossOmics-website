@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 type MenuEntry = {
@@ -43,6 +44,7 @@ function slotStyle(offset: number) {
 }
 
 export default function Hero() {
+  const router = useRouter();
   const [active, setActive] = useState(0); // start on TUTORIAL
   const [tickerIdx, setTickerIdx] = useState(0);
 
@@ -56,7 +58,6 @@ export default function Hero() {
     <>
       <header className="header">
         <div className="logo">
-          <span className="logo-mark">C&amp;O</span>
           <span className="logo-word">CROSS OMICS</span>
         </div>
         <div className="header-right">
@@ -120,7 +121,10 @@ export default function Hero() {
                         : undefined
                     }
                     transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                    onClick={() => setActive(i)}
+                    onClick={() => {
+                      if (offset === 0) router.push(m.href);
+                      else setActive(i);
+                    }}
                     aria-label={m.label}
                   />
                 );
@@ -141,16 +145,17 @@ export default function Hero() {
                 </AnimatePresence>
 
                 <AnimatePresence mode="wait">
-                  <motion.div
+                  <motion.a
                     key={current.key + "-vert"}
                     className="vertical-label"
+                    href={current.href}
                     initial={{ opacity: 0, y: 22 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -14 }}
                     transition={{ duration: 0.55, ease: "easeOut", delay: 0.25 }}
                   >
                     {current.vertical}
-                  </motion.div>
+                  </motion.a>
                 </AnimatePresence>
 
                 <a className="enter-btn" href={current.href} aria-label="Enter">

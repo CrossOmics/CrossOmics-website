@@ -25,7 +25,6 @@ export default function PageShell({
 
       <header className="page-header">
         <Link href="/" className="logo">
-          <span className="logo-mark">C&amp;O</span>
           <span className="logo-word">CROSS OMICS</span>
         </Link>
         <nav className="page-nav">
@@ -57,7 +56,6 @@ export default function PageShell({
       <footer className="page-footer">
         <div className="footer-inner">
           <div className="footer-logo">
-            <span className="logo-mark">C&amp;O</span>
             <span className="logo-word">CROSS OMICS</span>
           </div>
           <nav className="footer-nav">
