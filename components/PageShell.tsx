@@ -2,13 +2,10 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 const NAV = [
-  { href: "/company", label: "Company" },
-  { href: "/business", label: "Business" },
-  { href: "/sustainability", label: "Sustainability" },
-  { href: "/ir", label: "IR" },
-  { href: "/news", label: "News" },
-  { href: "/development", label: "Development" },
-  { href: "/blog", label: "Blog" }
+  { href: "/tutorial", label: "Tutorial" },
+  { href: "/research", label: "Research" },
+  { href: "/value", label: "Value" },
+  { href: "/future", label: "Future" }
 ];
 
 export default function PageShell({
@@ -39,7 +36,7 @@ export default function PageShell({
           ))}
         </nav>
         <div className="page-header-right">
-          <a href="/recruitment">Recruitment</a>
+          <a href="https://github.com/CrossOmics/Gardener-Agent" target="_blank" rel="noopener noreferrer">GitHub</a>
           <div className="burger" aria-label="menu"><span /><span /></div>
         </div>
       </header>

@@ -8,13 +8,10 @@ type MenuEntry = {
 };
 
 const MENU: MenuEntry[] = [
-  { key: "company", label: "COMPANY", vertical: "Company information", image: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80", href: "/company" },
-  { key: "business", label: "BUSINESS", vertical: "Our business lines", image: "https://images.unsplash.com/photo-1505236858219-8359eb29e329?auto=format&fit=crop&w=1200&q=80", href: "/business" },
-  { key: "sustainability", label: "SUSTAINABILITY", vertical: "A circle of happiness", image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80", href: "/sustainability" },
-  { key: "ir", label: "IR", vertical: "Investor relations", image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1200&q=80", href: "/ir" },
-  { key: "news", label: "NEWS", vertical: "Latest news and topics", image: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80", href: "/news" },
-  { key: "dev", label: "DEVELOPMENT / CONSULTING", vertical: "Development and consulting", image: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1200&q=80", href: "/development" },
-  { key: "blog", label: "BLOG", vertical: "Stories from the team", image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1200&q=80", href: "/blog" }
+  { key: "tutorial", label: "TUTORIAL",  vertical: "Meet Gardener-Agent", image: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1200&q=80", href: "/tutorial" },
+  { key: "research", label: "RESEARCH",  vertical: "Publications",        image: "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1200&q=80", href: "/research" },
+  { key: "value",    label: "VALUE",     vertical: "What we stand for",   image: "https://images.unsplash.com/photo-1454425064867-83bc48b40c4d?auto=format&fit=crop&w=1200&q=80", href: "/value" },
+  { key: "future",   label: "FUTURE",    vertical: "What's next",         image: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1200&q=80", href: "/future" }
 ];
 
 const TICKER = [
@@ -46,7 +43,7 @@ function slotStyle(offset: number) {
 }
 
 export default function Hero() {
-  const [active, setActive] = useState(1); // start on BUSINESS so peek demo is visible
+  const [active, setActive] = useState(0); // start on TUTORIAL
   const [tickerIdx, setTickerIdx] = useState(0);
 
   useEffect(() => { MENU.forEach((m) => { const img = new Image(); img.src = m.image; }); }, []);
@@ -63,8 +60,8 @@ export default function Hero() {
           <span className="logo-word">CROSS OMICS</span>
         </div>
         <div className="header-right">
-          <a href="/news">News</a>
-          <a href="/recruitment">Recruitment</a>
+          <a href="/research">Research</a>
+          <a href="https://github.com/CrossOmics/Gardener-Agent" target="_blank" rel="noopener noreferrer">GitHub</a>
           <div className="burger" aria-label="menu"><span /><span /></div>
         </div>
       </header>

@@ -95,7 +95,7 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
   padding: 0 6vw 0 8vw;
 }
 
-.menu-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.menu-list { list-style: none; display: flex; flex-direction: column; gap: 24px; }
 .menu-item {
   font-family: var(--serif);
   font-weight: 400;
@@ -585,3 +585,28 @@ html:has(.page), body:has(.page) { overflow-y: auto; overflow-x: hidden; backgro
   .news-thumb { width: 100%; height: 180px; }
   .footer-inner { grid-template-columns: 1fr; text-align: center; }
 }
+
+/* ----- Tutorial: code block + CTA link ----- */
+.code-block {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  background: rgba(20, 20, 20, 0.92);
+  color: #ece5d6;
+  padding: 22px 26px;
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-x: auto;
+  margin: 24px 0;
+  white-space: pre;
+}
+.cta-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 2px;
+  transition: gap 240ms ease;
+}
+.cta-link:hover { gap: 14px; }
+.cta-link svg { transition: transform 240ms ease; }
+.cta-link:hover svg { transform: translateX(4px); }
