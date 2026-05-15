@@ -96,27 +96,45 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
   padding: 0 6vw 0 8vw;
 }
 
-.menu-list { list-style: none; display: flex; flex-direction: column; gap: 24px; }
+.menu-list { list-style: none; display: flex; flex-direction: column; gap: 18px; }
 .menu-item {
   font-family: var(--serif);
   font-weight: 400;
-  font-size: clamp(26px, 3.6vw, 56px);
-  line-height: 1.05;
-  letter-spacing: 0.01em;
+  font-size: clamp(20px, 2.8vw, 40px);
+  line-height: 1.1;
+  letter-spacing: 0.04em;
   cursor: pointer;
   position: relative;
   display: inline-block;
-  padding: 6px 16px;
-  color: rgba(255, 255, 255, 0.92);
+  padding: 2px 0 2px 0;
+  margin-left: 48px;
+  color: rgba(255, 255, 255, 0.7);
   user-select: none;
-  border: 1px solid transparent;
-  transition: border-color 320ms ease, color 320ms ease;
+  transition: color 320ms ease, transform 320ms cubic-bezier(0.22,1,0.36,1), letter-spacing 320ms ease;
 }
 .menu-item .label { position: relative; z-index: 2; }
-.menu-item.active {
-  border-color: rgba(255,255,255,0.95);
-  color: #ffffff;
+.menu-item::before {
+  content: "";
+  position: absolute;
+  left: -44px;
+  top: 50%;
+  width: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateY(-50%);
+  transition: width 360ms cubic-bezier(0.22,1,0.36,1), opacity 360ms ease;
+  opacity: 0;
 }
+.menu-item.active {
+  color: #ffffff;
+  transform: translateX(8px);
+  letter-spacing: 0.08em;
+}
+.menu-item.active::before {
+  width: 36px;
+  opacity: 1;
+}
+.menu-item:hover { color: rgba(255,255,255,0.95); }
 
 /* ---------- Stage (center) ---------- */
 .stage {
@@ -162,7 +180,7 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
   aspect-ratio: 3 / 4.2;
   pointer-events: none;
   z-index: 10;
-  transform: scale(1.45);
+  transform: scale(1.0);
 }
 .overlay > * { pointer-events: auto; }
 

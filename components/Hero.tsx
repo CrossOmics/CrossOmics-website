@@ -30,7 +30,7 @@ const TICKER = [
 function slotStyle(offset: number) {
   const map: Record<number, { x: number; y: number; scale: number; opacity: number; z: number }> = {
     [-1]: { x: -680, y:  280, scale: 0.5,  opacity: 0.4,  z: 2 },
-    [0]:  { x:    0, y:    0, scale: 1.45, opacity: 1.0,  z: 5 },
+    [0]:  { x:    0, y:    0, scale: 1.0,  opacity: 1.0,  z: 5 },
     [1]:  { x:  620, y: -260, scale: 0.45, opacity: 0.4,  z: 2 }
   };
   return (
