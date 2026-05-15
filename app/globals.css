@@ -167,31 +167,32 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
 .overlay > * { pointer-events: auto; }
 
 /* Labels overlaid INSIDE the active card image */
+/* Labels stacked ABOVE the active card */
 .rot-label {
   position: absolute;
-  top: 18px;
-  left: 20px;
+  top: -52px;
+  left: 0;
   font-family: var(--serif);
   font-size: 10px;
   letter-spacing: 0.34em;
   color: rgba(255,255,255,0.95);
   white-space: nowrap;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.55);
+  text-shadow: 0 2px 12px rgba(0,0,0,0.65);
   z-index: 11;
 }
 
 .vertical-label {
   position: absolute;
-  top: 42px;
-  left: 20px;
-  right: 20px;
+  top: -32px;
+  left: 0;
+  right: 0;
   font-family: var(--serif);
   font-size: 22px;
   line-height: 1.15;
   letter-spacing: 0.02em;
   color: #fff;
   white-space: normal;
-  text-shadow: 0 2px 14px rgba(0,0,0,0.6);
+  text-shadow: 0 2px 14px rgba(0,0,0,0.65);
   z-index: 11;
   cursor: pointer;
   text-decoration: none;
