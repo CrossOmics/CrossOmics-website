@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import NavMenu from "@/components/NavMenu";
 
 const NAV = [
   { href: "/tutorial", label: "Tutorial" },
@@ -36,7 +37,7 @@ export default function PageShell({
         </nav>
         <div className="page-header-right">
           <a href="https://github.com/CrossOmics/Gardener-Agent" target="_blank" rel="noopener noreferrer">GitHub</a>
-          <div className="burger" aria-label="menu"><span /><span /></div>
+          <NavMenu />
         </div>
       </header>
 

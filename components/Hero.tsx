@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import NavMenu from "@/components/NavMenu";
 
 type MenuEntry = {
   key: string; label: string; vertical: string; bg: string; card: string; href: string;
@@ -67,7 +68,7 @@ export default function Hero() {
         <div className="header-right">
           <a href="/research">Research</a>
           <a href="https://github.com/CrossOmics/Gardener-Agent" target="_blank" rel="noopener noreferrer">GitHub</a>
-          <div className="burger" aria-label="menu"><span /><span /></div>
+          <NavMenu />
         </div>
       </header>
 
