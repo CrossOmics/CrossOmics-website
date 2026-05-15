@@ -15,12 +15,6 @@ const MENU: MenuEntry[] = [
   { key: "future",   label: "FUTURE",   vertical: "What's next",         bg: "/bg5.jpg", card: "/plants/tree.jpg",     href: "/future" }
 ];
 
-const TICKER = [
-  { date: "2026/04/10", title: "The expansion of co-creation triggered by obtaining advanced certification." },
-  { date: "2026/03/22", title: "New flagship venue announced in Kyoto, opening this winter." },
-  { date: "2026/02/08", title: "Annual sustainability report 2025 is now available for download." }
-];
-
 // Diagonal peek layout:
 //   offset -1 -> bottom-left small (previous item)
 //   offset  0 -> center large       (active item)
@@ -46,14 +40,12 @@ function slotStyle(offset: number) {
 export default function Hero() {
   const router = useRouter();
   const [active, setActive] = useState(0); // start on TUTORIAL
-  const [tickerIdx, setTickerIdx] = useState(0);
 
   useEffect(() => {
     MENU.forEach((m) => {
       [m.bg, m.card].forEach((src) => { const img = new Image(); img.src = src; });
     });
   }, []);
-  useEffect(() => { const id = setInterval(() => setTickerIdx((i) => (i + 1) % TICKER.length), 5000); return () => clearInterval(id); }, []);
 
   const len = MENU.length;
   const current = MENU[active];
@@ -196,18 +188,6 @@ export default function Hero() {
           </div>
         </div>
       </section>
-
-      <div className="ticker" role="status" aria-live="polite">
-        <div className="ticker-date">{TICKER[tickerIdx].date}</div>
-        <AnimatePresence mode="wait">
-          <motion.div key={tickerIdx} className="ticker-title" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.35 }}>
-            {TICKER[tickerIdx].title}
-          </motion.div>
-        </AnimatePresence>
-        <div className="ticker-arrow">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M4 12h16M14 6l6 6-6 6" /></svg>
-        </div>
-      </div>
     </>
   );
 }
