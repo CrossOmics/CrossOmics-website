@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 type MenuEntry = {
-  key: string; label: string; vertical: string; image: string; href: string;
+  key: string; label: string; vertical: string; bg: string; card: string; href: string;
 };
 
 const MENU: MenuEntry[] = [
-  { key: "tutorial", label: "TUTORIAL",  vertical: "Meet Gardener-Agent", image: "/bg2.png", href: "/tutorial" },
-  { key: "research", label: "RESEARCH",  vertical: "Publications",        image: "/bg3.png", href: "/research" },
-  { key: "value",    label: "VALUE",     vertical: "What we stand for",   image: "/bg4.jpg", href: "/value" },
-  { key: "future",   label: "FUTURE",    vertical: "What's next",         image: "/bg5.jpg", href: "/future" }
+  { key: "tutorial", label: "TUTORIAL", vertical: "Meet Gardener-Agent", bg: "/bg2.png", card: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?auto=format&fit=crop&w=1200&q=80", href: "/tutorial" },
+  { key: "research", label: "RESEARCH", vertical: "Publications",        bg: "/bg3.png", card: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=1200&q=80", href: "/research" },
+  { key: "value",    label: "VALUE",    vertical: "What we stand for",   bg: "/bg4.jpg", card: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1200&q=80", href: "/value" },
+  { key: "future",   label: "FUTURE",   vertical: "What's next",         bg: "/bg5.jpg", card: "https://images.unsplash.com/photo-1470509037663-253afd7f0f51?auto=format&fit=crop&w=1200&q=80", href: "/future" }
 ];
 
 const TICKER = [
@@ -48,7 +48,11 @@ export default function Hero() {
   const [active, setActive] = useState(0); // start on TUTORIAL
   const [tickerIdx, setTickerIdx] = useState(0);
 
-  useEffect(() => { MENU.forEach((m) => { const img = new Image(); img.src = m.image; }); }, []);
+  useEffect(() => {
+    MENU.forEach((m) => {
+      [m.bg, m.card].forEach((src) => { const img = new Image(); img.src = src; });
+    });
+  }, []);
   useEffect(() => { const id = setInterval(() => setTickerIdx((i) => (i + 1) % TICKER.length), 5000); return () => clearInterval(id); }, []);
 
   const len = MENU.length;
@@ -68,7 +72,19 @@ export default function Hero() {
       </header>
 
       <section className="hero">
-        <div className="hero-bg hero-bg-painting" aria-hidden />
+        <div className="hero-bg" aria-hidden>
+          <AnimatePresence>
+            <motion.div
+              key={current.key + "-bg"}
+              className="hero-bg-sharp"
+              style={{ backgroundImage: `url(${current.bg})` }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.9, ease: "easeOut" }}
+            />
+          </AnimatePresence>
+        </div>
 
         <div className="menu">
           <ul className="menu-list" role="menu">
@@ -103,7 +119,7 @@ export default function Hero() {
                   <motion.button
                     key={m.key}
                     className={`card ${offset === 0 ? "card-active" : "card-peek"}`}
-                    style={{ backgroundImage: `url(${m.image})` }}
+                    style={{ backgroundImage: `url(${m.card})` }}
                     animate={{
                       x: s.x,
                       y: s.y,

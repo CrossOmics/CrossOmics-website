@@ -58,16 +58,17 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
   position: absolute; inset: 0;
   background: linear-gradient(180deg, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.38) 100%);
 }
-/* Home: crisp painting bg */
-.hero-bg-painting {
-  background-image: url('/bg-painting.png');
+/* Home: crisp section bg, swapped per active menu item */
+.hero-bg-sharp {
+  position: absolute;
+  inset: 0;
   background-size: cover;
   background-position: center;
 }
-.hero-bg-painting::after {
+.hero-bg-sharp::after {
   content: "";
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.25) 100%);
+  background: linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.28) 100%);
 }
 /* Inner pages: blurred painting bg */
 .page-bg-painting {
