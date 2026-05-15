@@ -211,7 +211,7 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   background: rgba(255,255,255,0.04);
-  overflow: hidden;
+  overflow: visible;
   transition: border-color 360ms ease, background 360ms ease, transform 480ms cubic-bezier(0.22,1,0.36,1);
 }
 .enter-btn:hover {
@@ -220,30 +220,33 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
   transform: scale(1.04);
 }
 
-/* shared arrow easing — both glyphs slide at exactly the same rhythm */
-.enter-btn svg,
-.enter-btn .arrow-in {
-  width: 18px; height: 18px;
-  transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1);
+/* expanding ring(s) that pulse outward on hover */
+.enter-btn::before,
+.enter-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(255,255,255,0.7);
+  border-radius: 50%;
+  opacity: 0;
   pointer-events: none;
 }
-/* outgoing arrow: centered → slides right out of the circle */
+.enter-btn:hover::before { animation: ring-pulse 1.6s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+.enter-btn:hover::after  { animation: ring-pulse 1.6s cubic-bezier(0.22, 1, 0.36, 1) infinite; animation-delay: 0.8s; }
+
+@keyframes ring-pulse {
+  0%   { transform: scale(1);    opacity: 0.8; border-color: rgba(255,255,255,0.85); }
+  60%  {                          opacity: 0.25; }
+  100% { transform: scale(1.7);  opacity: 0;    border-color: rgba(255,255,255,0.2); }
+}
+
 .enter-btn svg {
+  width: 18px; height: 18px;
   position: relative;
   z-index: 2;
-  transform: translateX(0);
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.enter-btn:hover svg { transform: translateX(56px); }
-/* incoming arrow: hidden left of the circle → slides into center */
-.enter-btn .arrow-in {
-  position: absolute;
-  left: 50%; top: 50%;
-  transform: translate(-50%, -50%) translateX(-56px);
-  z-index: 2;
-}
-.enter-btn:hover .arrow-in {
-  transform: translate(-50%, -50%) translateX(0);
-}
+.enter-btn:hover svg { transform: translateX(4px); }
 
 /* ---------- Ticker ---------- */
 .ticker {
