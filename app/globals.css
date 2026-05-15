@@ -167,17 +167,18 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
 .overlay > * { pointer-events: auto; }
 
 /* Labels overlaid INSIDE the active card image */
-/* Labels stacked ABOVE the active card */
+/* Labels stacked ABOVE the active card: big main title + small italic subtitle */
 .rot-label {
   position: absolute;
-  top: -52px;
+  top: -78px;
   left: 0;
   font-family: var(--serif);
-  font-size: 10px;
-  letter-spacing: 0.34em;
-  color: rgba(255,255,255,0.95);
+  font-size: 30px;
+  line-height: 1.1;
+  letter-spacing: 0.08em;
+  color: #fff;
   white-space: nowrap;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.65);
+  text-shadow: 0 2px 14px rgba(0,0,0,0.65);
   z-index: 11;
 }
 
@@ -187,12 +188,13 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
   left: 0;
   right: 0;
   font-family: var(--serif);
-  font-size: 22px;
-  line-height: 1.15;
-  letter-spacing: 0.02em;
-  color: #fff;
-  white-space: normal;
-  text-shadow: 0 2px 14px rgba(0,0,0,0.65);
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  color: rgba(255,255,255,0.92);
+  white-space: nowrap;
+  text-shadow: 0 1px 10px rgba(0,0,0,0.6);
   z-index: 11;
   cursor: pointer;
   text-decoration: none;

@@ -153,10 +153,10 @@ export default function Hero() {
                   <motion.div
                     key={current.key + "-rot"}
                     className="rot-label"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.4, delay: 0.2 }}
+                    initial={{ opacity: 0, filter: "blur(8px)" }}
+                    animate={{ opacity: 1, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, filter: "blur(4px)" }}
+                    transition={{ duration: 0.6, ease: "easeOut", delay: 0.15 }}
                   >
                     {current.label}
                   </motion.div>
@@ -167,12 +167,23 @@ export default function Hero() {
                     key={current.key + "-vert"}
                     className="vertical-label"
                     href={current.href}
-                    initial={{ opacity: 0 }}
+                    aria-label={current.vertical}
+                    initial={{ opacity: 1 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5, ease: "easeOut", delay: 0.25 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    {current.vertical}
+                    {current.vertical.split("").map((c, i) => (
+                      <motion.span
+                        key={i}
+                        initial={{ opacity: 0, filter: "blur(6px)" }}
+                        animate={{ opacity: 1, filter: "blur(0px)" }}
+                        transition={{ duration: 0.4, delay: 0.4 + i * 0.022, ease: "easeOut" }}
+                        style={{ display: "inline-block", whiteSpace: "pre" }}
+                      >
+                        {c}
+                      </motion.span>
+                    ))}
                   </motion.a>
                 </AnimatePresence>
 
