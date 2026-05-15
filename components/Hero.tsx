@@ -153,9 +153,9 @@ export default function Hero() {
                   <motion.div
                     key={current.key + "-rot"}
                     className="rot-label"
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
                     transition={{ duration: 0.4, delay: 0.2 }}
                   >
                     {current.label}
@@ -167,10 +167,10 @@ export default function Hero() {
                     key={current.key + "-vert"}
                     className="vertical-label"
                     href={current.href}
-                    initial={{ opacity: 0, y: 22 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -14 }}
-                    transition={{ duration: 0.55, ease: "easeOut", delay: 0.25 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5, ease: "easeOut", delay: 0.25 }}
                   >
                     {current.vertical}
                   </motion.a>
