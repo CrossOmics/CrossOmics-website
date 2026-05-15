@@ -32,17 +32,6 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
 .logo-mark { font-family: var(--serif); font-size: 22px; }
 .logo-word { font-family: var(--serif); font-size: 22px; letter-spacing: 0.18em; opacity: 0.95; }
 .header-right { display: flex; align-items: center; gap: 36px; font-size: 15px; }
-.lang { display: flex; gap: 8px; }
-.lang .active { opacity: 1; }
-.lang span { opacity: 0.55; }
-.burger {
-  width: 36px; height: 18px;
-  display: flex; flex-direction: column; justify-content: space-between;
-  cursor: pointer;
-}
-.burger span { display: block; height: 1px; background: var(--fg); }
-.burger span:nth-child(2) { width: 70%; align-self: flex-end; }
-
 /* ---------- Hero ---------- */
 .hero { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
 
@@ -248,34 +237,12 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
 }
 .enter-btn:hover svg { transform: translateX(4px); }
 
-/* ---------- Ticker ---------- */
-.ticker {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
-  display: flex; align-items: center; gap: 24px;
-  padding: 16px 40px;
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  border-top: 1px solid rgba(255,255,255,0.15);
-  background: rgba(0,0,0,0.28);
-  backdrop-filter: blur(8px);
-}
-.ticker-date { opacity: 0.75; min-width: 90px; }
-.ticker-title { flex: 1; opacity: 0.95; }
-.ticker-arrow {
-  width: 24px; height: 24px;
-  display: flex; align-items: center; justify-content: center;
-  opacity: 0.7;
-  transition: opacity 200ms ease, transform 200ms ease;
-}
-.ticker:hover .ticker-arrow { opacity: 1; transform: translateX(4px); }
-
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .menu { grid-template-columns: 1fr; padding: 100px 6vw 140px; align-content: center; gap: 40px; }
   .stage { display: none; }
   .menu-item { font-size: clamp(34px, 9vw, 56px); }
   .header { padding: 18px 20px; }
-  .ticker { padding: 12px 20px; font-size: 11px; }
 }
 
 /* ========================================================================
@@ -315,7 +282,6 @@ html:has(.page), body:has(.page) { overflow-y: auto; overflow-x: hidden; backgro
 }
 .page-nav a:hover { opacity: 1; }
 .page-header-right { display: flex; align-items: center; gap: 24px; color: #1a1a1a; }
-.page-header-right .burger span { background: #1a1a1a; }
 
 /* main */
 .page-main {
@@ -605,62 +571,3 @@ html:has(.page), body:has(.page) { overflow-y: auto; overflow-x: hidden; backgro
 .cta-link svg { transition: transform 240ms ease; }
 .cta-link:hover svg { transform: translateX(4px); }
 
-/* ----- Nav overlay (burger menu) ----- */
-.burger {
-  padding: 0;
-  background: none;
-  border: 0;
-  cursor: pointer;
-}
-.burger-open span {
-  background: #1a1a1a !important;
-}
-
-.nav-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: rgba(244, 238, 226, 0.97);
-  backdrop-filter: blur(18px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-.nav-overlay-inner {
-  cursor: default;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  align-items: flex-start;
-  padding: 60px;
-  position: relative;
-}
-.nav-overlay-inner a {
-  font-family: var(--serif);
-  font-size: clamp(36px, 6.5vw, 76px);
-  line-height: 1.15;
-  letter-spacing: 0.03em;
-  color: #1a1a1a;
-  text-decoration: none;
-  padding: 4px 4px;
-  opacity: 0.78;
-  display: inline-block;
-  transition: opacity 280ms ease, transform 280ms cubic-bezier(0.22,1,0.36,1);
-}
-.nav-overlay-inner a:hover {
-  opacity: 1;
-  transform: translateX(14px);
-}
-.nav-overlay-foot {
-  margin-top: 36px;
-  font-size: 11px;
-  letter-spacing: 0.24em;
-  opacity: 0.5;
-  text-transform: uppercase;
-  color: #1a1a1a;
-}
-
-@media (max-width: 700px) {
-  .nav-overlay-inner { padding: 40px 28px; }
-}
