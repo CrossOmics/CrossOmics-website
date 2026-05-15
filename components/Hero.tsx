@@ -9,10 +9,10 @@ type MenuEntry = {
 };
 
 const MENU: MenuEntry[] = [
-  { key: "tutorial", label: "TUTORIAL", vertical: "Meet Gardener-Agent", bg: "/bg2.png", card: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?auto=format&fit=crop&w=1200&q=80", href: "/tutorial" },
+  { key: "tutorial", label: "TUTORIAL", vertical: "Meet Gardener-Agent", bg: "/bg2.png", card: "https://images.unsplash.com/photo-1499002238440-d264edd596ec?auto=format&fit=crop&w=1200&q=80", href: "/tutorial" },
   { key: "research", label: "RESEARCH", vertical: "Publications",        bg: "/bg3.png", card: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=1200&q=80", href: "/research" },
-  { key: "value",    label: "VALUE",    vertical: "What we stand for",   bg: "/bg4.jpg", card: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1200&q=80", href: "/value" },
-  { key: "future",   label: "FUTURE",   vertical: "What's next",         bg: "/bg5.jpg", card: "https://images.unsplash.com/photo-1470509037663-253afd7f0f51?auto=format&fit=crop&w=1200&q=80", href: "/future" }
+  { key: "value",    label: "VALUE",    vertical: "What we stand for",   bg: "/bg4.jpg", card: "https://images.unsplash.com/photo-1444858291040-58f756a3bdd6?auto=format&fit=crop&w=1200&q=80", href: "/value" },
+  { key: "future",   label: "FUTURE",   vertical: "What's next",         bg: "/bg5.jpg", card: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1200&q=80", href: "/future" }
 ];
 
 const TICKER = [
