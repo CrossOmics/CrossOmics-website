@@ -1,4 +1,5 @@
 import PageShell from "@/components/PageShell";
+import Reveal from "@/components/Reveal";
 
 const ROADMAP = [
   {
@@ -47,8 +48,8 @@ const ROADMAP = [
 
 export default function FuturePage() {
   return (
-    <PageShell title="FUTURE" subtitle="What's next" breadcrumb="Future">
-      <section className="section">
+    <PageShell title="FUTURE" subtitle="What's next" breadcrumb="Future" backgroundImage="/bg5.jpg">
+      <Reveal as="section" className="section">
         <div className="section-header">
           <div className="section-eyebrow">ROADMAP — directional, not committed dates</div>
           <h2 className="section-title">Where we're headed</h2>
@@ -60,10 +61,10 @@ export default function FuturePage() {
             parallel.
           </p>
         </div>
-      </section>
+      </Reveal>
 
       {ROADMAP.map((r) => (
-        <article key={r.num} className="biz-segment">
+        <Reveal key={r.num} as="article" className="biz-segment">
           <div className="biz-image" style={{ backgroundImage: `url(${r.image})` }} />
           <div>
             <div className="biz-num">— {r.num}</div>
@@ -71,7 +72,7 @@ export default function FuturePage() {
             <div className="biz-sub">{r.sub}</div>
             <p className="biz-desc">{r.desc}</p>
           </div>
-        </article>
+        </Reveal>
       ))}
     </PageShell>
   );

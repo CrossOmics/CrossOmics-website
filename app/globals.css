@@ -59,20 +59,23 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
   position: absolute; inset: 0;
   background: linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.28) 100%);
 }
-/* Inner pages: blurred painting bg */
+/* Inner pages: blurred section bg */
 .page-bg-painting {
-  position: fixed; inset: -10%;
-  z-index: -1;
+  position: fixed; inset: -8%;
+  z-index: 0;
+  pointer-events: none;
   background-image: url('/bg-painting.png');
   background-size: cover;
   background-position: center;
-  filter: blur(48px) saturate(1.1) brightness(0.9);
-  transform: scale(1.15);
+  filter: blur(18px) saturate(1.12);
+  transform: scale(1.06);
 }
 .page-bg-painting::after {
   content: "";
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(245,240,230,0.55) 0%, rgba(235,228,215,0.75) 100%);
+  background:
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.12) 32%, transparent 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(238, 232, 218, 0.34));
 }
 
 /* ---------- Menu ---------- */
@@ -237,6 +240,42 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
 }
 .enter-btn:hover svg { transform: translateX(4px); }
 
+/* ---------- Route transition ---------- */
+.route-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  overflow: hidden;
+  pointer-events: all;
+  background: transparent;
+}
+.route-transition-bg {
+  position: absolute;
+  inset: -8%;
+  background-size: cover;
+  background-position: center;
+  will-change: clip-path, filter, transform;
+}
+.route-transition-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.04) 28%, transparent 46%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.48));
+}
+.route-transition-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--serif);
+  font-size: clamp(34px, 6vw, 86px);
+  letter-spacing: 0.08em;
+  color: #fff;
+  text-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .menu { grid-template-columns: 1fr; padding: 100px 6vw 140px; align-content: center; gap: 40px; }
@@ -253,8 +292,9 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
   min-height: 100vh;
   color: #1a1a1a;
   overflow-x: hidden;
+  isolation: isolate;
 }
-html:has(.page), body:has(.page) { overflow-y: auto; overflow-x: hidden; background: #ece5d6; }
+html:has(.page), body:has(.page) { overflow-y: auto; overflow-x: hidden; background: #171510; }
 
 /* page header */
 .page-header {
@@ -265,8 +305,8 @@ html:has(.page), body:has(.page) { overflow-y: auto; overflow-x: hidden; backgro
   align-items: center;
   justify-content: space-between;
   padding: 24px 44px;
-  background: rgba(245, 240, 230, 0.78);
-  backdrop-filter: blur(14px);
+  background: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(18px) saturate(1.15);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   font-size: 16px;
   letter-spacing: 0.14em;
@@ -285,6 +325,8 @@ html:has(.page), body:has(.page) { overflow-y: auto; overflow-x: hidden; backgro
 
 /* main */
 .page-main {
+  position: relative;
+  z-index: 1;
   max-width: 1280px;
   margin: 0 auto;
   padding: 80px 40px 120px;
@@ -320,8 +362,8 @@ html:has(.page), body:has(.page) { overflow-y: auto; overflow-x: hidden; backgro
   z-index: 1;
   padding: 60px 40px;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(245, 240, 230, 0.6);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.34);
+  backdrop-filter: blur(16px) saturate(1.12);
 }
 .footer-inner {
   max-width: 1280px;
@@ -369,7 +411,7 @@ html:has(.page), body:has(.page) { overflow-y: auto; overflow-x: hidden; backgro
 .news-list { display: flex; flex-direction: column; gap: 0; }
 .news-item {
   display: grid;
-  grid-template-columns: 200px 100px 1fr auto;
+  grid-template-columns: 140px 1fr auto;
   gap: 32px;
   align-items: center;
   padding: 24px 8px;
@@ -518,6 +560,13 @@ html:has(.page), body:has(.page) { overflow-y: auto; overflow-x: hidden; backgro
   font-size: 24px;
   margin-bottom: 12px;
 }
+.pillar-sub {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  line-height: 1.5;
+  opacity: 0.65;
+  margin-bottom: 12px;
+}
 .pillar-desc { font-size: 14px; line-height: 1.7; opacity: 0.85; }
 
 /* ----- IR card grid ----- */
@@ -571,3 +620,29 @@ html:has(.page), body:has(.page) { overflow-y: auto; overflow-x: hidden; backgro
 .cta-link svg { transition: transform 240ms ease; }
 .cta-link:hover svg { transform: translateX(4px); }
 
+/* ----- About page ----- */
+.about-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 440px);
+  gap: 64px;
+  align-items: center;
+}
+.about-copy .section-body { max-width: 760px; }
+.about-cell-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background-image: url('/plants/cell.png');
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 36px 80px rgba(40, 35, 25, 0.2);
+}
+
+@media (max-width: 900px) {
+  .about-intro {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .about-cell-image {
+    max-width: 420px;
+  }
+}

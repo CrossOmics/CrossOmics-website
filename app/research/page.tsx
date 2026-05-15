@@ -1,6 +1,7 @@
 "use client";
 
 import PageShell from "@/components/PageShell";
+import Reveal from "@/components/Reveal";
 
 // TODO: confirm paper title + abstract from https://www.biorxiv.org/content/10.1101/2025.05.30.656746v1
 const PAPERS = [
@@ -10,19 +11,21 @@ const PAPERS = [
     title: "CrossOmics — Featured preprint",
     excerpt:
       "A preprint from the CrossOmics group describing the foundations behind Gardener-Agent. Click through for the full text on bioRxiv.",
-    href: "https://www.biorxiv.org/content/10.1101/2025.05.30.656746v1",
-    thumb:
-      "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?auto=format&fit=crop&w=600&q=70"
+    href: "https://www.biorxiv.org/content/10.1101/2025.05.30.656746v1"
   }
 ];
 
 export default function ResearchPage() {
   return (
-    <PageShell title="RESEARCH" subtitle="Publications" breadcrumb="Research">
+    <PageShell title="RESEARCH" subtitle="Publications" breadcrumb="Research" backgroundImage="/bg3.png">
       <ul className="news-list">
         {PAPERS.map((p, idx) => (
-          <li key={idx} className="news-item" onClick={() => window.open(p.href, "_blank")}>
-            <div className="news-thumb" style={{ backgroundImage: `url(${p.thumb})` }} />
+          <Reveal
+            key={idx}
+            as="li"
+            className="news-item"
+            onClick={() => window.open(p.href, "_blank")}
+          >
             <div className="news-date">{p.date}</div>
             <div className="news-meta">
               <div className="news-tags">
@@ -38,13 +41,13 @@ export default function ResearchPage() {
                 <path d="M4 12h16M14 6l6 6-6 6" />
               </svg>
             </div>
-          </li>
+          </Reveal>
         ))}
       </ul>
 
-      <nav className="pagination" aria-label="pagination">
+      <Reveal as="nav" className="pagination" aria-label="pagination" hover={false}>
         <a href="#" className="current">1</a>
-      </nav>
+      </Reveal>
     </PageShell>
   );
 }

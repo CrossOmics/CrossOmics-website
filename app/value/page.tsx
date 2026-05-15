@@ -1,55 +1,71 @@
 import PageShell from "@/components/PageShell";
+import Reveal from "@/components/Reveal";
 
 const PILLARS = [
   {
     num: "01",
-    title: "Privacy",
-    sub: "Your data stays yours",
-    desc: "Raw expression matrices never leave your machine. Cloud LLMs only ever receive sanitized structural metadata — names of columns, shapes of matrices, summary statistics — never the values themselves. Privacy is the default, not a setting.",
-    image:
-      "https://images.unsplash.com/photo-1454425064867-83bc48b40c4d?auto=format&fit=crop&w=1200&q=80"
+    title: "HPC-Native Execution",
+    sub: "Compute where the data lives",
+    desc: "Gardener-Agent treats HPC as the primary execution environment, not an afterthought. Datasets remain on the compute system where they belong, while the agent helps launch, monitor, and organize analysis jobs."
   },
   {
     num: "02",
-    title: "Reproducibility",
-    sub: "Every step is recorded",
-    desc: "Each analysis step is captured as a versioned snapshot of the underlying state. Months later, replay the lineage to reproduce a figure exactly, branch from any intermediate point, or compare two runs side by side. No more orphaned notebooks.",
-    image:
-      "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1200&q=80"
+    title: "Three-Party Computation Framework",
+    sub: "LLM, desktop GUI, and HPC each play a clear role",
+    desc: "The workflow separates reasoning, interaction, and execution. The LLM assists with planning and coordination, the GUI keeps the user in control, and the HPC performs data-intensive computation without exposing raw data to the model."
   },
   {
     num: "03",
-    title: "Scalability",
-    sub: "Local laptop to institutional HPC",
-    desc: "Iterate on a laptop, then push the same workflow to your institution's HPC for jobs that don't fit in local memory. The interface and lineage stay identical — only the compute backend changes.",
-    image:
-      "https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1200&q=80"
+    title: "Pipeline-First Analysis",
+    sub: "Built around rigorous dry-lab workflows",
+    desc: "Gardener-Agent is built to work with established community pipelines such as nf-core. Instead of relying on ad hoc commands, analyses can be launched, recorded, and repeated through trusted workflow standards."
+  },
+  {
+    num: "04",
+    title: "Expert-Guided Decisions",
+    sub: "Automation without replacing judgment",
+    desc: "The agent helps with execution, record-keeping, and routine coordination, while biological interpretation and scientific decisions remain with the researcher."
   }
 ];
 
 export default function ValuePage() {
   return (
-    <PageShell title="VALUE" subtitle="What we stand for" breadcrumb="Value">
-      <section className="section">
+    <PageShell title="APPROACH" subtitle="How Gardener-Agent works" breadcrumb="Approach" backgroundImage="/bg4.jpg">
+      <Reveal as="section" className="section">
+        <div className="section-header">
+          <div className="section-eyebrow">01 / METHOD</div>
+          <h2 className="section-title">Built for Real Biological Computing</h2>
+        </div>
         <div className="section-body">
           <p>
-            Three principles shape every design decision in Gardener-Agent.
-            They are the things we will not trade away for convenience.
+            Gardener-Agent is designed around the way modern biological
+            analysis actually happens: data is large, compute is distributed,
+            and decisions require expert judgment.
+          </p>
+          <p>
+            Instead of sending raw datasets into a cloud chatbot, Gardener-Agent
+            separates reasoning, interaction, and computation into a
+            privacy-preserving workflow.
           </p>
         </div>
-      </section>
+      </Reveal>
 
-      {PILLARS.map((p) => (
-        <article key={p.num} className="biz-segment">
-          <div className="biz-image" style={{ backgroundImage: `url(${p.image})` }} />
-          <div>
-            <div className="biz-num">— {p.num}</div>
-            <h2 className="biz-title">{p.title}</h2>
-            <div className="biz-sub">{p.sub}</div>
-            <p className="biz-desc">{p.desc}</p>
-          </div>
-        </article>
-      ))}
+      <Reveal as="section" className="section" hover={false}>
+        <div className="section-header">
+          <div className="section-eyebrow">02 / CORE PRINCIPLES</div>
+          <h2 className="section-title">Our Approach</h2>
+        </div>
+        <div className="pillars">
+          {PILLARS.map((p) => (
+            <Reveal key={p.num} className="pillar">
+              <div className="pillar-num">— {p.num}</div>
+              <div className="pillar-title">{p.title}</div>
+              <div className="pillar-sub">{p.sub}</div>
+              <p className="pillar-desc">{p.desc}</p>
+            </Reveal>
+          ))}
+        </div>
+      </Reveal>
     </PageShell>
   );
 }

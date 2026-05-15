@@ -29,7 +29,7 @@ app/
 ├── globals.css           # all styles (no Tailwind, hand-rolled CSS)
 ├── tutorial/page.tsx     # Tutorial — Gardener-Agent intro
 ├── research/page.tsx     # Research — publications list
-├── value/page.tsx        # Value — Privacy / Reproducibility / Scalability
+├── value/page.tsx        # Approach — HPC-native / three-party computation / pipelines
 └── future/page.tsx       # Future — roadmap
 
 components/
@@ -39,14 +39,14 @@ components/
 public/
 ├── bg-painting.png       # oil painting — blurred bg of inner pages
 ├── bg2.png – bg5.jpg     # 4 section backgrounds for the home hero
-└── plants/               # card illustrations (lavender / fern / wheat / tree)
+└── plants/               # card illustrations (lavender / fern / value / tree)
 ```
 
 ## Design notes
 
 **Home hero**: a "diagonal-peek" carousel. The active section's card sits in the center; the previous wraps to the bottom-left, the next to the top-right. Hovering or clicking a left menu item, or any card, switches the active section. The page background image (`bg2`–`bg5`) cross-fades in sync.
 
-**Inner pages**: share a `PageShell` with a sticky header, four-link nav (Tutorial / Research / Value / Future), and a blurred copy of `bg-painting.png` as a calm background. Section blocks reuse a small set of layout primitives (`.section`, `.pillars`, `.biz-segment`, `.news-list`) defined in `app/globals.css`.
+**Inner pages**: share a `PageShell` with a sticky header, five-link nav (About / Tutorial / Research / Approach / Future), and section-specific blurred backgrounds. Section blocks reuse a small set of layout primitives (`.section`, `.pillars`, `.biz-segment`, `.news-list`) defined in `app/globals.css`.
 
 **Typography**: serif headings (Playfair Display fallback chain), sans-serif body (system fonts).
 
@@ -54,14 +54,14 @@ public/
 
 ### Plant illustrations (`public/plants/`)
 
-All four are from [Unsplash](https://unsplash.com) under the [Unsplash License](https://unsplash.com/license) — free for commercial and non-commercial use, no attribution required (but appreciated).
+All four card illustrations are ChatGPT-generated oil-painting style images.
 
-| File | Section | Source |
+| File | Section | Image |
 |---|---|---|
-| `lavender.jpg` | Tutorial | <https://unsplash.com/photos/d264edd596ec> |
-| `fern.jpg`     | Research | <https://unsplash.com/photos/91b2f5f229cc> |
-| `value.jpg` | Value | <https://unsplash.com/photos/brown-leaves-on-shore-during-sunset-7iwYPkGzO2o> |
-| `tree.jpg`     | Future   | <https://unsplash.com/photos/f009c37129b9> |
+| `lavender.jpg` | Tutorial | DNA helix illustration |
+| `fern.jpg`     | Research | cell illustration |
+| `value.jpg`    | Approach | protein structure illustration |
+| `tree.jpg`     | Future   | landscape and omics profile illustration |
 
 ### Backgrounds (`public/bg-painting.png`, `public/bg2-5.*`)
 

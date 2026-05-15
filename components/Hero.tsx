@@ -9,9 +9,10 @@ type MenuEntry = {
 };
 
 const MENU: MenuEntry[] = [
+  { key: "about",    label: "ABOUT",    vertical: "Gardener-Agent overview", bg: "/bg6.png", card: "/plants/cell.png", href: "/about" },
   { key: "tutorial", label: "TUTORIAL", vertical: "Meet Gardener-Agent", bg: "/bg2.png", card: "/plants/lavender.jpg", href: "/tutorial" },
   { key: "research", label: "RESEARCH", vertical: "Publications",        bg: "/bg3.png", card: "/plants/fern.jpg",     href: "/research" },
-  { key: "value",    label: "VALUE",    vertical: "What we stand for",   bg: "/bg4.jpg", card: "/plants/value.jpg", href: "/value" },
+  { key: "value",    label: "APPROACH", vertical: "How Gardener-Agent works", bg: "/bg4.jpg", card: "/plants/value.jpg", href: "/value" },
   { key: "future",   label: "FUTURE",   vertical: "What's next",         bg: "/bg5.jpg", card: "/plants/tree.jpg",     href: "/future" }
 ];
 
@@ -39,7 +40,8 @@ function slotStyle(offset: number) {
 
 export default function Hero() {
   const router = useRouter();
-  const [active, setActive] = useState(0); // start on TUTORIAL
+  const [active, setActive] = useState(0); // start on ABOUT
+  const [transitionItem, setTransitionItem] = useState<MenuEntry | null>(null);
 
   useEffect(() => {
     MENU.forEach((m) => {
@@ -50,14 +52,21 @@ export default function Hero() {
   const len = MENU.length;
   const current = MENU[active];
 
+  function enterSubpage(item: MenuEntry) {
+    if (transitionItem) return;
+    setTransitionItem(item);
+    window.setTimeout(() => {
+      router.push(item.href);
+    }, 620);
+  }
+
   return (
     <>
       <header className="header">
         <div className="logo">
-          <span className="logo-word">CROSS OMICS</span>
+          <span className="logo-word">CrossOmics</span>
         </div>
         <div className="header-right">
-          <a href="/research">Research</a>
           <a href="https://github.com/CrossOmics/Gardener-Agent" target="_blank" rel="noopener noreferrer">GitHub</a>
         </div>
       </header>
@@ -85,8 +94,8 @@ export default function Hero() {
                 className={`menu-item ${i === active ? "active" : ""}`}
                 onMouseEnter={() => setActive(i)}
                 onFocus={() => setActive(i)}
-                onClick={() => router.push(m.href)}
-                onKeyDown={(e) => { if (e.key === "Enter") router.push(m.href); }}
+                onClick={() => enterSubpage(m)}
+                onKeyDown={(e) => { if (e.key === "Enter") enterSubpage(m); }}
                 tabIndex={0}
                 role="menuitem"
               >
@@ -131,7 +140,7 @@ export default function Hero() {
                     }
                     transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
                     onClick={() => {
-                      if (offset === 0) router.push(m.href);
+                      if (offset === 0) enterSubpage(m);
                       else setActive(i);
                     }}
                     aria-label={m.label}
@@ -159,6 +168,10 @@ export default function Hero() {
                     className="vertical-label"
                     href={current.href}
                     aria-label={current.vertical}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      enterSubpage(current);
+                    }}
                     initial={{ opacity: 1 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -178,7 +191,15 @@ export default function Hero() {
                   </motion.a>
                 </AnimatePresence>
 
-                <a className="enter-btn" href={current.href} aria-label="Enter">
+                <a
+                  className="enter-btn"
+                  href={current.href}
+                  aria-label="Enter"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    enterSubpage(current);
+                  }}
+                >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                     <path d="M4 12h16M14 6l6 6-6 6" />
                   </svg>
@@ -188,6 +209,43 @@ export default function Hero() {
           </div>
         </div>
       </section>
+
+      <AnimatePresence>
+        {transitionItem && (
+          <motion.div
+            className="route-transition"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.08 }}
+            aria-hidden
+          >
+            <motion.div
+              className="route-transition-bg"
+              style={{ backgroundImage: `url(${transitionItem.bg})` }}
+              initial={{
+                clipPath: "circle(0% at 50% 50%)",
+                scale: 1,
+                filter: "blur(0px) saturate(1.05)"
+              }}
+              animate={{
+                clipPath: "circle(145% at 50% 50%)",
+                scale: 1.06,
+                filter: "blur(18px) saturate(1.12)"
+              }}
+              transition={{ duration: 0.62, ease: [0.76, 0, 0.24, 1] }}
+            />
+            <motion.div
+              className="route-transition-label"
+              initial={{ opacity: 0, y: 8, filter: "blur(8px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.28, delay: 0.14, ease: "easeOut" }}
+            >
+              {transitionItem.label}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
