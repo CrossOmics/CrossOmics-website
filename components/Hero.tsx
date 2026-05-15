@@ -11,7 +11,7 @@ type MenuEntry = {
 const MENU: MenuEntry[] = [
   { key: "tutorial", label: "TUTORIAL", vertical: "Meet Gardener-Agent", bg: "/bg2.png", card: "/plants/lavender.jpg", href: "/tutorial" },
   { key: "research", label: "RESEARCH", vertical: "Publications",        bg: "/bg3.png", card: "/plants/fern.jpg",     href: "/research" },
-  { key: "value",    label: "VALUE",    vertical: "What we stand for",   bg: "/bg4.jpg", card: "/plants/sunflower.jpg", href: "/value" },
+  { key: "value",    label: "VALUE",    vertical: "What we stand for",   bg: "/bg4.jpg", card: "/plants/value.jpg", href: "/value" },
   { key: "future",   label: "FUTURE",   vertical: "What's next",         bg: "/bg5.jpg", card: "/plants/tree.jpg",     href: "/future" }
 ];
 

@@ -60,7 +60,7 @@ All four are from [Unsplash](https://unsplash.com) under the [Unsplash License](
 |---|---|---|
 | `lavender.jpg` | Tutorial | <https://unsplash.com/photos/d264edd596ec> |
 | `fern.jpg`     | Research | <https://unsplash.com/photos/91b2f5f229cc> |
-| `sunflower.jpg` | Value | <https://unsplash.com/photos/253afd7f0f51> |
+| `value.jpg` | Value | <https://unsplash.com/photos/brown-leaves-on-shore-during-sunset-7iwYPkGzO2o> |
 | `tree.jpg`     | Future   | <https://unsplash.com/photos/f009c37129b9> |
 
 ### Backgrounds (`public/bg-painting.png`, `public/bg2-5.*`)
