@@ -4,25 +4,25 @@ import Reveal from "@/components/Reveal";
 const PILLARS = [
   {
     num: "01",
-    title: "HPC-Native Execution",
+    title: "Reproducibility and Robustness",
     sub: "Compute where the data lives",
     desc: "Gardener-Agent treats HPC as the primary execution environment, not an afterthought. Datasets remain on the compute system where they belong, while the agent helps launch, monitor, and organize analysis jobs."
   },
   {
     num: "02",
-    title: "Three-Party Computation Framework",
+    title: "Accessbility",
     sub: "LLM, desktop GUI, and HPC each play a clear role",
     desc: "The workflow separates reasoning, interaction, and execution. The LLM assists with planning and coordination, the GUI keeps the user in control, and the HPC performs data-intensive computation without exposing raw data to the model."
   },
   {
     num: "03",
-    title: "Pipeline-First Analysis",
+    title: "Privacy",
     sub: "Built around rigorous dry-lab workflows",
     desc: "Gardener-Agent is built to work with established community pipelines such as nf-core. Instead of relying on ad hoc commands, analyses can be launched, recorded, and repeated through trusted workflow standards."
   },
   {
     num: "04",
-    title: "Expert-Guided Decisions",
+    title: "Scalability",
     sub: "Automation without replacing judgment",
     desc: "The agent helps with execution, record-keeping, and routine coordination, while biological interpretation and scientific decisions remain with the researcher."
   }
