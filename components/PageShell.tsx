@@ -6,8 +6,8 @@ const NAV = [
   { href: "/about", label: "About" },
   { href: "/tutorial", label: "Tutorial" },
   { href: "/research", label: "Research" },
-  { href: "/value", label: "Approach" },
-  { href: "/future", label: "Future" }
+  { href: "/approach", label: "Approach" },
+  { href: "/roadmap", label: "Roadmap" }
 ];
 
 export default function PageShell({
