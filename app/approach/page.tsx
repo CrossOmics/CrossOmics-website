@@ -5,7 +5,7 @@ const PILLARS = [
   {
     num: "01",
     title: "Reproducibility and Robustness",
-    sub: "Compute where the data lives",
+    sub: "Biological research is serious, and our tools should be too",
     desc: "Gardener-Agent treats HPC as the primary execution environment, not an afterthought. Datasets remain on the compute system where they belong, while the agent helps launch, monitor, and organize analysis jobs."
   },
   {
@@ -53,7 +53,7 @@ export default function ValuePage() {
       <Reveal as="section" className="section" hover={false}>
         <div className="section-header">
           <div className="section-eyebrow">02 / CORE PRINCIPLES</div>
-          <h2 className="section-title">Our Approach</h2>
+          <h2 className="section-title">Our Designing Principles</h2>
         </div>
         <div className="pillars">
           {PILLARS.map((p) => (
