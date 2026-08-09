@@ -170,6 +170,10 @@ img { max-width: 100%; display: block; }
   margin-top: var(--section-gap);
   padding: 48px 0;
 }
+/* The last block already carries a section-gap bottom margin; without this the
+   two stack into a 240px void above the footer. */
+.page-main > :last-child,
+.page-main-home > :last-child { margin-bottom: 0; }
 .site-footer-inner {
   display: flex; align-items: center; gap: 32px; flex-wrap: wrap;
 }
@@ -313,6 +317,10 @@ img { max-width: 100%; display: block; }
   .home-highlight { padding: 24px; }
 }
 
+@media (max-width: 640px) {
+  .home-hero-break { display: none; }
+}
+
 /* ========================================================================
    Inner pages
    ======================================================================== */
@@ -361,7 +369,9 @@ img { max-width: 100%; display: block; }
 }
 
 /* ----- Research list ----- */
-.news-list { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+/* No border-top: the title block's bottom rule already closes the space above,
+   and a second rule a section-gap below it reads as an empty box. */
+.news-list { display: flex; flex-direction: column; }
 .news-item {
   display: grid;
   grid-template-columns: 120px minmax(0, 1fr) 32px;
@@ -449,6 +459,9 @@ img { max-width: 100%; display: block; }
   width: 100%;
   aspect-ratio: 16 / 10;
   border-radius: var(--radius-card);
+  /* Neutral fill so a dead remote URL degrades to a placeholder block rather
+     than an invisible hole in the row. */
+  background-color: var(--surface);
   background-size: cover;
   background-position: center;
 }
@@ -874,13 +887,18 @@ img { max-width: 100%; display: block; }
 /* ----- tables ----- */
 .setup-table {
   width: 100%;
-  border-collapse: collapse;
+  /* `separate` (not `collapse`) — border-radius on a table is ignored under
+     border-collapse: collapse, so the header fill squares off the top corners. */
+  border-collapse: separate;
+  border-spacing: 0;
   margin: 20px 0;
   font-size: 14.5px;
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
   overflow: hidden;
 }
+.setup-table tr:first-child th:first-child { border-top-left-radius: var(--radius-card); }
+.setup-table tr:first-child th:last-child { border-top-right-radius: var(--radius-card); }
 .setup-table th {
   text-align: left;
   font-weight: 600;

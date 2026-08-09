@@ -6,7 +6,8 @@ export default function Hero() {
     <section className="home-hero container">
       <h1 className="home-hero-title">
         An AI operating system
-        <br />
+        {/* Hidden below 640px, where the line already wraps on its own. */}
+        <br className="home-hero-break" />
         for single-cell biology
       </h1>
       <p className="home-hero-lede">
