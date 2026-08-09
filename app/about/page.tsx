@@ -27,7 +27,7 @@ const FEATURES = [
 export default function AboutPage() {
   return (
     <PageShell
-      title="ABOUT"
+      title="About"
       subtitle="Meet Gardener"
       breadcrumb="About"
     >

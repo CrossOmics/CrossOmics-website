@@ -28,7 +28,7 @@ const ROADMAP = [
 
 export default function RoadmapPage() {
   return (
-    <PageShell title="ROADMAP" subtitle="What's Next" breadcrumb="Roadmap">
+    <PageShell title="Roadmap" subtitle="What's Next" breadcrumb="Roadmap">
       <Reveal as="section" className="section">
         <div className="section-header">
           <div className="section-eyebrow">ROADMAP — directional, not committed dates</div>

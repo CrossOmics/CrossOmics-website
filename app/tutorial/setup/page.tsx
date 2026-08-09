@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function SetupPage() {
   return (
     <PageShell
-      title="SETUP"
+      title="Setup"
       subtitle="Install Gardener, Then Connect a Machine"
       breadcrumb={[{ label: "Tutorial", href: "/tutorial" }, { label: "Setup" }]}
     >

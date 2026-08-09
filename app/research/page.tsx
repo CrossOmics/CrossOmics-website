@@ -6,7 +6,7 @@ import { PAPERS } from "@/lib/papers";
 
 export default function ResearchPage() {
   return (
-    <PageShell title="RESEARCH" subtitle="Publications" breadcrumb="Research">
+    <PageShell title="Research" subtitle="Publications" breadcrumb="Research">
       <ul className="news-list">
         {PAPERS.map((p, idx) => (
           <Reveal
