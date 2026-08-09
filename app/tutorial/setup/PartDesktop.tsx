@@ -7,7 +7,7 @@ import { ASSAY_DEMOS, RELEASES } from "./data";
 export default function PartDesktop() {
   return (
     <section className="setup-part" id="part-desktop">
-      <PartHead num="PART I" title="Desktop setup">
+      <PartHead num="PART I" title="Desktop Setup">
         Installing on macOS or Windows, first launch, creating a project, importing a dataset,
         running a stage, and configuring the AI model.
       </PartHead>
@@ -30,7 +30,7 @@ export default function PartDesktop() {
         </ul>
         <Figure
           src="/setup/01-releases.webp"
-          alt="Gardener-Agent GitHub Releases page listing the .dmg and .exe assets"
+          alt="Gardener GitHub Releases page listing the .dmg and .exe assets"
           caption="Releases page"
           width={1600}
           height={1070}
@@ -88,7 +88,7 @@ export default function PartDesktop() {
         />
       </Step>
 
-      <Step id="first-launch" num="02" title="First launch">
+      <Step id="first-launch" num="02" title="First Launch">
         <p>Open the app and wait for the backend to start.</p>
         <Figure
           src="/setup/04-Launch.webp"
@@ -100,7 +100,7 @@ export default function PartDesktop() {
         />
       </Step>
 
-      <Step id="project" num="03" title="Create a project and import data">
+      <Step id="project" num="03" title="Create a Project and Import Data">
         <p>Create a project.</p>
         <Figure
           src="/setup/05-new-project.webp"
@@ -119,7 +119,7 @@ export default function PartDesktop() {
         />
       </Step>
 
-      <Step id="run-stage" num="04" title="Run a stage">
+      <Step id="run-stage" num="04" title="Run a Stage">
         <ol className="setup-ol">
           <li>Select the dataset.</li>
           <li>Pick a stage and fill in the form.</li>
@@ -136,7 +136,7 @@ export default function PartDesktop() {
         />
         <Note>No LLM API key is required for this path.</Note>
 
-        <Sub>Pipeline walkthroughs</Sub>
+        <Sub>Pipeline Walkthroughs</Sub>
         <p>
           One demo per assay, each running the pipeline start to finish. Single-cell RNA is covered
           in the{" "}
@@ -152,7 +152,7 @@ export default function PartDesktop() {
         </div>
       </Step>
 
-      <Step id="api-key" num="05" title="Add an LLM API key">
+      <Step id="api-key" num="05" title="Add an LLM API Key">
         <p className="setup-optional">Optional — skip it if you are not using LLM features.</p>
         <p>Required only for:</p>
         <ul className="setup-list">

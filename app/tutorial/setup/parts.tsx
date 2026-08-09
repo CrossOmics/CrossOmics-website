@@ -100,7 +100,7 @@ export function Arrow() {
 /** Shared step 01 — identical in all three topology guides. */
 export function OpenPanelStep() {
   return (
-    <Step id="remote-panel" num="01" title="Open the connection panel">
+    <Step id="remote-panel" num="01" title="Open the Connection Panel">
       <p>
         Click <strong>HPC</strong> in the header, or <strong>HPC Connection</strong> in the sidebar
         footer.

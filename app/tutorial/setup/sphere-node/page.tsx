@@ -6,21 +6,21 @@ import SetupIndex from "../SetupIndex";
 import { Arrow, Note, Step, Sub } from "../parts";
 
 export const metadata: Metadata = {
-  title: "Preparing a SPHERE compute node — Gardener-Agent | CrossOmics",
+  title: "Preparing a SPHERE Compute Node — Gardener | CrossOmics",
   description:
     "Node-side setup for SPHERE: reaching the node, mounting its data disk at /data, installing Apptainer and build tools, and SSH key access."
 };
 
 const INDEX = [
   {
-    title: "Node preparation",
+    title: "Node Preparation",
     sectionId: "node-steps",
     items: [
-      { id: "reach-node", label: "01  Reach your node" },
-      { id: "mount-data", label: "02  Mount the disk" },
+      { id: "reach-node", label: "01  Reach Your Node" },
+      { id: "mount-data", label: "02  Mount the Disk" },
       { id: "install-apptainer", label: "03  Apptainer" },
-      { id: "build-tools", label: "04  Build tools" },
-      { id: "ssh-keys", label: "05  SSH keys" },
+      { id: "build-tools", label: "04  Build Tools" },
+      { id: "ssh-keys", label: "05  SSH Keys" },
       { id: "troubleshooting", label: "Troubleshooting" }
     ]
   }
@@ -68,18 +68,18 @@ export default function SphereNodePage() {
   return (
     <PageShell
       title="NODE PREP"
-      subtitle="Preparing a SPHERE compute node"
+      subtitle="Preparing a SPHERE Compute Node"
       breadcrumb={[
         { label: "Tutorial", href: "/tutorial" },
         { label: "Setup", href: "/tutorial/setup" },
-        { label: "Node prep" }
+        { label: "Node Prep" }
       ]}
       backgroundImage="/bg2.png"
     >
       <Reveal as="section" className="section" hover={false}>
         <div className="section-header">
           <div className="section-eyebrow">00 / SCOPE</div>
-          <h2 className="section-title">The node side of Sphere</h2>
+          <h2 className="section-title">The Node Side of Sphere</h2>
         </div>
         <div className="section-body">
           <p>
@@ -108,7 +108,7 @@ export default function SphereNodePage() {
 
         <div className="setup-content">
           <section className="setup-part" id="node-steps">
-            <Step id="reach-node" num="01" title="Reach your node">
+            <Step id="reach-node" num="01" title="Reach Your Node">
               <p>Two ways in. Both land on the same machine.</p>
 
               <Sub>Browser</Sub>
@@ -117,7 +117,7 @@ export default function SphereNodePage() {
                 {`https://dewexp64518387-jiapengz.xdc.sphere-testbed.net/jupyter/user/jiapengz/crossomics/lab`}
               </pre>
 
-              <Sub>Local terminal</Sub>
+              <Sub>Local Terminal</Sub>
               <p>Hop through the XDC, then into the compute node:</p>
               <pre className="code-block">
                 {`mrg xdc ssh dewexp64518387.jiapengz
@@ -166,7 +166,7 @@ ssh actor1`}
               </Note>
             </Step>
 
-            <Step id="mount-data" num="02" title="Mount the data disk at /data">
+            <Step id="mount-data" num="02" title="Mount the Data Disk at /data">
               <p>
                 SPHERE nodes ship with a second, unmounted disk. Gardener&rsquo;s default Sphere
                 workspace is <code>/data/gardener_remote</code>, so mounting it is what makes that
@@ -214,7 +214,7 @@ sudo apt install -y apptainer`}
               </Note>
             </Step>
 
-            <Step id="build-tools" num="04" title="Install build tools">
+            <Step id="build-tools" num="04" title="Install Build Tools">
               <p className="setup-optional">Optional</p>
               <p>
                 Only needed when running the backend <strong>from source</strong> (
@@ -235,7 +235,7 @@ sudo apt install -y apptainer`}
               <pre className="code-block">{`sudo yum groupinstall -y "Development Tools"`}</pre>
             </Step>
 
-            <Step id="ssh-keys" num="05" title="SSH key access">
+            <Step id="ssh-keys" num="05" title="SSH Key Access">
               <Note>
                 Gardener&rsquo;s <strong>Sphere XDC</strong> topology does not need this — it
                 authenticates through MRG and uses <code>~/.ssh/merge_key</code> for the whole hop
@@ -243,14 +243,14 @@ sudo apt install -y apptainer`}
                 own terminal, or when pointing the <strong>Direct SSH</strong> topology at it.
               </Note>
 
-              <Sub>From your local machine</Sub>
+              <Sub>From Your Local Machine</Sub>
               <pre className="code-block">{`ssh-copy-id jiapengz@dewexp07690701`}</pre>
               <p>
                 The part after <code>@</code> differs per node — take it from the connection details
                 shown for your node.
               </p>
 
-              <Sub>Or add the key manually on the node</Sub>
+              <Sub>Or Add the Key Manually on the Node</Sub>
               <pre className="code-block">
                 {`mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo "ssh-public-key" >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys`}
               </pre>

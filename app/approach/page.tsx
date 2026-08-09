@@ -6,11 +6,11 @@ const PILLARS = [
     num: "01",
     title: "Reproducibility and Robustness",
     sub: "Compute where the data lives",
-    desc: "Gardener-Agent treats HPC as the primary execution environment, not an afterthought. Datasets remain on the compute system where they belong, while the agent helps launch, monitor, and organize analysis jobs."
+    desc: "Gardener treats HPC as the primary execution environment, not an afterthought. Datasets remain on the compute system where they belong, while the agent helps launch, monitor, and organize analysis jobs."
   },
   {
     num: "02",
-    title: "Accessbility",
+    title: "Accessibility",
     sub: "LLM, desktop GUI, and HPC each play a clear role",
     desc: "The workflow separates reasoning, interaction, and execution. The LLM assists with planning and coordination, the GUI keeps the user in control, and the HPC performs data-intensive computation without exposing raw data to the model."
   },
@@ -18,7 +18,7 @@ const PILLARS = [
     num: "03",
     title: "Privacy",
     sub: "Built around rigorous dry-lab workflows",
-    desc: "Gardener-Agent is built to work with established community pipelines such as nf-core. Instead of relying on ad hoc commands, analyses can be launched, recorded, and repeated through trusted workflow standards."
+    desc: "Gardener is built to work with established community pipelines such as nf-core. Instead of relying on ad hoc commands, analyses can be launched, recorded, and repeated through trusted workflow standards."
   },
   {
     num: "04",
@@ -30,7 +30,7 @@ const PILLARS = [
 
 export default function ValuePage() {
   return (
-    <PageShell title="APPROACH" subtitle="How Gardener-Agent works" breadcrumb="Approach" backgroundImage="/bg4.jpg">
+    <PageShell title="APPROACH" subtitle="How Gardener Works" breadcrumb="Approach" backgroundImage="/bg4.jpg">
       <Reveal as="section" className="section">
         <div className="section-header">
           <div className="section-eyebrow">01 / METHOD</div>
@@ -38,12 +38,12 @@ export default function ValuePage() {
         </div>
         <div className="section-body">
           <p>
-            Gardener-Agent is designed around the way modern biological
+            Gardener is designed around the way modern biological
             analysis actually happens: data is large, compute is distributed,
             and decisions require expert judgment.
           </p>
           <p>
-            Instead of sending raw datasets into a cloud chatbot, Gardener-Agent
+            Instead of sending raw datasets into a cloud chatbot, Gardener
             separates reasoning, interaction, and computation into a
             privacy-preserving workflow.
           </p>

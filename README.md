@@ -1,10 +1,10 @@
-# CrossOmics — Gardener-Agent landing site
+# CrossOmics — Gardener Landing Site
 
-Marketing site for [Gardener-Agent](https://github.com/CrossOmics/Gardener-Agent), an AI co-pilot for single-cell RNA sequencing analysis.
+Marketing site for [Gardener](https://github.com/CrossOmics/Gardener-Agent), an AI co-pilot for single-cell RNA sequencing analysis.
 
 Built with **Next.js 14** (App Router) + **TypeScript** + **Framer Motion**.
 
-## Quick start
+## Quick Start
 
 ```bash
 npm install
@@ -20,14 +20,14 @@ npm run start    # serve production build
 npm run lint     # eslint
 ```
 
-## Project layout
+## Project Layout
 
 ```
 app/
 ├── page.tsx              # home (diagonal-peek hero menu)
 ├── layout.tsx            # root layout + metadata
 ├── globals.css           # all styles (no Tailwind, hand-rolled CSS)
-├── tutorial/page.tsx     # Tutorial — Gardener-Agent intro
+├── tutorial/page.tsx     # Tutorial — Gardener intro
 ├── research/page.tsx     # Research — publications list
 ├── value/page.tsx        # Approach — HPC-native / three-party computation / pipelines
 └── future/page.tsx       # Future — roadmap
@@ -42,7 +42,7 @@ public/
 └── plants/               # card illustrations (lavender / fern / value / tree)
 ```
 
-## Design notes
+## Design Notes
 
 **Home hero**: a "diagonal-peek" carousel. The active section's card sits in the center; the previous wraps to the bottom-left, the next to the top-right. Hovering or clicking a left menu item, or any card, switches the active section. The page background image (`bg2`–`bg5`) cross-fades in sync.
 
@@ -52,7 +52,7 @@ public/
 
 ## Assets
 
-### Plant illustrations (`public/plants/`)
+### Plant Illustrations (`public/plants/`)
 
 All four card illustrations are ChatGPT-generated oil-painting style images.
 
@@ -67,7 +67,7 @@ All four card illustrations are ChatGPT-generated oil-painting style images.
 
 Oil-painting compositions used as page backgrounds. Original assets.
 
-## Adding a new section
+## Adding a New Section
 
 1. Add an entry to the `MENU` array in `components/Hero.tsx` (`{ key, label, vertical, bg, card, href }`).
 2. Add the matching entry to the `NAV` array in `components/PageShell.tsx`.

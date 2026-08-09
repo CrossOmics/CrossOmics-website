@@ -9,11 +9,11 @@ type MenuEntry = {
 };
 
 const MENU: MenuEntry[] = [
-  { key: "about",    label: "ABOUT",    vertical: "Gardener-Agent overview", bg: "/bg6.png", card: "/plants/cell.png", href: "/about" },
-  { key: "tutorial", label: "TUTORIAL", vertical: "Meet Gardener-Agent", bg: "/bg2.png", card: "/plants/lavender.jpg", href: "/tutorial" },
+  { key: "about",    label: "ABOUT",    vertical: "Gardener Overview", bg: "/bg6.png", card: "/plants/cell.png", href: "/about" },
+  { key: "tutorial", label: "TUTORIAL", vertical: "Meet Gardener", bg: "/bg2.png", card: "/plants/lavender.jpg", href: "/tutorial" },
   { key: "research", label: "RESEARCH", vertical: "Publications",        bg: "/bg3.png", card: "/plants/fern.jpg",     href: "/research" },
-  { key: "approach", label: "APPROACH", vertical: "How Gardener-Agent works", bg: "/bg4.jpg", card: "/plants/value.jpg", href: "/approach" },
-  { key: "roadmap",  label: "ROADMAP",   vertical: "What's next",         bg: "/bg5.jpg", card: "/plants/tree.jpg",     href: "/roadmap" }
+  { key: "approach", label: "APPROACH", vertical: "How Gardener Works", bg: "/bg4.jpg", card: "/plants/value.jpg", href: "/approach" },
+  { key: "roadmap",  label: "ROADMAP",   vertical: "What's Next",         bg: "/bg5.jpg", card: "/plants/tree.jpg",     href: "/roadmap" }
 ];
 
 // Diagonal peek layout:

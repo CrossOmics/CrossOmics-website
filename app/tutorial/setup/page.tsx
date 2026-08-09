@@ -7,7 +7,7 @@ import { Arrow } from "./parts";
 import { INTRO_VIDEO, RELEASES } from "./data";
 
 export const metadata: Metadata = {
-  title: "Setup — Gardener-Agent | CrossOmics",
+  title: "Setup — Gardener | CrossOmics",
   description:
     "Install Gardener on macOS or Windows, create your first project, run a stage, and connect the app to a Slurm cluster, a single server over SSH, or a SPHERE testbed node."
 };
@@ -16,14 +16,14 @@ export default function SetupPage() {
   return (
     <PageShell
       title="SETUP"
-      subtitle="Install Gardener, then connect a machine"
+      subtitle="Install Gardener, Then Connect a Machine"
       breadcrumb={[{ label: "Tutorial", href: "/tutorial" }, { label: "Setup" }]}
       backgroundImage="/bg2.png"
     >
       <Reveal as="section" className="section" hover={false}>
         <div className="section-header">
           <div className="section-eyebrow">00 / BEFORE YOU START</div>
-          <h2 className="section-title">Two parts, one afternoon</h2>
+          <h2 className="section-title">Two Parts, One Afternoon</h2>
         </div>
         <div className="section-body">
           <p>

@@ -4,16 +4,16 @@ import Reveal from "@/components/Reveal";
 
 export default function TutorialPage() {
   return (
-    <PageShell title="TUTORIAL" subtitle="Meet Gardener-Agent" breadcrumb="Tutorial" backgroundImage="/bg2.png">
+    <PageShell title="TUTORIAL" subtitle="Meet Gardener" breadcrumb="Tutorial" backgroundImage="/bg2.png">
       <Reveal as="section" className="section">
         <div className="section-header">
           <div className="section-eyebrow">01 / OVERVIEW</div>
-          <h2 className="section-title">Brief introduction</h2>
+          <h2 className="section-title">Brief Introduction</h2>
         </div>
         <div className="section-body">
           <p>
             This tutorial page will guide users through the core workflows of
-            <strong> Gardener-Agent</strong>, from preparing datasets to
+            <strong> Gardener</strong>, from preparing datasets to
             connecting compute resources and launching reproducible dry-lab
             analyses.
           </p>
@@ -29,7 +29,7 @@ export default function TutorialPage() {
       <Reveal as="section" className="section">
         <div className="section-header">
           <div className="section-eyebrow">02 / SETUP</div>
-          <h2 className="section-title">Install and connect</h2>
+          <h2 className="section-title">Install and Connect</h2>
         </div>
         <div className="section-body">
           <p>

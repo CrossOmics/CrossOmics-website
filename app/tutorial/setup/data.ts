@@ -10,7 +10,7 @@ export type Video = {
 
 export const INTRO_VIDEO: Video = {
   id: "hPXpYxSJ2-U",
-  title: "Intro, setup & scRNA",
+  title: "Intro, Setup & scRNA",
   full: "CrossOmics Gardener Demo - Intro, setup, and scRNA"
 };
 
@@ -58,17 +58,17 @@ export const TOPOLOGIES: Topology[] = [
 
 /** Step ids are shared across topologies so anchors and scroll position survive a switch. */
 export function remoteIndexItems(topology: TopologyKey) {
-  const access = topology === "sphere" ? "04  MRG access" : "04  SSH";
+  const access = topology === "sphere" ? "04  MRG Access" : "04  SSH";
   const prereq =
     topology === "ssh"
       ? [{ id: "remote-prereq", label: "00  Requirements" }]
       : topology === "sphere"
-        ? [{ id: "remote-prereq", label: "00  Before you start" }]
+        ? [{ id: "remote-prereq", label: "00  Before You Start" }]
         : [];
 
   return [
     ...prereq,
-    { id: "remote-panel", label: "01  Connection panel" },
+    { id: "remote-panel", label: "01  Connection Panel" },
     { id: "remote-topology", label: "02  Topology" },
     { id: "remote-fields", label: "03  Fields" },
     { id: "remote-access", label: access },
@@ -80,8 +80,8 @@ export function remoteIndexItems(topology: TopologyKey) {
 
 export const DESKTOP_INDEX_ITEMS = [
   { id: "install", label: "01  Install" },
-  { id: "first-launch", label: "02  First launch" },
-  { id: "project", label: "03  Project & data" },
-  { id: "run-stage", label: "04  Run a stage" },
-  { id: "api-key", label: "05  LLM API key" }
+  { id: "first-launch", label: "02  First Launch" },
+  { id: "project", label: "03  Project & Data" },
+  { id: "run-stage", label: "04  Run a Stage" },
+  { id: "api-key", label: "05  LLM API Key" }
 ];
