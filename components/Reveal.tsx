@@ -7,6 +7,9 @@ type RevealElement = "div" | "section" | "article" | "li" | "nav";
 
 type RevealProps = {
   as?: RevealElement;
+  /** How much of the element must be in view before it reveals. Use "some" for
+   *  blocks taller than the viewport — a fraction they can never satisfy. */
+  amount?: number | "some" | "all";
   children?: ReactNode;
   "aria-label"?: string;
   className?: string;
@@ -26,6 +29,7 @@ const hoverState = { y: -6, boxShadow: "0 28px 70px rgba(30, 24, 18, 0.16)" };
 
 export default function Reveal({
   as = "div",
+  amount = 0.24,
   children,
   "aria-label": ariaLabel,
   className,
@@ -38,7 +42,7 @@ export default function Reveal({
     className,
     initial: "hidden",
     whileInView: "show",
-    viewport: { once: true, amount: 0.24 },
+    viewport: { once: true, amount },
     variants: reveal,
     transition: { ...transition, delay },
     whileHover: hover ? hoverState : undefined,
