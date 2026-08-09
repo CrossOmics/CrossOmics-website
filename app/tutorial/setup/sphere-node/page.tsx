@@ -74,7 +74,6 @@ export default function SphereNodePage() {
         { label: "Setup", href: "/tutorial/setup" },
         { label: "Node Prep" }
       ]}
-      backgroundImage="/bg2.png"
     >
       <Reveal as="section" className="section" hover={false}>
         <div className="section-header">

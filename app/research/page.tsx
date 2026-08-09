@@ -19,7 +19,7 @@ const PAPERS = [
 
 export default function ResearchPage() {
   return (
-    <PageShell title="RESEARCH" subtitle="Publications" breadcrumb="Research" backgroundImage="/bg3.png">
+    <PageShell title="RESEARCH" subtitle="Publications" breadcrumb="Research">
       <ul className="news-list">
         {PAPERS.map((p, idx) => (
           <Reveal

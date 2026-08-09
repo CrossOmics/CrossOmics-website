@@ -30,7 +30,7 @@ const PILLARS = [
 
 export default function ValuePage() {
   return (
-    <PageShell title="APPROACH" subtitle="How Gardener Works" breadcrumb="Approach" backgroundImage="/bg4.jpg">
+    <PageShell title="APPROACH" subtitle="How Gardener Works" breadcrumb="Approach">
       <Reveal as="section" className="section">
         <div className="section-header">
           <div className="section-eyebrow">01 / METHOD</div>

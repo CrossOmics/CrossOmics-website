@@ -18,7 +18,6 @@ export default function SetupPage() {
       title="SETUP"
       subtitle="Install Gardener, Then Connect a Machine"
       breadcrumb={[{ label: "Tutorial", href: "/tutorial" }, { label: "Setup" }]}
-      backgroundImage="/bg2.png"
     >
       <Reveal as="section" className="section" hover={false}>
         <div className="section-header">

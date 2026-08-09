@@ -30,7 +30,6 @@ export default function AboutPage() {
       title="ABOUT"
       subtitle="Meet Gardener"
       breadcrumb="About"
-      backgroundImage="/bg6.png"
     >
       <Reveal as="section" className="about-intro section">
         <div className="about-copy">
