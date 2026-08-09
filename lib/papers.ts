@@ -11,7 +11,7 @@ export type Paper = {
 export const PAPERS: Paper[] = [
   {
     date: "2026/07",
-    tags: ["ACL 2026", "System Demonstrations"],
+    tags: ["ACL 2026 Demo"],
     title: "Gardener: An Agentic AI System for Single-Cell RNA Sequence Analysis",
     authors: "Junhan Liu, Zhenke Liu, Yongcheng Shi, Peilin Yu, Minxing Zhang, Jiapeng Zhang",
     venue:

@@ -22,7 +22,7 @@ export default function SetupPage() {
       <Reveal as="section" className="section" hover={false}>
         <div className="section-header">
           <div className="section-eyebrow">00 / BEFORE YOU START</div>
-          <h2 className="section-title">Two Parts, One Afternoon</h2>
+          <h2 className="section-title">One-time Installation</h2>
         </div>
         <div className="section-body">
           <p>
