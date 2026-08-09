@@ -37,14 +37,14 @@ function SlurmSteps() {
     <>
       <OpenPanelStep />
 
-      <Step id="remote-topology" num="02" title="Choose the topology">
+      <Step id="remote-topology" num="02" title="Choose the Topology">
         <p>
           Set <strong>Connection Topology</strong> to <strong>HPC via Slurm</strong> — this is the
           default. The rest of this section covers that path.
         </p>
       </Step>
 
-      <Step id="remote-fields" num="03" title="Fill in the fields">
+      <Step id="remote-fields" num="03" title="Fill in the Fields">
         <table className="setup-table">
           <thead>
             <tr>
@@ -92,7 +92,7 @@ function SlurmSteps() {
         />
       </Step>
 
-      <Step id="remote-access" num="04" title="Set up SSH">
+      <Step id="remote-access" num="04" title="Set Up SSH">
         <ol className="setup-ol">
           <li>
             <strong>Set Up SSH Key</strong> → enter your cluster password in the terminal that opens.
@@ -103,7 +103,7 @@ function SlurmSteps() {
         </ol>
       </Step>
 
-      <Step id="remote-storage" num="05" title="Check storage">
+      <Step id="remote-storage" num="05" title="Check Storage">
         <p>
           <strong>Query Storage</strong> → confirm quota headroom if you want to check remote
           storage.
@@ -147,7 +147,7 @@ function SlurmSteps() {
 function SshSteps() {
   return (
     <>
-      <Step id="remote-prereq" num="00" title="What the remote host needs">
+      <Step id="remote-prereq" num="00" title="What the Remote Host Needs">
         <table className="setup-table">
           <thead>
             <tr>
@@ -188,7 +188,7 @@ function SshSteps() {
 
       <OpenPanelStep />
 
-      <Step id="remote-topology" num="02" title="Choose the topology">
+      <Step id="remote-topology" num="02" title="Choose the Topology">
         <p>
           Set <strong>Connection Topology</strong> to <strong>Direct SSH</strong>.
         </p>
@@ -198,7 +198,7 @@ function SshSteps() {
         </p>
       </Step>
 
-      <Step id="remote-fields" num="03" title="Fill in the fields">
+      <Step id="remote-fields" num="03" title="Fill in the Fields">
         <table className="setup-table">
           <thead>
             <tr>
@@ -244,7 +244,7 @@ function SshSteps() {
         </Note>
       </Step>
 
-      <Step id="remote-access" num="04" title="Set up SSH">
+      <Step id="remote-access" num="04" title="Set Up SSH">
         <ol className="setup-ol">
           <li>
             <strong>Set Up SSH Key</strong> → enter your server password in the terminal that opens.
@@ -255,7 +255,7 @@ function SshSteps() {
         </ol>
       </Step>
 
-      <Step id="remote-storage" num="05" title="Check storage">
+      <Step id="remote-storage" num="05" title="Check Storage">
         <p>
           <strong>Query Storage</strong> → confirm quota headroom if you want to check remote
           storage.
@@ -308,7 +308,7 @@ function SshSteps() {
 function SphereSteps() {
   return (
     <>
-      <Step id="remote-prereq" num="00" title="Before you start">
+      <Step id="remote-prereq" num="00" title="Before You Start">
         <p>
           Unlike the other topologies, Gardener does not SSH straight to the target. It authenticates
           with <strong>MRG</strong> (the Merge portal CLI), then hops:
@@ -368,7 +368,7 @@ function SphereSteps() {
 
         <Link className="setup-crosslink" href={NODE_GUIDE}>
           <span className="setup-crosslink-eyebrow">Companion guide · do this first</span>
-          <span className="setup-crosslink-title">Preparing a SPHERE compute node</span>
+          <span className="setup-crosslink-title">Preparing a SPHERE Compute Node</span>
           <span className="setup-crosslink-desc">
             Reaching the node, mounting its data disk at <code>/data</code>, installing Apptainer
             and build tools, and SSH keys. Once per compute node, before you connect from Gardener.
@@ -378,7 +378,7 @@ function SphereSteps() {
 
       <OpenPanelStep />
 
-      <Step id="remote-topology" num="02" title="Choose the topology">
+      <Step id="remote-topology" num="02" title="Choose the Topology">
         <p>
           Set <strong>Connection Topology</strong> to <strong>Sphere XDC</strong>.
         </p>
@@ -388,7 +388,7 @@ function SphereSteps() {
         </p>
       </Step>
 
-      <Step id="remote-fields" num="03" title="Fill in the fields">
+      <Step id="remote-fields" num="03" title="Fill in the Fields">
         <table className="setup-table">
           <thead>
             <tr>
@@ -465,7 +465,7 @@ function SphereSteps() {
           this topology — the backend runs directly on the compute node.
         </Note>
 
-        <Sub id="finding-xdc">Finding your XDC name and username</Sub>
+        <Sub id="finding-xdc">Finding Your XDC Name and Username</Sub>
         <p>
           Both are in the URL of your XDC&rsquo;s JupyterLab — the page SPHERE gives you once the XDC
           is set up. For example:
@@ -522,7 +522,7 @@ function SphereSteps() {
         </Note>
       </Step>
 
-      <Step id="remote-access" num="04" title="Set up MRG access">
+      <Step id="remote-access" num="04" title="Set Up MRG Access">
         <ol className="setup-ol">
           <li>
             <strong>Set Up MRG Login</strong> → a terminal opens and runs{" "}
@@ -568,7 +568,7 @@ function SphereSteps() {
         </table>
       </Step>
 
-      <Step id="remote-storage" num="05" title="Check storage">
+      <Step id="remote-storage" num="05" title="Check Storage">
         <p>
           <strong>Query Storage</strong> → reports free space via <code>df -h</code> on the compute
           node.
@@ -629,7 +629,7 @@ export default function PartRemote({
 }) {
   return (
     <section className="setup-part" id="part-remote">
-      <PartHead num="PART II" title="Connect a remote machine">
+      <PartHead num="PART II" title="Connect a Remote Machine">
         Required for sandbox execution, which cannot run locally on macOS or Windows. Finish
         Part&nbsp;I first, then pick the topology that matches your machine — the steps below change
         to suit it.

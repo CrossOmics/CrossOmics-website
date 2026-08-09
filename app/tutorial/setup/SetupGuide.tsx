@@ -46,7 +46,7 @@ export default function SetupGuide() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Gardener-Agent repository
+              Gardener repository
             </a>
             .
           </p>

@@ -1,4 +1,7 @@
 :root {
+  /* Light-only design. Without this, Chrome's "Auto Dark Mode for Web
+     Contents" inverts the page into an unintended dark theme. */
+  color-scheme: only light;
   --bg: #0a0a0a;
   --fg: #ffffff;
   --muted: rgba(255, 255, 255, 0.55);
@@ -67,15 +70,24 @@ button { background: none; border: none; color: inherit; cursor: pointer; font: 
   background-image: url('/bg-painting.png');
   background-size: cover;
   background-position: center;
-  filter: blur(18px) saturate(1.12);
+  /* The source paintings are dark — bg2.png (tutorial/setup) sits at relative
+     luminance 0.081, near black. Lifting the image itself beats piling on more
+     white, but a straight brightness push also blows out the lighter paintings.
+     contrast() flattens the artwork's own light/dark swing first, so a gentler
+     brightness lands every page in the same soft range instead of glaring.
+     Backdrop luminance: 0.55 (too murky) -> 1.35 alone gave 0.80 (glaring) ->
+     this lands at 0.63, with zero blown-out pixels on any page. */
+  filter: blur(18px) saturate(1.05) contrast(0.88) brightness(1.25);
   transform: scale(1.06);
 }
 .page-bg-painting::after {
   content: "";
   position: absolute; inset: 0;
+  /* Holds an even wash edge to edge. The original faded to transparent past 58%,
+     so body copy drifted onto bare painting at the margins and while scrolling. */
   background:
-    radial-gradient(circle at center, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.12) 32%, transparent 58%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(238, 232, 218, 0.34));
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.34) 40%, rgba(255, 255, 255, 0.26) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(238, 232, 218, 0.44));
 }
 
 /* ---------- Menu ---------- */
@@ -344,7 +356,7 @@ body:has(.page) { overflow: visible; }
   font-size: 11px;
   letter-spacing: 0.16em;
   margin-bottom: 24px;
-  opacity: 0.6;
+  opacity: 0.78;
 }
 .breadcrumb a { color: inherit; }
 .breadcrumb-crumb { display: flex; gap: 8px; }
@@ -360,7 +372,7 @@ body:has(.page) { overflow: visible; }
   font-family: var(--serif);
   font-style: italic;
   font-size: 18px;
-  opacity: 0.7;
+  opacity: 0.82;
 }
 
 /* footer */
@@ -449,6 +461,8 @@ body:has(.page) { overflow: visible; }
   font-size: 18px;
   line-height: 1.4;
 }
+.news-authors { font-size: 13px; line-height: 1.6; opacity: 0.8; }
+.news-venue { font-size: 12.5px; line-height: 1.6; font-style: italic; opacity: 0.6; }
 .news-arrow {
   width: 36px; height: 36px;
   border: 1px solid rgba(0, 0, 0, 0.3);
@@ -483,7 +497,7 @@ body:has(.page) { overflow: visible; }
 .section-eyebrow {
   font-size: 11px;
   letter-spacing: 0.24em;
-  opacity: 0.6;
+  opacity: 0.78;
   margin-bottom: 8px;
 }
 .section-title {
@@ -497,7 +511,7 @@ body:has(.page) { overflow: visible; }
   font-size: 15px;
   line-height: 1.8;
   max-width: 720px;
-  opacity: 0.85;
+  opacity: 0.95;
 }
 .section-body p + p { margin-top: 1em; }
 
@@ -538,14 +552,14 @@ body:has(.page) { overflow: visible; }
 .biz-desc {
   font-size: 14px;
   line-height: 1.8;
-  opacity: 0.85;
+  opacity: 0.95;
 }
 
 /* ----- Timeline ----- */
 .timeline { border-left: 1px solid rgba(0, 0, 0, 0.2); padding-left: 32px; }
 .timeline-row { display: grid; grid-template-columns: 120px 1fr; gap: 24px; padding: 16px 0; border-bottom: 1px solid rgba(0, 0, 0, 0.06); }
 .timeline-year { font-family: var(--serif); font-size: 20px; }
-.timeline-body { font-size: 14px; line-height: 1.7; opacity: 0.85; }
+.timeline-body { font-size: 14px; line-height: 1.7; opacity: 0.95; }
 
 /* ----- Pillar cards (sustainability) ----- */
 .pillars { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
@@ -574,7 +588,7 @@ body:has(.page) { overflow: visible; }
   opacity: 0.65;
   margin-bottom: 12px;
 }
-.pillar-desc { font-size: 14px; line-height: 1.7; opacity: 0.85; }
+.pillar-desc { font-size: 14px; line-height: 1.7; opacity: 0.95; }
 
 /* ----- IR card grid ----- */
 .ir-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
@@ -697,21 +711,21 @@ body:has(.page) { overflow: visible; }
   font-size: 10px;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  opacity: 0.55;
+  opacity: 0.78;
   margin-bottom: 12px;
 }
 .setup-index-list { list-style: none; display: flex; flex-direction: column; }
 .setup-index-list a {
   display: block;
   padding: 7px 0 7px 14px;
-  border-left: 1px solid rgba(0, 0, 0, 0.14);
+  border-left: 1px solid rgba(0, 0, 0, 0.22);
   font-size: 12px;
   letter-spacing: 0.06em;
   font-variant-numeric: tabular-nums;
-  opacity: 0.55;
+  opacity: 0.8;
   transition: opacity 200ms ease, border-color 200ms ease, padding-left 240ms ease;
 }
-.setup-index-list a:hover { opacity: 0.9; }
+.setup-index-list a:hover { opacity: 1; }
 .setup-index-list a.active {
   opacity: 1;
   border-left-color: #1a1a1a;
@@ -724,7 +738,7 @@ body:has(.page) { overflow: visible; }
 .setup-part-num {
   font-size: 11px;
   letter-spacing: 0.28em;
-  opacity: 0.6;
+  opacity: 0.78;
   margin-bottom: 10px;
 }
 .setup-part-title {
@@ -737,7 +751,7 @@ body:has(.page) { overflow: visible; }
 .setup-part-lede {
   font-size: 14px;
   line-height: 1.8;
-  opacity: 0.75;
+  opacity: 0.88;
   max-width: 640px;
 }
 
@@ -801,7 +815,7 @@ body:has(.page) { overflow: visible; }
   font-size: 10.5px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  opacity: 0.5;
+  opacity: 0.72;
   border-bottom: 1px solid currentColor;
   margin-left: auto;
 }
@@ -843,7 +857,7 @@ body:has(.page) { overflow: visible; }
   font-size: 10px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  opacity: 0.6;
+  opacity: 0.78;
 }
 .topo-card-label { font-family: var(--serif); font-size: 21px; line-height: 1.2; }
 .topo-card-blurb { font-size: 12.5px; line-height: 1.6; opacity: 0.75; }
@@ -860,7 +874,7 @@ body:has(.page) { overflow: visible; }
   font-family: var(--serif);
   font-size: 22px;
   letter-spacing: 0.1em;
-  opacity: 0.4;
+  opacity: 0.62;
   padding-top: 2px;
 }
 .setup-step-title {
@@ -874,7 +888,7 @@ body:has(.page) { overflow: visible; }
 .setup-step-body {
   font-size: 14.5px;
   line-height: 1.8;
-  opacity: 0.88;
+  opacity: 0.95;
   max-width: 760px;
 }
 .setup-step-body > p + p { margin-top: 1em; }
@@ -896,7 +910,7 @@ body:has(.page) { overflow: visible; }
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  opacity: 0.65;
+  opacity: 0.8;
   margin: 40px 0 14px;
   padding-bottom: 8px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
@@ -908,7 +922,7 @@ body:has(.page) { overflow: visible; }
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  opacity: 0.6;
+  opacity: 0.75;
   margin-bottom: 16px;
 }
 
@@ -937,7 +951,7 @@ body:has(.page) { overflow: visible; }
   font-size: 10px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  opacity: 0.6;
+  opacity: 0.78;
 }
 .setup-pill {
   display: inline-block;
@@ -969,7 +983,7 @@ body:has(.page) { overflow: visible; }
   font-size: 10.5px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  opacity: 0.5;
+  opacity: 0.7;
 }
 
 /* ----- tables ----- */
@@ -985,7 +999,7 @@ body:has(.page) { overflow: visible; }
   font-size: 10px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  opacity: 0.55;
+  opacity: 0.75;
   padding: 0 14px 10px 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.25);
 }
@@ -1002,7 +1016,7 @@ body:has(.page) { overflow: visible; }
   border-left: 2px solid rgba(0, 0, 0, 0.28);
   font-size: 13.5px;
   line-height: 1.75;
-  opacity: 0.8;
+  opacity: 0.92;
 }
 .setup-note--warn { border-left-color: #9c4a2a; }
 .setup-note--danger {
@@ -1032,7 +1046,7 @@ body:has(.page) { overflow: visible; }
   font-size: 10px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  opacity: 0.55;
+  opacity: 0.75;
 }
 .setup-crosslink-title { font-family: var(--serif); font-size: 22px; line-height: 1.25; }
 .setup-crosslink-title::after { content: " →"; }

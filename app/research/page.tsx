@@ -3,15 +3,17 @@
 import PageShell from "@/components/PageShell";
 import Reveal from "@/components/Reveal";
 
-// TODO: confirm paper title + abstract from https://www.biorxiv.org/content/10.1101/2025.05.30.656746v1
 const PAPERS = [
   {
-    date: "2025/05/30",
-    tags: ["bioRxiv", "Preprint"],
-    title: "CrossOmics — Featured preprint",
+    date: "2026/07",
+    tags: ["ACL 2026", "System Demonstrations"],
+    title: "Gardener: An Agentic AI System for Single-Cell RNA Sequence Analysis",
+    authors: "Junhan Liu, Zhenke Liu, Yongcheng Shi, Peilin Yu, Minxing Zhang, Jiapeng Zhang",
+    venue:
+      "Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (Volume 3: System Demonstrations), pages 408–417",
     excerpt:
-      "A preprint from the CrossOmics group describing the foundations behind Gardener-Agent. Click through for the full text on bioRxiv.",
-    href: "https://www.biorxiv.org/content/10.1101/2025.05.30.656746v1"
+      "An interactive agentic system for scRNA-seq analysis that supports expert-steered, iterative workflows under strict data-residency requirements. Reasoning is grounded in a local scientific engine and an Experiment Management Kernel holding persistent, immutable snapshots; cloud-hosted LLMs see only snapshot identifiers and sanitized summaries, while raw expression matrices stay on the user's device.",
+    href: "https://aclanthology.org/2026.acl-demo.40.pdf"
   }
 ];
 
@@ -34,6 +36,8 @@ export default function ResearchPage() {
                 ))}
               </div>
               <div className="news-title">{p.title}</div>
+              <div className="news-authors">{p.authors}</div>
+              <div className="news-venue">{p.venue}</div>
               <div className="pillar-desc">{p.excerpt}</div>
             </div>
             <div className="news-arrow">

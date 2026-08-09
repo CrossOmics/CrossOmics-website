@@ -5,7 +5,7 @@ const FEATURES = [
   {
     num: "01",
     title: "Data Privacy & Three-Party Computation",
-    desc: "Gardener-Agent keeps the LLM, desktop GUI, and HPC environment in separate roles. Data lives and runs on your HPC, while the LLM only helps coordinate the work without seeing raw biological data."
+    desc: "Gardener keeps the LLM, desktop GUI, and HPC environment in separate roles. Data lives and runs on your HPC, while the LLM only helps coordinate the work without seeing raw biological data."
   },
   {
     num: "02",
@@ -15,7 +15,7 @@ const FEATURES = [
   {
     num: "03",
     title: "Rigorous Pipeline Execution",
-    desc: "Gardener-Agent can help retrieve public datasets, connect to your compute environment, and launch trusted dry-lab workflows such as nf-core pipelines with clear records of each run."
+    desc: "Gardener can help retrieve public datasets, connect to your compute environment, and launch trusted dry-lab workflows such as nf-core pipelines with clear records of each run."
   },
   {
     num: "04",
@@ -28,7 +28,7 @@ export default function AboutPage() {
   return (
     <PageShell
       title="ABOUT"
-      subtitle="Meet Gardener-Agent"
+      subtitle="Meet Gardener"
       breadcrumb="About"
       backgroundImage="/bg6.png"
     >
@@ -36,11 +36,11 @@ export default function AboutPage() {
         <div className="about-copy">
           <div className="section-header">
             <div className="section-eyebrow">01 / OVERVIEW</div>
-            <h2 className="section-title">What is Gardener-Agent?</h2>
+            <h2 className="section-title">What Is Gardener?</h2>
           </div>
           <div className="section-body">
             <p>
-              <strong>Gardener-Agent</strong> is an AI-powered operating system
+              <strong>Gardener</strong> is an AI-powered operating system
               for biologists and bioinformaticians. It helps you retrieve and
               download public datasets from NIH, connect to your personal HPC
               environment, and run rigorous dry-lab analyses through established
@@ -68,7 +68,7 @@ export default function AboutPage() {
       <Reveal as="section" className="section" hover={false}>
         <div className="section-header">
           <div className="section-eyebrow">02 / FEATURES</div>
-          <h2 className="section-title">What it enables</h2>
+          <h2 className="section-title">What It Enables</h2>
         </div>
         <div className="pillars">
           {FEATURES.map((feature) => (
