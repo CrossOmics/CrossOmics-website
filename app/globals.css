@@ -223,34 +223,6 @@ img { max-width: 100%; display: block; }
   position: absolute; inset: 0;
   background: linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.28) 100%);
 }
-/* Inner pages: blurred section bg */
-.page-bg-painting {
-  position: fixed; inset: -8%;
-  z-index: 0;
-  pointer-events: none;
-  background-image: url('/bg-painting.png');
-  background-size: cover;
-  background-position: center;
-  /* The source paintings are dark — bg2.png (tutorial/setup) sits at relative
-     luminance 0.081, near black. Lifting the image itself beats piling on more
-     white, but a straight brightness push also blows out the lighter paintings.
-     contrast() flattens the artwork's own light/dark swing first, so a gentler
-     brightness lands every page in the same soft range instead of glaring.
-     Backdrop luminance: 0.55 (too murky) -> 1.35 alone gave 0.80 (glaring) ->
-     this lands at 0.63, with zero blown-out pixels on any page. */
-  filter: blur(18px) saturate(1.05) contrast(0.88) brightness(1.25);
-  transform: scale(1.06);
-}
-.page-bg-painting::after {
-  content: "";
-  position: absolute; inset: 0;
-  /* Holds an even wash edge to edge. The original faded to transparent past 58%,
-     so body copy drifted onto bare painting at the margins and while scrolling. */
-  background:
-    radial-gradient(circle at center, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.34) 40%, rgba(255, 255, 255, 0.26) 100%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(238, 232, 218, 0.44));
-}
-
 /* ---------- Menu ---------- */
 .menu {
   position: relative; z-index: 10;
@@ -461,52 +433,47 @@ img { max-width: 100%; display: block; }
    Inner pages
    ======================================================================== */
 .page {
-  position: relative;
   min-height: 100vh;
-  color: #1a1a1a;
+  display: flex;
+  flex-direction: column;
   /* `clip` (not `hidden`) — `hidden` makes .page a scroll container, which
      breaks position: sticky for the header and the setup step index. */
   overflow-x: clip;
-  isolation: isolate;
-}
-html:has(.page), body:has(.page) { background: #171510; }
-/* Scrolling lives on <html> only. Giving <body> its own overflow would make it a
-   non-scrolling scroll container and silently disable every sticky descendant. */
-html:has(.page) { overflow-y: auto; overflow-x: hidden; }
-body:has(.page) { overflow: visible; }
-
-/* main */
-.page-main {
-  position: relative;
-  z-index: 1;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 80px 40px 120px;
 }
 
-.page-title-block { margin-bottom: 80px; }
+.page-main { flex: 1; padding-top: 72px; padding-bottom: 40px; }
+
+.page-title-block {
+  padding-bottom: 40px;
+  margin-bottom: var(--section-gap);
+  border-bottom: 1px solid var(--line);
+}
 .breadcrumb {
-  display: flex; gap: 8px;
-  font-size: 11px;
-  letter-spacing: 0.16em;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   margin-bottom: 24px;
-  opacity: 0.78;
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--muted);
 }
-.breadcrumb a { color: inherit; }
-.breadcrumb-crumb { display: flex; gap: 8px; }
+.breadcrumb a:hover { color: var(--accent); }
+.breadcrumb-crumb { display: flex; align-items: center; gap: 8px; }
 .page-title {
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: clamp(48px, 7vw, 96px);
-  letter-spacing: 0.02em;
-  line-height: 1;
-  margin-bottom: 16px;
+  font-size: clamp(34px, 4vw, 56px);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 .page-subtitle {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 18px;
-  opacity: 0.82;
+  max-width: var(--maxw-prose);
+  margin-top: 20px;
+  font-size: 20px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .page-main { padding-top: 40px; }
+  .page-title-block { padding-bottom: 28px; }
 }
 
 /* ----- News list ----- */
