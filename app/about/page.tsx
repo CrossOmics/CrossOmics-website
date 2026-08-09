@@ -27,10 +27,9 @@ const FEATURES = [
 export default function AboutPage() {
   return (
     <PageShell
-      title="ABOUT"
+      title="About"
       subtitle="Meet Gardener"
       breadcrumb="About"
-      backgroundImage="/bg6.png"
     >
       <Reveal as="section" className="about-intro section">
         <div className="about-copy">

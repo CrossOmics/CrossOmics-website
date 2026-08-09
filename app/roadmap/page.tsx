@@ -15,7 +15,7 @@ const ROADMAP = [
     title: "Team Workspaces",
     sub: "Shared lineages across a lab",
     desc: "Move from a single-user tool to a shared workspace: lineages, skills, and annotated runs that a whole lab can read, comment on, and fork.",
-    image: "https://images.unsplash.com/photo-1454425064867-83bc48b40c4d?auto=format&fit=crop&w=1200&q=80"
+    image: "https://images.unsplash.com/photo-1702794130211-8fdb84960cce?auto=format&fit=crop&w=1200&q=80"
   },
   {
     num: "03",
@@ -26,9 +26,9 @@ const ROADMAP = [
   }
 ];
 
-export default function FuturePage() {
+export default function RoadmapPage() {
   return (
-    <PageShell title="FUTURE" subtitle="What's Next" breadcrumb="Future" backgroundImage="/bg5.jpg">
+    <PageShell title="Roadmap" subtitle="What's Next" breadcrumb="Roadmap">
       <Reveal as="section" className="section">
         <div className="section-header">
           <div className="section-eyebrow">ROADMAP — directional, not committed dates</div>

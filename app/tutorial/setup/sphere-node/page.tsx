@@ -67,14 +67,13 @@ echo "== ✅ Done. BioAgent data, models, and Docker can now live in $MOUNT =="`
 export default function SphereNodePage() {
   return (
     <PageShell
-      title="NODE PREP"
+      title="Node Prep"
       subtitle="Preparing a SPHERE Compute Node"
       breadcrumb={[
         { label: "Tutorial", href: "/tutorial" },
         { label: "Setup", href: "/tutorial/setup" },
         { label: "Node Prep" }
       ]}
-      backgroundImage="/bg2.png"
     >
       <Reveal as="section" className="section" hover={false}>
         <div className="section-header">

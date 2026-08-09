@@ -20,12 +20,14 @@ type RevealProps = {
 };
 
 const reveal = {
-  hidden: { opacity: 0, y: 28, filter: "blur(8px)" },
-  show: { opacity: 1, y: 0, filter: "blur(0px)" }
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0 }
 };
 
 const transition = { duration: 0.72, ease: [0.22, 1, 0.36, 1] };
-const hoverState = { y: -6, boxShadow: "0 28px 70px rgba(30, 24, 18, 0.16)" };
+// Hover affordances live in CSS per component now — the old shared lift-and-shadow
+// was tuned for translucent panels on a painting and reads as noise on white.
+const hoverState = { y: 0 };
 
 export default function Reveal({
   as = "div",

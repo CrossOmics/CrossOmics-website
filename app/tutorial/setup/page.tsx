@@ -15,10 +15,9 @@ export const metadata: Metadata = {
 export default function SetupPage() {
   return (
     <PageShell
-      title="SETUP"
+      title="Setup"
       subtitle="Install Gardener, Then Connect a Machine"
       breadcrumb={[{ label: "Tutorial", href: "/tutorial" }, { label: "Setup" }]}
-      backgroundImage="/bg2.png"
     >
       <Reveal as="section" className="section" hover={false}>
         <div className="section-header">

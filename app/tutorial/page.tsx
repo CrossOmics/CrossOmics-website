@@ -4,7 +4,7 @@ import Reveal from "@/components/Reveal";
 
 export default function TutorialPage() {
   return (
-    <PageShell title="TUTORIAL" subtitle="Meet Gardener" breadcrumb="Tutorial" backgroundImage="/bg2.png">
+    <PageShell title="Tutorial" subtitle="Meet Gardener" breadcrumb="Tutorial">
       <Reveal as="section" className="section">
         <div className="section-header">
           <div className="section-eyebrow">01 / OVERVIEW</div>

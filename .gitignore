@@ -12,3 +12,6 @@ CrossOmics-crossfade/
 CrossOmics-maskwipe/
 CrossOmics-flip3d/
 CrossOmics-diagonal/
+
+# claude worktrees
+.claude/worktrees/
