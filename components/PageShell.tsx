@@ -10,6 +10,8 @@ const NAV = [
   { href: "/roadmap", label: "Roadmap" }
 ];
 
+type Crumb = { label: string; href?: string };
+
 export default function PageShell({
   title,
   subtitle,
@@ -19,10 +21,12 @@ export default function PageShell({
 }: {
   title: string;
   subtitle?: string;
-  breadcrumb?: string;
+  /** A single label, or a trail of ancestors ending with the current page. */
+  breadcrumb?: string | Crumb[];
   backgroundImage?: string;
   children: ReactNode;
 }) {
+  const crumbs: Crumb[] = typeof breadcrumb === "string" ? [{ label: breadcrumb }] : breadcrumb ?? [];
   return (
     <div className="page">
       <div
@@ -49,9 +53,15 @@ export default function PageShell({
 
       <main className="page-main">
         <Reveal className="page-title-block" hover={false}>
-          {breadcrumb && (
+          {crumbs.length > 0 && (
             <div className="breadcrumb">
-              <Link href="/">TOP</Link> <span>›</span> <span>{breadcrumb}</span>
+              <Link href="/">TOP</Link>
+              {crumbs.map((c) => (
+                <span key={c.label} className="breadcrumb-crumb">
+                  <span>›</span>{" "}
+                  {c.href ? <Link href={c.href}>{c.label}</Link> : <span>{c.label}</span>}
+                </span>
+              ))}
             </div>
           )}
           <h1 className="page-title">{title}</h1>
