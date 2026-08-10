@@ -45,7 +45,7 @@ actor1 = net.node(
     proc.cores >= 84,
     memory.capacity >= gb(192),
     disk.capacity == gb(512),
-    image == '2404',        # check which image names SPHERE currently supports first
+    image == '2604',        # check which image names SPHERE currently supports first
     # metal == True,        # enable when you need bare metal — expect a much longer wait for resources
 )
 
