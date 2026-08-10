@@ -49,21 +49,6 @@ actor1 = net.node(
     # metal == True,        # enable when you need bare metal — expect a much longer wait for resources
 )
 
-# ---------------------------------------------------------------------------
-# Multi-node variant: if the single-node model fails to compile, or you need
-# a worker anyway, uncomment the lines below. capacity on the link is
-# optional — leave it off unless you need rate limiting, since link
-# constraints add emulation overhead.
-# ---------------------------------------------------------------------------
-# n1 = net.node(
-#     'n1',
-#     proc.cores >= 4,
-#     memory.capacity >= gb(8),
-# )
-# link = net.connect([actor1, n1])
-# link[actor1].socket.addrs = ip4('10.0.0.1/24')
-# link[n1].socket.addrs = ip4('10.0.0.2/24')
-
 # The model file must end with this line — without it, compilation always fails
 experiment(net)`;
 
