@@ -139,29 +139,29 @@ export const content = {
     introEyebrow: "01 / DIRECTION",
     introTitle: "Where We're Headed",
     introBody: [
-      "Three directions we are actively investing in. These are directional, not committed dates. Order indicates rough priority, not a sequenced timeline, and several of these will land in parallel."
+      "Three directions we are working toward: an open plugin ecosystem, agentic workflows that keep you in control, and higher analysis throughput that cuts false positives."
     ],
     // Card images stay inline below; text lives here.
     items: [
       {
         num: "01",
-        title: "Notebook Export",
-        sub: "Lineage → Jupyter",
-        desc: "Render any saved lineage as a runnable Jupyter notebook for handoff to collaborators or archival in a lab's existing workflow.",
+        title: "Plugin Ecosystem",
+        sub: "Share algorithms others can run in minutes",
+        desc: "We are abstracting the backend into a common interface, so anyone can package a method with its code and environment and publish it as a plugin. Others drop it in, reproduce the run, and try the algorithm on their own data without setting anything up.",
         image: "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1200&q=80"
       },
       {
         num: "02",
-        title: "Team Workspaces",
-        sub: "Shared lineages across a lab",
-        desc: "Move from a single-user tool to a shared workspace: lineages, skills, and annotated runs that a whole lab can read, comment on, and fork.",
+        title: "Agentic Workflows",
+        sub: "Automation that keeps a human in the loop",
+        desc: "We are building agentic workflows that handle the routine steps while every scientific decision stays with you. The agent is still in beta, and the work now is turning it into complete, real-world workflows you can trust.",
         image: "https://images.unsplash.com/photo-1702794130211-8fdb84960cce?auto=format&fit=crop&w=1200&q=80"
       },
       {
         num: "03",
-        title: "Benchmarks",
-        sub: "Open evals for analysis quality",
-        desc: "Public benchmarks measuring analysis quality on real genomics tasks, so progress is visible and improvements are accountable.",
+        title: "Higher Throughput",
+        sub: "More analyses, fewer false positives",
+        desc: "We want to help you maximize analysis throughput and build data-driven, data-mining workflows on top of it. Running more analyses gives you more ways to cross-check a result and cut false positives.",
         image: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1200&q=80"
       }
     ]
