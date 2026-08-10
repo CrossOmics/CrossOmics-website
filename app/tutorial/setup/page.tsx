@@ -33,6 +33,13 @@ export default function SetupPage() {
             sandbox execution because that cannot run locally on macOS or Windows.
           </p>
           <p>
+            This setup takes real work, and some of it is fiddly — installing the app, adding
+            credentials, preparing a machine you may not administer yourself. That is the nature
+            of the task, not a sign you are doing it wrong. Please give it the patience it asks
+            for: <strong>you do this once</strong>. Afterwards, opening a project and running a
+            pipeline is a few clicks, and nothing on this page comes back.
+          </p>
+          <p>
             Three remote topologies are supported — a Slurm cluster, a single server over SSH, or a
             SPHERE testbed node. Pick one in Part&nbsp;II and the steps follow your choice.
           </p>
