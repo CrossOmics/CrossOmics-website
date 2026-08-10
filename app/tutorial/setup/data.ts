@@ -1,4 +1,4 @@
-export const RELEASES = "https://github.com/CrossOmics/Gardener-Agent/releases";
+export { RELEASES_URL as RELEASES } from "@/lib/releases";
 
 export type Video = {
   id: string;

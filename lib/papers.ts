@@ -8,10 +8,23 @@ export type Paper = {
   href: string;
 };
 
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/**
+ * "2026/07" → "Jul 2026", so a paper sits next to a release date without the two
+ * reading as different kinds of value. The Research page keeps the raw form,
+ * where the column is dates and the format is unambiguous.
+ */
+export function formatPaperDate(date: string): string {
+  const [year, month] = date.split("/");
+  const name = MONTHS[Number(month) - 1];
+  return name ? `${name} ${year}` : date;
+}
+
 export const PAPERS: Paper[] = [
   {
     date: "2026/07",
-    tags: ["ACL 2026", "System Demonstrations"],
+    tags: ["ACL 2026 Demo"],
     title: "Gardener: An Agentic AI System for Single-Cell RNA Sequence Analysis",
     authors: "Junhan Liu, Zhenke Liu, Yongcheng Shi, Peilin Yu, Minxing Zhang, Jiapeng Zhang",
     venue:
