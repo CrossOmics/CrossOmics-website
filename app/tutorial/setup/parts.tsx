@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import Reveal from "@/components/Reveal";
 
 export function Step({
@@ -50,6 +50,34 @@ export function Figure({
       <img src={src} alt={alt} width={width} height={height} loading="lazy" decoding="async" />
       <figcaption>{caption}</figcaption>
     </figure>
+  );
+}
+
+export function CodeBlock({ children }: { children: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(children);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      // Clipboard unavailable (insecure context, old browser) — the text stays selectable.
+    }
+  }
+
+  return (
+    <div className="code-block-wrap">
+      <pre className="code-block">{children}</pre>
+      <button
+        type="button"
+        className={`code-copy ${copied ? "is-copied" : ""}`}
+        onClick={copy}
+        aria-label="Copy to clipboard"
+      >
+        {copied ? "Copied" : "Copy"}
+      </button>
+    </div>
   );
 }
 

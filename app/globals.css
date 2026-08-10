@@ -129,6 +129,22 @@ img { max-width: 100%; display: block; }
   color: var(--fg);
 }
 
+.code-block-wrap { position: relative; margin: 24px 0; }
+.code-block-wrap .code-block { margin: 0; }
+.code-copy {
+  position: absolute; top: 10px; right: 10px;
+  padding: 4px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease;
+}
+.code-copy:hover { color: var(--accent); border-color: var(--accent); }
+.code-copy.is-copied { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
 /* ---------- Site chrome ---------- */
 .site-header {
   position: sticky; top: 0; z-index: 50;

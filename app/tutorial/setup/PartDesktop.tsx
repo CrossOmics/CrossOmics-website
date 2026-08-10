@@ -1,7 +1,7 @@
 "use client";
 
-import { Figure, Note, PartHead, Step, Sub } from "./parts";
-import { RELEASES } from "./data";
+import { CodeBlock, Figure, Note, PartHead, Step, Sub } from "./parts";
+import { ASSAY_DEMOS, RELEASES } from "./data";
 
 export default function PartDesktop() {
   return (
@@ -58,9 +58,9 @@ export default function PartDesktop() {
           size="md"
         />
         <p>If Gatekeeper still blocks the app, clear the quarantine flag instead:</p>
-        <pre className="code-block">
+        <CodeBlock>
           {`xattr -d com.apple.quarantine "/Applications/Lotus Biological Agent.app"`}
-        </pre>
+        </CodeBlock>
 
         <Sub>Windows</Sub>
         <p>

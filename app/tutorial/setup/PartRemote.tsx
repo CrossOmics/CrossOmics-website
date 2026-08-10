@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Figure, Note, OpenPanelStep, PartHead, Step, Sub } from "./parts";
+import { CodeBlock, Figure, Note, OpenPanelStep, PartHead, Step, Sub } from "./parts";
 import { NODE_GUIDE, TOPOLOGIES, type TopologyKey } from "./data";
 
 function Chooser({
@@ -313,9 +313,9 @@ function SphereSteps() {
           Unlike the other topologies, Gardener does not SSH straight to the target. It authenticates
           with <strong>MRG</strong> (the Merge portal CLI), then hops:
         </p>
-        <pre className="code-block">
+        <CodeBlock>
           {`your laptop  →  jump.sphere-testbed.net  →  your XDC  →  compute node (actor)`}
-        </pre>
+        </CodeBlock>
         <table className="setup-table">
           <thead>
             <tr>
@@ -470,11 +470,11 @@ function SphereSteps() {
           Both are in the URL of your XDC&rsquo;s JupyterLab, the page SPHERE gives you once the XDC
           is set up. For example:
         </p>
-        <pre className="code-block">
+        <CodeBlock>
           {`https://dewexp64518387-jiapengz.xdc.sphere-testbed.net/jupyter/user/jiapengz/crossomics/lab
         └──────────┬──────────┘                                     └──┬───┘
             XDC host label                                         username`}
-        </pre>
+        </CodeBlock>
         <table className="setup-table">
           <thead>
             <tr>
