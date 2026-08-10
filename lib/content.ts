@@ -162,7 +162,7 @@ export const content = {
         title: "Higher Throughput",
         sub: "More analyses, fewer false positives",
         desc: "We want to help you maximize analysis throughput and build data-driven, data-mining workflows on top of it. Running more analyses gives you more ways to cross-check a result and cut false positives.",
-        image: "https://images.unsplash.com/photo-1683322499436-f4383dd59f5a?auto=format&fit=crop&w=1200&q=80"
+        image: "https://images.unsplash.com/photo-1604869515882-4d10fa4b0492?auto=format&fit=crop&w=1200&q=80"
       }
     ]
   }
