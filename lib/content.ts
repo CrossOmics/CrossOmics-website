@@ -146,23 +146,23 @@ export const content = {
       {
         num: "01",
         title: "Plugin Ecosystem",
-        sub: "Share algorithms others can run in minutes",
-        desc: "We are abstracting the backend into a common interface, so anyone can package a method with its code and environment and publish it as a plugin. Others drop it in, reproduce the run, and try the algorithm on their own data without setting anything up.",
-        image: "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1200&q=80"
+        sub: "Share methods others can plug into a workflow",
+        desc: "We are turning the analysis service into a shared interface, so any method can be packaged as a plugin that carries its own code and environment. Each one becomes a block you drag into a workflow: plug it in, reproduce the analysis, and evaluate the algorithm on your own data without any setup.",
+        image: "https://images.unsplash.com/photo-1639322537228-f710d846310a?auto=format&fit=crop&w=1200&q=80"
       },
       {
         num: "02",
         title: "Agentic Workflows",
         sub: "Automation that keeps a human in the loop",
         desc: "We are building agentic workflows that handle the routine steps while every scientific decision stays with you. The agent is still in beta, and the work now is turning it into complete, real-world workflows you can trust.",
-        image: "https://images.unsplash.com/photo-1702794130211-8fdb84960cce?auto=format&fit=crop&w=1200&q=80"
+        image: "https://images.unsplash.com/photo-1737505599162-d9932323a889?auto=format&fit=crop&w=1200&q=80"
       },
       {
         num: "03",
         title: "Higher Throughput",
         sub: "More analyses, fewer false positives",
         desc: "We want to help you maximize analysis throughput and build data-driven, data-mining workflows on top of it. Running more analyses gives you more ways to cross-check a result and cut false positives.",
-        image: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1200&q=80"
+        image: "https://images.unsplash.com/photo-1683322499436-f4383dd59f5a?auto=format&fit=crop&w=1200&q=80"
       }
     ]
   }
