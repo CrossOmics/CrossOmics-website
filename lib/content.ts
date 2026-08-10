@@ -155,7 +155,7 @@ export const content = {
         title: "Agentic Workflows",
         sub: "Automation that keeps a human in the loop",
         desc: "We are building agentic workflows that handle the routine steps while every scientific decision stays with you. The agent is still in beta, and the work now is turning it into complete, real-world workflows you can trust.",
-        image: "https://images.unsplash.com/photo-1737505599162-d9932323a889?auto=format&fit=crop&w=1200&q=80"
+        image: "https://images.unsplash.com/photo-1674027215016-0a4abfdbf1cc?auto=format&fit=crop&w=1200&q=80"
       },
       {
         num: "03",
