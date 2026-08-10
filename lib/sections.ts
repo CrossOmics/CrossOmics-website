@@ -7,9 +7,9 @@ export type SectionEntry = {
 };
 
 export const SECTIONS: SectionEntry[] = [
-  { key: "about",    label: "About",    blurb: "What Gardener is and what it enables.",           image: "/plants/cell.png",     href: "/about" },
-  { key: "tutorial", label: "Tutorial", blurb: "Install, connect, and run your first analysis.",  image: "/plants/lavender.jpg", href: "/tutorial" },
-  { key: "research", label: "Research", blurb: "Papers and system demonstrations.",               image: "/plants/fern.jpg",     href: "/research" },
-  { key: "approach", label: "Approach", blurb: "How reasoning, interaction, and compute split.",  image: "/plants/value.jpg",    href: "/approach" },
-  { key: "roadmap",  label: "Roadmap",  blurb: "Where the project is headed next.",               image: "/plants/tree.jpg",     href: "/roadmap" }
+  { key: "about",    label: "About",    blurb: "See what Gardener does",                    image: "/bg-painting.png", href: "/about" },
+  { key: "tutorial", label: "Tutorial", blurb: "Install, connect your HPC, run your first analysis", image: "/bg2.png",     href: "/tutorial" },
+  { key: "research", label: "Research", blurb: "Read the papers behind it",                  image: "/bg3.png",         href: "/research" },
+  { key: "approach", label: "Approach", blurb: "Why it runs on your own HPC",               image: "/bg4.jpg",         href: "/approach" },
+  { key: "roadmap",  label: "Roadmap",  blurb: "See where it's headed",                     image: "/bg5.jpg",         href: "/roadmap" }
 ];

@@ -3,10 +3,12 @@
 import PageShell from "@/components/PageShell";
 import Reveal from "@/components/Reveal";
 import { PAPERS } from "@/lib/papers";
+import { content } from "@/lib/content";
 
 export default function ResearchPage() {
+  const { research } = content;
   return (
-    <PageShell title="Research" subtitle="Publications" breadcrumb="Research">
+    <PageShell title={research.title} subtitle={research.subtitle} breadcrumb={research.breadcrumb}>
       <ul className="news-list">
         {PAPERS.map((p, idx) => (
           <Reveal

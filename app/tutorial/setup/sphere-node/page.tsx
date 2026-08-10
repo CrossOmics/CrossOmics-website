@@ -78,7 +78,7 @@ export default function SphereNodePage() {
       <Reveal as="section" className="section" hover={false}>
         <div className="section-header">
           <div className="section-eyebrow">00 / SCOPE</div>
-          <h2 className="section-title">The Node Side of Sphere</h2>
+          <h2 className="section-title">The Node Side of SPHERE</h2>
         </div>
         <div className="section-body">
           <p>
@@ -90,7 +90,7 @@ export default function SphereNodePage() {
             <Link className="setup-inline-link" href="/tutorial/setup#remote-panel">
               Sphere XDC topology
             </Link>{" "}
-            in the setup guide, which covers the app side — what to type into the connection panel.
+            in the setup guide, which covers the app side, meaning what to type into the connection panel.
             Do the steps here <strong>once per compute node</strong>, before you connect from
             Gardener.
           </p>
@@ -169,14 +169,14 @@ ssh actor1`}
               <p>
                 SPHERE nodes ship with a second, unmounted disk. Gardener&rsquo;s default Sphere
                 workspace is <code>/data/gardener_remote</code>, so mounting it is what makes that
-                default work — and it is where you want container images, datasets, and results to
+                default work. It is also where you want container images, datasets, and results to
                 live rather than on the small root filesystem.
               </p>
 
               <Note tone="danger">
                 <strong>This script formats a disk.</strong> <code>mkfs.ext4</code> destroys
                 everything on the target. It skips formatting when it finds an existing filesystem,
-                but confirm the device is the empty data disk before running it — check with{" "}
+                but confirm the device is the empty data disk before running it. Check with{" "}
                 <code>lsblk -f</code>, and adjust <code>DISK=</code> if your data disk is not{" "}
                 <code>/dev/vdb</code>.
               </Note>
@@ -184,7 +184,7 @@ ssh actor1`}
               <pre className="code-block">{MOUNT_SCRIPT}</pre>
 
               <p>
-                The script is idempotent — re-running it will not reformat a mounted disk — and the{" "}
+                The script is idempotent, so re-running it will not reformat a mounted disk, and the{" "}
                 <code>fstab</code> entry makes the mount survive a reboot.
               </p>
               <Note tone="warn">
@@ -207,7 +207,7 @@ sudo apt install -y apptainer`}
               <p>Verify:</p>
               <pre className="code-block">{`apptainer --version`}</pre>
               <Note>
-                <code>singularity</code> works too — Gardener looks for either, and also tries{" "}
+                <code>singularity</code> works too. Gardener looks for either, and also tries{" "}
                 <code>module load apptainer</code> / <code>module load singularity</code> on nodes
                 where containers ship as a module.
               </Note>
@@ -236,7 +236,7 @@ sudo apt install -y apptainer`}
 
             <Step id="ssh-keys" num="05" title="SSH Key Access">
               <Note>
-                Gardener&rsquo;s <strong>Sphere XDC</strong> topology does not need this — it
+                Gardener&rsquo;s <strong>Sphere XDC</strong> topology does not need this. It
                 authenticates through MRG and uses <code>~/.ssh/merge_key</code> for the whole hop
                 chain. Set this up when you want plain <code>ssh</code> access to the node from your
                 own terminal, or when pointing the <strong>Direct SSH</strong> topology at it.
@@ -245,7 +245,7 @@ sudo apt install -y apptainer`}
               <Sub>From Your Local Machine</Sub>
               <pre className="code-block">{`ssh-copy-id jiapengz@dewexp07690701`}</pre>
               <p>
-                The part after <code>@</code> differs per node — take it from the connection details
+                The part after <code>@</code> differs per node. Take it from the connection details
                 shown for your node.
               </p>
 
@@ -260,7 +260,7 @@ vim ~/.ssh/authorized_keys      # paste the whole public key line, then :wq
 chmod 600 ~/.ssh/authorized_keys`}
               </pre>
               <p>
-                The permissions matter — <code>700</code> on <code>~/.ssh</code> and{" "}
+                The permissions matter: <code>700</code> on <code>~/.ssh</code> and{" "}
                 <code>600</code> on <code>authorized_keys</code>. SSH refuses keys on more permissive
                 files.
               </p>
@@ -307,7 +307,7 @@ chmod 600 ~/.ssh/authorized_keys`}
                   <tr>
                     <td>Out of disk space on the node</td>
                     <td>
-                      Check <code>df -h /data</code> — results may be landing on the root filesystem
+                      Check <code>df -h /data</code>; results may be landing on the root filesystem
                     </td>
                   </tr>
                   <tr>
@@ -323,7 +323,7 @@ chmod 600 ~/.ssh/authorized_keys`}
                 </tbody>
               </table>
               <p>
-                For failures in the app&rsquo;s connection panel itself — MRG login, XDC attachment —
+                For failures in the app&rsquo;s connection panel itself (MRG login, XDC attachment),
                 see the{" "}
                 <Link className="setup-inline-link" href="/tutorial/setup#remote-access">
                   Sphere XDC topology

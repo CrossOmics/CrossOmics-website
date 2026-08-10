@@ -37,18 +37,18 @@ function SlurmSteps() {
     <>
       <OpenPanelStep />
 
-      <Step id="remote-topology" num="02" title="Choose the Topology">
+      <Step id="remote-topology" num="02" title="Choose a Connection Type">
         <p>
-          Set <strong>Connection Topology</strong> to <strong>HPC via Slurm</strong> — this is the
-          default. The rest of this section covers that path.
+          Set <strong>Connection Topology</strong> to <strong>HPC via Slurm</strong>. This is the
+          default, and the rest of this section covers that path.
         </p>
       </Step>
 
-      <Step id="remote-fields" num="03" title="Fill in the Fields">
+      <Step id="remote-fields" num="03" title="Enter the Connection Details">
         <table className="setup-table">
           <thead>
             <tr>
-              <th>Field</th>
+              <th>Setting</th>
               <th>Value</th>
             </tr>
           </thead>
@@ -188,7 +188,7 @@ function SshSteps() {
 
       <OpenPanelStep />
 
-      <Step id="remote-topology" num="02" title="Choose the Topology">
+      <Step id="remote-topology" num="02" title="Choose a Connection Type">
         <p>
           Set <strong>Connection Topology</strong> to <strong>Direct SSH</strong>.
         </p>
@@ -198,11 +198,11 @@ function SshSteps() {
         </p>
       </Step>
 
-      <Step id="remote-fields" num="03" title="Fill in the Fields">
+      <Step id="remote-fields" num="03" title="Enter the Connection Details">
         <table className="setup-table">
           <thead>
             <tr>
-              <th>Field</th>
+              <th>Setting</th>
               <th>Value</th>
             </tr>
           </thead>
@@ -239,7 +239,7 @@ function SshSteps() {
         </Note>
         <Note>
           <strong>Advanced Backend Slurm Resources</strong> is hidden in this topology. There is no
-          allocation to size — the backend runs as an ordinary process and uses whatever the host
+          allocation to size. The backend runs as an ordinary process and uses whatever the host
           has.
         </Note>
       </Step>
@@ -262,7 +262,7 @@ function SshSteps() {
         </p>
         <Note>
           This runs <code>checkquota</code>, which is an HPC tool. A plain server usually does not
-          have it and reports <code>Remote host does not provide checkquota.</code> — that is
+          have it and reports <code>Remote host does not provide checkquota.</code> That is
           expected and does not block the connection. Check free space with <code>df -h</code>{" "}
           yourself instead.
         </Note>
@@ -339,7 +339,7 @@ function SphereSteps() {
                 The XDC <strong>attached to a materialization</strong>
               </td>
               <td>
-                Gardener refuses to connect otherwise — materialize and attach it from the portal
+                Gardener refuses to connect otherwise, so materialize and attach it from the portal
                 first
               </td>
             </tr>
@@ -352,7 +352,7 @@ function SphereSteps() {
             <tr>
               <td>The node prepared</td>
               <td>
-                Data disk mounted, Apptainer installed — see{" "}
+                Data disk mounted, Apptainer installed. See{" "}
                 <Link className="setup-inline-link" href={NODE_GUIDE}>
                   Preparing a SPHERE compute node
                 </Link>
@@ -378,7 +378,7 @@ function SphereSteps() {
 
       <OpenPanelStep />
 
-      <Step id="remote-topology" num="02" title="Choose the Topology">
+      <Step id="remote-topology" num="02" title="Choose a Connection Type">
         <p>
           Set <strong>Connection Topology</strong> to <strong>Sphere XDC</strong>.
         </p>
@@ -388,11 +388,11 @@ function SphereSteps() {
         </p>
       </Step>
 
-      <Step id="remote-fields" num="03" title="Fill in the Fields">
+      <Step id="remote-fields" num="03" title="Enter the Connection Details">
         <table className="setup-table">
           <thead>
             <tr>
-              <th>Field</th>
+              <th>Setting</th>
               <th>Value</th>
               <th>Default</th>
             </tr>
@@ -412,7 +412,7 @@ function SphereSteps() {
                 <strong>Sphere Username</strong>
               </td>
               <td>
-                Your SPHERE username — <a href="#finding-xdc">see below</a>
+                Your SPHERE username, <a href="#finding-xdc">see below</a>
               </td>
               <td>—</td>
             </tr>
@@ -421,7 +421,7 @@ function SphereSteps() {
                 <strong>XDC</strong>
               </td>
               <td>
-                <code>projectid.username</code> — <a href="#finding-xdc">see below</a>
+                <code>projectid.username</code>, <a href="#finding-xdc">see below</a>
               </td>
               <td>—</td>
             </tr>
@@ -439,7 +439,7 @@ function SphereSteps() {
                 <strong>Compute Workspace Root</strong>
               </td>
               <td>
-                Workspace on the compute node, or use <strong>Browse</strong> — use{" "}
+                Workspace on the compute node, or use <strong>Browse</strong>. Use{" "}
                 <code>/data/gardener_remote</code> once the{" "}
                 <Link className="setup-inline-link" href={`${NODE_GUIDE}#mount-data`}>
                   data disk is mounted
@@ -462,12 +462,12 @@ function SphereSteps() {
         </table>
         <Note>
           The first four are required. <strong>Advanced Backend Slurm Resources</strong> is hidden in
-          this topology — the backend runs directly on the compute node.
+          this topology. The backend runs directly on the compute node.
         </Note>
 
         <Sub id="finding-xdc">Finding Your XDC Name and Username</Sub>
         <p>
-          Both are in the URL of your XDC&rsquo;s JupyterLab — the page SPHERE gives you once the XDC
+          Both are in the URL of your XDC&rsquo;s JupyterLab, the page SPHERE gives you once the XDC
           is set up. For example:
         </p>
         <pre className="code-block">
@@ -478,7 +478,7 @@ function SphereSteps() {
         <table className="setup-table">
           <thead>
             <tr>
-              <th>Field</th>
+              <th>Setting</th>
               <th>How to read it off the URL</th>
               <th>In this example</th>
             </tr>
@@ -511,7 +511,7 @@ function SphereSteps() {
         </table>
         <Note>
           URLs spell the XDC with a hyphen (<code>dewexp64518387-jiapengz</code>) because a dot would
-          start a new domain level. The <strong>XDC</strong> field wants the dotted form —{" "}
+          start a new domain level. The <strong>XDC</strong> field wants the dotted form,{" "}
           <code>dewexp64518387.jiapengz</code>.
         </Note>
         <Note>
@@ -574,7 +574,7 @@ function SphereSteps() {
           node.
         </p>
         <Note>
-          There is no quota output here, unlike the Slurm topology — SPHERE compute nodes report
+          There is no quota output here, unlike the Slurm topology. SPHERE compute nodes report
           plain disk usage.
         </Note>
       </Step>
@@ -582,8 +582,7 @@ function SphereSteps() {
       <Step id="remote-connect" num="06" title="Connect">
         <p>
           Click <strong>Connect to Remote Server</strong>. The first connection pulls two container
-          images and is slow — slower than the other topologies, since every byte crosses the jump
-          host.
+          images and is slow, since every byte crosses the jump host.
         </p>
         <Figure
           src="/setup/14-connecting.webp"
@@ -594,7 +593,7 @@ function SphereSteps() {
         />
         <Note>
           The compute node needs <code>apptainer</code> (or <code>singularity</code>) and network
-          egress to <code>ghcr.io</code> for the image pull to succeed — see{" "}
+          egress to <code>ghcr.io</code> for the image pull to succeed. See{" "}
           <Link className="setup-inline-link" href={`${NODE_GUIDE}#install-apptainer`}>
             Install Apptainer
           </Link>{" "}
@@ -630,8 +629,8 @@ export default function PartRemote({
   return (
     <section className="setup-part" id="part-remote">
       <PartHead num="PART II" title="Connect a Remote Machine">
-        Required for sandbox execution, which cannot run locally on macOS or Windows. Finish
-        Part&nbsp;I first, then pick the topology that matches your machine — the steps below change
+        Required for the heavy compute that cannot run locally on macOS or Windows. Finish
+        Part&nbsp;I first, then pick the connection that matches your machine. The steps below change
         to suit it.
       </PartHead>
 

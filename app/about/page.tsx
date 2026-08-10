@@ -1,59 +1,36 @@
 import PageShell from "@/components/PageShell";
 import Reveal from "@/components/Reveal";
+import { GITHUB_URL } from "@/lib/nav";
+import { content } from "@/lib/content";
 
-const FEATURES = [
-  {
-    num: "01",
-    title: "Data Privacy & Three-Party Computation",
-    desc: "Gardener keeps the LLM, desktop GUI, and HPC environment in separate roles. Data lives and runs on your HPC, while the LLM only helps coordinate the work without seeing raw biological data."
-  },
-  {
-    num: "02",
-    title: "Data Management",
-    desc: "Every dataset, command, parameter, and result is organized as the analysis progresses. You can return to an earlier step, try another direction, or compare outcomes without losing track of what happened."
-  },
-  {
-    num: "03",
-    title: "Rigorous Pipeline Execution",
-    desc: "Gardener can help retrieve public datasets, connect to your compute environment, and launch trusted dry-lab workflows such as nf-core pipelines with clear records of each run."
-  },
-  {
-    num: "04",
-    title: "Expert-Driven Workflow",
-    desc: "The agent acts as a trustworthy helper for execution, organization, and routine analysis work. Biological interpretation and scientific decisions stay with the expert."
-  }
-];
+const about = content.about;
 
 export default function AboutPage() {
   return (
     <PageShell
-      title="About"
-      subtitle="Meet Gardener"
-      breadcrumb="About"
+      title={about.title}
+      subtitle={about.subtitle}
+      breadcrumb={about.breadcrumb}
     >
       <Reveal as="section" className="about-intro section">
         <div className="about-copy">
           <div className="section-header">
-            <div className="section-eyebrow">01 / OVERVIEW</div>
-            <h2 className="section-title">What Is Gardener?</h2>
+            <div className="section-eyebrow">{about.overviewEyebrow}</div>
+            <h2 className="section-title">{about.overviewTitle}</h2>
           </div>
           <div className="section-body">
             <p>
-              <strong>Gardener</strong> is an AI-powered operating system
-              for biologists and bioinformaticians. It helps you retrieve and
-              download public datasets from NIH, connect to your personal HPC
-              environment, and run rigorous dry-lab analyses through established
-              pipelines such as nf-core.
+              <strong>{about.overviewLead}</strong>{about.overviewBody}
             </p>
             <p>
-              The project is open source.{" "}
+              {about.openSourceLead}{" "}
               <a
                 className="cta-link"
-                href="https://github.com/CrossOmics/Gardener-Agent"
+                href={GITHUB_URL}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                View on GitHub
+                {about.viewOnGithub}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
                   <path d="M4 12h16M14 6l6 6-6 6" />
                 </svg>
@@ -66,11 +43,11 @@ export default function AboutPage() {
 
       <Reveal as="section" className="section" hover={false}>
         <div className="section-header">
-          <div className="section-eyebrow">02 / FEATURES</div>
-          <h2 className="section-title">What It Enables</h2>
+          <div className="section-eyebrow">{about.featuresEyebrow}</div>
+          <h2 className="section-title">{about.featuresTitle}</h2>
         </div>
         <div className="pillars">
-          {FEATURES.map((feature) => (
+          {about.features.map((feature) => (
             <Reveal key={feature.num} className="pillar">
               <div className="pillar-num">— {feature.num}</div>
               <div className="pillar-title">{feature.title}</div>

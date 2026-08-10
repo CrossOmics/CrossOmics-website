@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { SECTIONS } from "@/lib/sections";
+import { content } from "@/lib/content";
 
 export default function SectionCards() {
   return (
     <section className="home-cards-section container" aria-labelledby="explore-heading">
-      <h2 id="explore-heading" className="home-cards-heading">Explore</h2>
+      <h2 id="explore-heading" className="home-cards-heading">{content.explore.heading}</h2>
 
       <ul className="home-cards">
         {SECTIONS.map((s) => (

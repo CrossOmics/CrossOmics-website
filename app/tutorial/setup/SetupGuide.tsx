@@ -24,9 +24,9 @@ export default function SetupGuide() {
     <div className="setup-layout">
       <SetupIndex
         groups={[
-          { title: "Part I — Desktop", sectionId: "part-desktop", items: DESKTOP_INDEX_ITEMS },
+          { title: "Part I: Desktop", sectionId: "part-desktop", items: DESKTOP_INDEX_ITEMS },
           {
-            title: `Part II — ${selected.label}`,
+            title: `Part II: ${selected.label}`,
             sectionId: "part-remote",
             items: remoteIndexItems(topology)
           }

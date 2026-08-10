@@ -1,62 +1,31 @@
 import PageShell from "@/components/PageShell";
 import Reveal from "@/components/Reveal";
+import { content } from "@/lib/content";
 
-const PILLARS = [
-  {
-    num: "01",
-    title: "Reproducibility and Robustness",
-    sub: "Compute where the data lives",
-    desc: "Gardener treats HPC as the primary execution environment, not an afterthought. Datasets remain on the compute system where they belong, while the agent helps launch, monitor, and organize analysis jobs."
-  },
-  {
-    num: "02",
-    title: "Accessibility",
-    sub: "LLM, desktop GUI, and HPC each play a clear role",
-    desc: "The workflow separates reasoning, interaction, and execution. The LLM assists with planning and coordination, the GUI keeps the user in control, and the HPC performs data-intensive computation without exposing raw data to the model."
-  },
-  {
-    num: "03",
-    title: "Privacy",
-    sub: "Built around rigorous dry-lab workflows",
-    desc: "Gardener is built to work with established community pipelines such as nf-core. Instead of relying on ad hoc commands, analyses can be launched, recorded, and repeated through trusted workflow standards."
-  },
-  {
-    num: "04",
-    title: "Scalability",
-    sub: "Automation without replacing judgment",
-    desc: "The agent helps with execution, record-keeping, and routine coordination, while biological interpretation and scientific decisions remain with the researcher."
-  }
-];
+const approach = content.approach;
 
 export default function ValuePage() {
   return (
-    <PageShell title="Approach" subtitle="How Gardener Works" breadcrumb="Approach">
+    <PageShell title={approach.title} subtitle={approach.subtitle} breadcrumb={approach.breadcrumb}>
       <Reveal as="section" className="section">
         <div className="section-header">
-          <div className="section-eyebrow">01 / METHOD</div>
-          <h2 className="section-title">Built for Real Biological Computing</h2>
+          <div className="section-eyebrow">{approach.methodEyebrow}</div>
+          <h2 className="section-title">{approach.methodTitle}</h2>
         </div>
         <div className="section-body">
-          <p>
-            Gardener is designed around the way modern biological
-            analysis actually happens: data is large, compute is distributed,
-            and decisions require expert judgment.
-          </p>
-          <p>
-            Instead of sending raw datasets into a cloud chatbot, Gardener
-            separates reasoning, interaction, and computation into a
-            privacy-preserving workflow.
-          </p>
+          {approach.methodBody.map((para, i) => (
+            <p key={i}>{para}</p>
+          ))}
         </div>
       </Reveal>
 
       <Reveal as="section" className="section" hover={false}>
         <div className="section-header">
-          <div className="section-eyebrow">02 / CORE PRINCIPLES</div>
-          <h2 className="section-title">Our Approach</h2>
+          <div className="section-eyebrow">{approach.principlesEyebrow}</div>
+          <h2 className="section-title">{approach.principlesTitle}</h2>
         </div>
         <div className="pillars">
-          {PILLARS.map((p) => (
+          {approach.pillars.map((p) => (
             <Reveal key={p.num} className="pillar">
               <div className="pillar-num">— {p.num}</div>
               <div className="pillar-title">{p.title}</div>

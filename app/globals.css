@@ -225,21 +225,30 @@ img { max-width: 100%; display: block; }
   padding-bottom: 20px;
   margin-bottom: 32px;
   border-bottom: 1px solid var(--line);
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--fg);
 }
 
 /* ----- The horizontal section-card row ----- */
 .home-cards-section { margin-bottom: var(--section-gap); }
 .home-cards {
   list-style: none;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 20px;
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  /* Bleed to the container edges so the strip reads as scrollable, while the
+     first card still lines up with the heading above it. */
+  margin-inline: calc(var(--gutter) * -1);
+  padding-inline: var(--gutter);
+  padding-bottom: 4px;
 }
+.home-cards::-webkit-scrollbar { display: none; }
+.home-card { flex: 0 0 300px; scroll-snap-align: start; }
 .home-card-link { display: flex; flex-direction: column; }
 .home-card-media {
   display: block;
@@ -295,26 +304,9 @@ img { max-width: 100%; display: block; }
 .home-highlight-title { font-size: 21px; font-weight: 600; line-height: 1.3; letter-spacing: -0.01em; }
 .home-highlight-desc { font-size: 15px; line-height: 1.6; color: var(--muted); }
 
-@media (max-width: 1199px) {
-  .home-cards { grid-template-columns: repeat(3, 1fr); gap: 24px; }
-}
-
 @media (max-width: 899px) {
-  .home-cards {
-    display: flex;
-    gap: 16px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    /* Bleed to the viewport edges so the strip reads as scrollable, while the
-       first card still lines up with the heading above it. */
-    margin-inline: calc(var(--gutter) * -1);
-    padding-inline: var(--gutter);
-    padding-bottom: 4px;
-  }
-  .home-cards::-webkit-scrollbar { display: none; }
-  .home-card { flex: 0 0 240px; scroll-snap-align: start; }
+  .home-cards { gap: 16px; }
+  .home-card { flex-basis: 240px; }
   .home-highlights-grid { grid-template-columns: 1fr; }
   .home-highlight { padding: 24px; }
 }
