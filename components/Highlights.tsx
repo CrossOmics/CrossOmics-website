@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { PAPERS } from "@/lib/papers";
+import { LATEST_RELEASE } from "@/lib/releases";
 
 export default function Highlights() {
   const paper = PAPERS[0];
@@ -18,15 +18,17 @@ export default function Highlights() {
           <span className="cta-link">Read the paper →</span>
         </a>
 
-        <Link className="home-highlight" href="/tutorial/setup">
+        <a
+          className="home-highlight"
+          href={LATEST_RELEASE.href}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <span className="tag-pill">Release</span>
-          <span className="home-highlight-title">Install Gardener and connect your compute</span>
-          <span className="home-highlight-desc">
-            macOS and Windows install, your first project, and connecting a Slurm
-            cluster, an SSH server, or a SPHERE testbed node.
-          </span>
-          <span className="cta-link">Open the guide →</span>
-        </Link>
+          <span className="home-highlight-title">Gardener {LATEST_RELEASE.version}</span>
+          <span className="home-highlight-desc">{LATEST_RELEASE.summary}</span>
+          <span className="cta-link">See the release →</span>
+        </a>
       </div>
     </section>
   );
