@@ -803,6 +803,10 @@ img { max-width: 100%; display: block; }
   padding: 2px 6px;
   border-radius: 6px;
   white-space: nowrap;
+  /* Where code does wrap (tables, narrow screens), close the pill on every
+     line instead of leaving the break edges open. */
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 .setup-step-body .code-block code { background: none; border: 0; padding: 0; }
 .setup-inline-link {
@@ -926,6 +930,9 @@ img { max-width: 100%; display: block; }
   vertical-align: top;
 }
 .setup-table tr:last-child td { border-bottom: 0; }
+/* Inline code is nowrap in prose, but a long command in a cell cannot shrink
+   under it — the cell's min-content width pushes the table past the column. */
+.setup-step-body .setup-table code { white-space: normal; overflow-wrap: anywhere; }
 
 /* ----- callouts ----- */
 .setup-note {
