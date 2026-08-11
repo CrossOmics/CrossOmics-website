@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import Reveal from "@/components/Reveal";
 
 export function Step({
@@ -50,6 +50,38 @@ export function Figure({
       <img src={src} alt={alt} width={width} height={height} loading="lazy" decoding="async" />
       <figcaption>{caption}</figcaption>
     </figure>
+  );
+}
+
+/**
+ * `wrap={false}` for content whose column alignment carries meaning (diagrams);
+ * it scrolls instead of wrapping, and the copy button takes its own band.
+ */
+export function CodeBlock({ children, wrap = true }: { children: string; wrap?: boolean }) {
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(children);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      // Clipboard unavailable (insecure context, old browser) — the text stays selectable.
+    }
+  }
+
+  return (
+    <div className={`code-block-wrap ${wrap ? "" : "code-block-wrap--nowrap"}`}>
+      <pre className="code-block">{children}</pre>
+      <button
+        type="button"
+        className={`code-copy ${copied ? "is-copied" : ""}`}
+        onClick={copy}
+        aria-label="Copy to clipboard"
+      >
+        {copied ? "Copied" : "Copy"}
+      </button>
+    </div>
   );
 }
 

@@ -129,6 +129,36 @@ img { max-width: 100%; display: block; }
   color: var(--fg);
 }
 
+.code-block-wrap { position: relative; margin: 24px 0; }
+/* Long commands wrap rather than scroll, with the right edge kept clear so no
+   line ever runs under the copy button. */
+.code-block-wrap .code-block {
+  margin: 0;
+  padding-right: 84px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+/* Diagrams keep their alignment, so they scroll — which would slide text under
+   the button. Give it a band of its own instead. */
+.code-block-wrap--nowrap .code-block {
+  padding: 46px 18px 16px;
+  white-space: pre;
+  overflow-wrap: normal;
+}
+.code-copy {
+  position: absolute; top: 10px; right: 10px;
+  padding: 4px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease;
+}
+.code-copy:hover { color: var(--accent); border-color: var(--accent); }
+.code-copy.is-copied { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
 /* ---------- Site chrome ---------- */
 .site-header {
   position: sticky; top: 0; z-index: 50;
@@ -787,6 +817,10 @@ img { max-width: 100%; display: block; }
   padding: 2px 6px;
   border-radius: 6px;
   white-space: nowrap;
+  /* Where code does wrap (tables, narrow screens), close the pill on every
+     line instead of leaving the break edges open. */
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 .setup-step-body .code-block code { background: none; border: 0; padding: 0; }
 .setup-inline-link {
@@ -910,6 +944,9 @@ img { max-width: 100%; display: block; }
   vertical-align: top;
 }
 .setup-table tr:last-child td { border-bottom: 0; }
+/* Inline code is nowrap in prose, but a long command in a cell cannot shrink
+   under it — the cell's min-content width pushes the table past the column. */
+.setup-step-body .setup-table code { white-space: normal; overflow-wrap: anywhere; }
 
 /* ----- callouts ----- */
 .setup-note {

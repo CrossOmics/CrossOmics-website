@@ -3,7 +3,7 @@ import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import Reveal from "@/components/Reveal";
 import SetupIndex from "../SetupIndex";
-import { Arrow, Note, Step, Sub } from "../parts";
+import { Arrow, CodeBlock, Note, Step, Sub } from "../parts";
 
 export const metadata: Metadata = {
   title: "Preparing a SPHERE Compute Node — Gardener | CrossOmics",
@@ -20,11 +20,37 @@ const INDEX = [
       { id: "mount-data", label: "02  Mount the Disk" },
       { id: "install-apptainer", label: "03  Apptainer" },
       { id: "build-tools", label: "04  Build Tools" },
-      { id: "ssh-keys", label: "05  SSH Keys" },
-      { id: "troubleshooting", label: "Troubleshooting" }
+      { id: "ssh-keys", label: "05  SSH Keys" }
     ]
   }
 ];
+
+const MODEL_EXAMPLE = `from mergexp import *
+
+# Topology object. addressing/routing let Merge auto-assign IPv4 addresses
+# and configure static routes. A single-node experiment does not actually use
+# either constraint, but keeping them makes it easy to add nodes later.
+net = Network('bignode', addressing == ipv4, routing == static)
+
+# Main node: >= 84 cores, >= 192 GB RAM, plus an extra 512 GB data disk.
+#
+#   proc.cores       CPU cores, default 1
+#   memory.capacity  RAM in bytes — use gb() to convert, default 512 MB
+#   disk.capacity    extra disk, attached to the node as /dev/vdb
+#                    (the root partition is fixed at 32 GB and unaffected)
+#   image            OS image, default bullseye (Debian)
+#   metal            True = bare metal, False = virtual machine (default False)
+actor1 = net.node(
+    'actor1',
+    proc.cores >= 84,
+    memory.capacity >= gb(192),
+    disk.capacity == gb(512),
+    image == '2604',        # check which image names SPHERE currently supports first
+    # metal == True,        # enable when you need bare metal — expect a much longer wait for resources
+)
+
+# The model file must end with this line — without it, compilation always fails
+experiment(net)`;
 
 const MOUNT_SCRIPT = `#!/usr/bin/env bash
 set -euo pipefail
@@ -108,20 +134,37 @@ export default function SphereNodePage() {
         <div className="setup-content">
           <section className="setup-part" id="node-steps">
             <Step id="reach-node" num="01" title="Reach Your Node">
-              <p>Two ways in. Both land on the same machine.</p>
+              <Sub>Where the Node Comes From</Sub>
+              <p>
+                Compute nodes are not picked from a list — they are declared. A SPHERE experiment
+                starts as a <strong>model</strong>: a short Python file, written in the Merge
+                portal&rsquo;s <strong>Model Editor</strong>, that describes the nodes you want and
+                the resources each one must have. When you <strong>materialize</strong> the model,
+                SPHERE reserves real machines that satisfy those constraints and provisions them;
+                attaching your XDC to the materialization is what puts them within reach. The node
+                name used throughout this page — <code>actor1</code> — is simply the name the model
+                gives its node.
+              </p>
+              <p>
+                An example model for a single large Gardener node, including the extra data disk
+                that <a href="#mount-data">step 02</a> mounts:
+              </p>
+              <CodeBlock>{MODEL_EXAMPLE}</CodeBlock>
+
+              <p>Once the materialization is up, there are two ways in. Both land on the same machine.</p>
 
               <Sub>Browser</Sub>
               <p>Your XDC&rsquo;s JupyterLab:</p>
-              <pre className="code-block">
+              <CodeBlock>
                 {`https://dewexp64518387-jiapengz.xdc.sphere-testbed.net/jupyter/user/jiapengz/crossomics/lab`}
-              </pre>
+              </CodeBlock>
 
               <Sub>Local Terminal</Sub>
               <p>Hop through the XDC, then into the compute node:</p>
-              <pre className="code-block">
+              <CodeBlock>
                 {`mrg xdc ssh dewexp64518387.jiapengz
 ssh actor1`}
-              </pre>
+              </CodeBlock>
 
               <p>Substitute your own values throughout this page:</p>
               <table className="setup-table">
@@ -154,7 +197,7 @@ ssh actor1`}
                     <td>
                       <code>actor1</code>
                     </td>
-                    <td>A node in your materialization</td>
+                    <td>The node name declared in your model</td>
                   </tr>
                 </tbody>
               </table>
@@ -181,7 +224,7 @@ ssh actor1`}
                 <code>/dev/vdb</code>.
               </Note>
 
-              <pre className="code-block">{MOUNT_SCRIPT}</pre>
+              <CodeBlock>{MOUNT_SCRIPT}</CodeBlock>
 
               <p>
                 The script is idempotent, so re-running it will not reformat a mounted disk, and the{" "}
@@ -199,13 +242,27 @@ ssh actor1`}
                 Gardener runs its backend and sandbox as <code>.sif</code> container images. Without
                 a container runtime on the node, the connection fails during the image pull.
               </p>
-              <pre className="code-block">
+              <Note tone="warn">
+                These commands are for <strong>Ubuntu</strong> only — the PPA and{" "}
+                <code>add-apt-repository</code> do not exist on other distributions. Elsewhere,
+                follow the{" "}
+                <a
+                  className="setup-inline-link"
+                  href="https://apptainer.org/docs/admin/main/installation.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  official Apptainer installation guide
+                </a>{" "}
+                instead.
+              </Note>
+              <CodeBlock>
                 {`sudo add-apt-repository -y ppa:apptainer/ppa
 sudo apt update
 sudo apt install -y apptainer`}
-              </pre>
+              </CodeBlock>
               <p>Verify:</p>
-              <pre className="code-block">{`apptainer --version`}</pre>
+              <CodeBlock>{`apptainer --version`}</CodeBlock>
               <Note>
                 <code>singularity</code> works too. Gardener looks for either, and also tries{" "}
                 <code>module load apptainer</code> / <code>module load singularity</code> on nodes
@@ -226,12 +283,12 @@ sudo apt install -y apptainer`}
               </p>
 
               <Sub>Ubuntu / Debian</Sub>
-              <pre className="code-block">
+              <CodeBlock>
                 {`sudo apt-get update && sudo apt-get install -y build-essential`}
-              </pre>
+              </CodeBlock>
 
               <Sub>RHEL / Rocky / CentOS</Sub>
-              <pre className="code-block">{`sudo yum groupinstall -y "Development Tools"`}</pre>
+              <CodeBlock>{`sudo yum groupinstall -y "Development Tools"`}</CodeBlock>
             </Step>
 
             <Step id="ssh-keys" num="05" title="SSH Key Access">
@@ -242,93 +299,43 @@ sudo apt install -y apptainer`}
                 own terminal, or when pointing the <strong>Direct SSH</strong> topology at it.
               </Note>
 
-              <Sub>From Your Local Machine</Sub>
-              <pre className="code-block">{`ssh-copy-id jiapengz@dewexp07690701`}</pre>
+              <Sub>1 · Generate a Key Pair on Your Local Machine</Sub>
               <p>
-                The part after <code>@</code> differs per node. Take it from the connection details
-                shown for your node.
+                Skip this if <code>~/.ssh/id_ed25519.pub</code> already exists. Otherwise, run it on
+                your own laptop, not on the node:
+              </p>
+              <CodeBlock>{`ssh-keygen -t ed25519 -C "your-email@example.com"`}</CodeBlock>
+              <p>
+                Press Enter at every prompt to accept the default path and an empty passphrase. This
+                writes the private key to <code>~/.ssh/id_ed25519</code> and the public key to{" "}
+                <code>~/.ssh/id_ed25519.pub</code>.
               </p>
 
-              <Sub>Or Add the Key Manually on the Node</Sub>
-              <pre className="code-block">
+              <Sub>2 · Read the Public Key</Sub>
+              <p>Still on your laptop:</p>
+              <CodeBlock>{`cat ~/.ssh/id_ed25519.pub`}</CodeBlock>
+              <p>
+                Copy the whole line it prints. It starts with <code>ssh-ed25519</code> and ends with
+                the comment you passed above.
+              </p>
+              <Note tone="warn">
+                Only ever copy the <code>.pub</code> file. The matching{" "}
+                <code>~/.ssh/id_ed25519</code>, with no extension, is the private key and never
+                leaves your machine.
+              </Note>
+
+              <Sub>3 · Add the Public Key on the Compute Node</Sub>
+              <p>
+                Open a shell on the node, then run this with <code>ssh-public-key</code> replaced by
+                the line you just copied:
+              </p>
+              <CodeBlock>
                 {`mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo "ssh-public-key" >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys`}
-              </pre>
-              <p>With an editor instead:</p>
-              <pre className="code-block">
-                {`mkdir -p ~/.ssh && chmod 700 ~/.ssh
-vim ~/.ssh/authorized_keys      # paste the whole public key line, then :wq
-chmod 600 ~/.ssh/authorized_keys`}
-              </pre>
+              </CodeBlock>
               <p>
                 The permissions matter: <code>700</code> on <code>~/.ssh</code> and{" "}
                 <code>600</code> on <code>authorized_keys</code>. SSH refuses keys on more permissive
                 files.
-              </p>
-            </Step>
-
-            <Step id="troubleshooting" num="—" title="Troubleshooting">
-              <table className="setup-table">
-                <thead>
-                  <tr>
-                    <th>Symptom</th>
-                    <th>Fix</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Connection fails while pulling container images</td>
-                    <td>
-                      <a className="setup-inline-link" href="#install-apptainer">
-                        Install Apptainer
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <code>npm run start</code> fails initializing the environment,{" "}
-                      <code>hnswlib</code> compile errors
-                    </td>
-                    <td>
-                      <a className="setup-inline-link" href="#build-tools">
-                        Install build tools
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      Workspace root is unwritable, or <code>/data</code> does not exist
-                    </td>
-                    <td>
-                      <a className="setup-inline-link" href="#mount-data">
-                        Mount the data disk
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Out of disk space on the node</td>
-                    <td>
-                      Check <code>df -h /data</code>; results may be landing on the root filesystem
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <code>Permission denied (publickey)</code> over plain SSH
-                    </td>
-                    <td>
-                      <a className="setup-inline-link" href="#ssh-keys">
-                        SSH key access
-                      </a>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <p>
-                For failures in the app&rsquo;s connection panel itself (MRG login, XDC attachment),
-                see the{" "}
-                <Link className="setup-inline-link" href="/tutorial/setup#remote-access">
-                  Sphere XDC topology
-                </Link>{" "}
-                in the setup guide.
               </p>
             </Step>
           </section>
