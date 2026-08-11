@@ -53,7 +53,11 @@ export function Figure({
   );
 }
 
-export function CodeBlock({ children }: { children: string }) {
+/**
+ * `wrap={false}` for content whose column alignment carries meaning (diagrams);
+ * it scrolls instead of wrapping, and the copy button takes its own band.
+ */
+export function CodeBlock({ children, wrap = true }: { children: string; wrap?: boolean }) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -67,7 +71,7 @@ export function CodeBlock({ children }: { children: string }) {
   }
 
   return (
-    <div className="code-block-wrap">
+    <div className={`code-block-wrap ${wrap ? "" : "code-block-wrap--nowrap"}`}>
       <pre className="code-block">{children}</pre>
       <button
         type="button"

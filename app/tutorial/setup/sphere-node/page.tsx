@@ -299,22 +299,38 @@ sudo apt install -y apptainer`}
                 own terminal, or when pointing the <strong>Direct SSH</strong> topology at it.
               </Note>
 
-              <Sub>From Your Local Machine</Sub>
-              <CodeBlock>{`ssh-copy-id jiapengz@dewexp07690701`}</CodeBlock>
+              <Sub>1 · Generate a Key Pair on Your Local Machine</Sub>
               <p>
-                The part after <code>@</code> differs per node. Take it from the connection details
-                shown for your node.
+                Skip this if <code>~/.ssh/id_ed25519.pub</code> already exists. Otherwise, run it on
+                your own laptop, not on the node:
+              </p>
+              <CodeBlock>{`ssh-keygen -t ed25519 -C "your-email@example.com"`}</CodeBlock>
+              <p>
+                Press Enter at every prompt to accept the default path and an empty passphrase. This
+                writes the private key to <code>~/.ssh/id_ed25519</code> and the public key to{" "}
+                <code>~/.ssh/id_ed25519.pub</code>.
               </p>
 
-              <Sub>Or Add the Key Manually on the Node</Sub>
+              <Sub>2 · Read the Public Key</Sub>
+              <p>Still on your laptop:</p>
+              <CodeBlock>{`cat ~/.ssh/id_ed25519.pub`}</CodeBlock>
+              <p>
+                Copy the whole line it prints. It starts with <code>ssh-ed25519</code> and ends with
+                the comment you passed above.
+              </p>
+              <Note tone="warn">
+                Only ever copy the <code>.pub</code> file. The matching{" "}
+                <code>~/.ssh/id_ed25519</code>, with no extension, is the private key and never
+                leaves your machine.
+              </Note>
+
+              <Sub>3 · Add the Public Key on the Compute Node</Sub>
+              <p>
+                Open a shell on the node, then run this with <code>ssh-public-key</code> replaced by
+                the line you just copied:
+              </p>
               <CodeBlock>
                 {`mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo "ssh-public-key" >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys`}
-              </CodeBlock>
-              <p>With an editor instead:</p>
-              <CodeBlock>
-                {`mkdir -p ~/.ssh && chmod 700 ~/.ssh
-vim ~/.ssh/authorized_keys      # paste the whole public key line, then :wq
-chmod 600 ~/.ssh/authorized_keys`}
               </CodeBlock>
               <p>
                 The permissions matter: <code>700</code> on <code>~/.ssh</code> and{" "}
