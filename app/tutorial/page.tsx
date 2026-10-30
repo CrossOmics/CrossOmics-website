@@ -34,8 +34,8 @@ export default function TutorialPage() {
         <div className="section-body">
           <p>
             Select your dataset, pick an analysis, and fill in the form, then run a
-            single step or the whole pipeline, with every command, parameter, and
-            result tracked. Demos walk through single-cell RNA-seq, bulk RNA-seq,
+            single step or the whole pipeline, or rerun it from any node, with every
+            command, parameter, and result tracked. Demos walk through single-cell RNA-seq, bulk RNA-seq,
             ATAC-seq, ChIP-seq, and whole-genome sequencing end to end.
           </p>
           <p className="setup-cta-row">
