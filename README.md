@@ -29,6 +29,7 @@ app/
 ├── globals.css           # all styles (no Tailwind, hand-rolled CSS)
 ├── about/page.tsx        # About — what Gardener is
 ├── tutorial/page.tsx     # Tutorial — Gardener intro
+│   ├── pipelines/       # v3 Pipeline & Community guide, linked from the intro
 │   └── setup/            # setup guide + sphere-node companion page
 ├── research/page.tsx     # Research — publications list
 ├── approach/page.tsx     # Approach — HPC-native / three-party computation
@@ -51,6 +52,7 @@ lib/
 public/
 ├── plants/               # card illustrations (cell / lavender / fern / value / tree)
 ├── setup/                # setup-guide screenshots
+├── tutorial-v3/           # real Gardener UI screenshots for the v3 guide
 └── bg*.png, bg*.jpg      # retired — the old painterly backgrounds, no longer referenced
 ```
 
@@ -75,6 +77,12 @@ dark theme; `color-scheme: only light` keeps browsers from inventing one.
 fallback stack. Weights 400/500/600/700 only. No serif.
 
 ## Assets
+
+`public/tutorial-v3/` contains four screenshots captured from the running Gardener
+frontend on 2026-11-03: community search, STAR's version tree, the maintenance
+ranking, and a STAR/StringTie comparison canvas. No credentials or chat contents
+are included. Ranking values are examples from the collection date shown, not
+live website metrics. The guide links each image at full size for readability.
 
 ### Plant Illustrations (`public/plants/`)
 
