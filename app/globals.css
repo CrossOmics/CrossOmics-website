@@ -895,6 +895,33 @@ img { max-width: 100%; display: block; }
 
 /* ----- figures ----- */
 .setup-figure { margin: 26px 0; }
+
+/* Tutorial introduction and the v3 workflow guide share the existing site tokens. */
+.tutorial-intro {
+  padding: clamp(24px, 4vw, 48px);
+  margin-bottom: var(--section-gap);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--accent-soft);
+}
+.tutorial-intro h2 { max-width: 800px; margin: 20px 0 16px; font-size: clamp(26px, 3vw, 38px); line-height: 1.2; }
+.tutorial-intro p, .feature-guide-lede { max-width: 760px; font-size: 18px; line-height: 1.75; }
+.tutorial-intro p { margin-bottom: 24px; }
+.feature-guide-lede { margin-bottom: 32px; }
+.feature-guide-topics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: var(--section-gap); }
+.feature-guide-topics a { display: flex; align-items: baseline; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius-card); font-size: 15px; line-height: 1.5; }
+.feature-guide-topics a:hover { color: var(--accent); background: var(--accent-soft); }
+.feature-guide-topics a span { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.feature-guide-topics a:focus-visible, .tutorial-image-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.feature-guide-section h2 { scroll-margin-top: calc(var(--header-h) + 24px); }
+.feature-guide-section .section-body { max-width: 100%; }
+.feature-guide-section .section-body > p, .feature-guide-section .setup-ol, .feature-guide-section .setup-list { max-width: 800px; }
+.feature-guide-section h3 { margin-top: 26px; }
+.tutorial-image-link { display: inline-block; margin: -14px 0 24px; font-size: 14px; }
+@media (max-width: 700px) {
+  .feature-guide-topics { grid-template-columns: 1fr; }
+  .tutorial-intro p, .feature-guide-lede { font-size: 16px; }
+}
 .setup-figure--sm { max-width: 380px; }
 .setup-figure--md { max-width: 560px; }
 .setup-figure--lg { max-width: 100%; }
