@@ -1,0 +1,49 @@
+services:
+  community:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:4100:4100"
+    environment:
+      COMMUNITY_WEB_ORIGIN: ${COMMUNITY_WEB_ORIGIN:?Set the website origin}
+      COMMUNITY_GITHUB_CLIENT_ID: ${COMMUNITY_GITHUB_CLIENT_ID:-}
+      COMMUNITY_GITHUB_CLIENT_SECRET: ${COMMUNITY_GITHUB_CLIENT_SECRET:-}
+      COMMUNITY_GOOGLE_CLIENT_ID: ${COMMUNITY_GOOGLE_CLIENT_ID:-}
+      COMMUNITY_GOOGLE_CLIENT_SECRET: ${COMMUNITY_GOOGLE_CLIENT_SECRET:-}
+      COMMUNITY_APPLE_CLIENT_ID: ${COMMUNITY_APPLE_CLIENT_ID:-}
+      COMMUNITY_APPLE_TEAM_ID: ${COMMUNITY_APPLE_TEAM_ID:-}
+      COMMUNITY_APPLE_KEY_ID: ${COMMUNITY_APPLE_KEY_ID:-}
+      COMMUNITY_APPLE_PRIVATE_KEY: ${COMMUNITY_APPLE_PRIVATE_KEY:-}
+      COMMUNITY_BOUNTY_EDITOR_IDS: ${COMMUNITY_BOUNTY_EDITOR_IDS:-}
+      COMMUNITY_SESSION_SECRET: ${COMMUNITY_SESSION_SECRET:?Set the session secret}
+      DATABASE_URL: postgresql://community:${COMMUNITY_DB_PASSWORD:?Set a random hex database password}@db:5432/community
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - 'fetch("http://127.0.0.1:4100/api/community/v1/bounties", { signal: AbortSignal.timeout(4000) }).then(response => process.exit(response.ok ? 0 : 1), () => process.exit(1))'
+      interval: 15s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: community
+      POSTGRES_USER: community
+      POSTGRES_PASSWORD: ${COMMUNITY_DB_PASSWORD:?Set a random hex database password}
+    volumes:
+      - community-data:/var/lib/postgresql/data
+      - ./db/community.sql:/docker-entrypoint-initdb.d/01-community.sql:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "community", "-d", "community"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+volumes:
+  community-data:

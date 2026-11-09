@@ -24,6 +24,7 @@ export default function Hero() {
         <a className="pill-btn" href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
           {hero.secondaryCta}
         </a>
+        <Link className="pill-btn" href="/community">Explore the community</Link>
       </div>
     </section>
   );
