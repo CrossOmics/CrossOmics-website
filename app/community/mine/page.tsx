@@ -3,6 +3,7 @@ import ContributionList, { ContributionPager } from "../ContributionList";
 import { redirect } from "next/navigation";
 import { communitySignInPath } from "@/lib/community/return-path";
 import AppAccess from "./AppAccess";
+import ContributorId from "./ContributorId";
 
 export default async function MyHistory({ searchParams: query }: { searchParams: Promise<{ login?: string; page?: string }> }) {
   const searchParams = await query;
@@ -22,6 +23,7 @@ export default async function MyHistory({ searchParams: query }: { searchParams:
           <span className="community-tag">@{contributor.login}</span>
           <form method="post" action="/api/community/auth/logout"><button className="community-secondary">Sign out</button></form>
         </div>
+        <ContributorId id={contributor.id} />
       </header>
       {history ? (
         <>

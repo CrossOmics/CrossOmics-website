@@ -192,6 +192,13 @@
 .community-heading > .community-actions { margin-top: 16px; }
 
 .community-actions { display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; }
+
+.community-contributor-id { color: var(--community-ink); font-size: 14px; }
+.community-contributor-id dl { min-width: 0; margin: 0; }
+.community-contributor-id dt { font-weight: 600; }
+.community-contributor-id dd { margin: 0; }
+.community-contributor-id code { user-select: all; }
+.community-contributor-id [role="status"] { color: var(--community-quiet); }
 .community-detail-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
