@@ -1,11 +1,9 @@
 import assert from "node:assert/strict";
-import { createRequire } from "node:module";
 import { test } from "node:test";
 
 const base = process.env.COMMUNITY_TEST_URL || "http://localhost:3017";
 const webOrigin = process.env.COMMUNITY_TEST_WEB_ORIGIN || new URL(base).origin;
 const service = process.env.COMMUNITY_TEST_SERVICE_URL || "http://localhost:4100";
-const requireFromService = createRequire(new URL("../community-server/package.json", import.meta.url));
 
 test("registry discovery returns real catalog records without signing in", async () => {
   const response = await fetch(`${base}/api/community/v1/catalog?q=suffix&kind=tool`);
@@ -93,7 +91,7 @@ test("Web and Gardener share records, deduplicate evidence and preserve impact z
   skip: !process.env.COMMUNITY_TEST_DATABASE_URL || !process.env.COMMUNITY_TEST_SESSION_SECRET
 }, async () => {
   const { createHmac, randomInt, randomUUID } = await import("node:crypto");
-  const { Pool } = requireFromService("pg");
+  const { Pool } = await import("pg");
   const db = new Pool({ connectionString: process.env.COMMUNITY_TEST_DATABASE_URL });
   const contributor = { id: String(randomInt(1000000000, 9999999999)), login: "community-test" };
   const other = { id: String(Number(contributor.id) + 1), login: "community-other" };
@@ -191,7 +189,7 @@ test("bounty publishing is restricted to editors and closing stops new replies",
   skip: !process.env.COMMUNITY_TEST_DATABASE_URL || !process.env.COMMUNITY_TEST_SESSION_SECRET || !process.env.COMMUNITY_TEST_BOARD_EDITOR_ID
 }, async () => {
   const { createHmac, randomInt, randomUUID } = await import("node:crypto");
-  const { Pool } = requireFromService("pg");
+  const { Pool } = await import("pg");
   const db = new Pool({ connectionString: process.env.COMMUNITY_TEST_DATABASE_URL });
   const editor = { id: process.env.COMMUNITY_TEST_BOARD_EDITOR_ID, login: "bounty-editor" };
   const member = { id: String(randomInt(1000000000, 9999999999)), login: "bounty-member" };

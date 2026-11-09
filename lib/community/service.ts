@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { cache } from "react";
-import type { Bounty, BountyReply, Contribution, Contributor, RegistryItem, SignInProvider } from "@/community-server/lib/community/types";
+import type { Bounty, BountyReply, Contribution, Contributor, RegistryItem, SignInProvider } from "@/lib/community/types";
 
 export function communityServiceFetch(path: string, init: RequestInit = {}) {
   const origin = process.env.COMMUNITY_SERVICE_URL;

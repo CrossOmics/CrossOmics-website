@@ -1,7 +1,7 @@
 import { communityContributions, communitySession } from "@/lib/community/service";
 import ContributionList, { ContributionPager } from "../ContributionList";
 import { redirect } from "next/navigation";
-import { communitySignInPath } from "@/community-server/lib/community/return-path";
+import { communitySignInPath } from "@/lib/community/return-path";
 import AppAccess from "./AppAccess";
 
 export default async function MyHistory({ searchParams: query }: { searchParams: Promise<{ login?: string; page?: string }> }) {

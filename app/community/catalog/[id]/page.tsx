@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { communityCatalogItem } from "@/lib/community/service";
-import { httpsUrl } from "@/community-server/lib/community/validation";
+import { httpsUrl } from "@/lib/community/https-url";
 
 export default async function RegistryDetail({ params }: { params: Promise<{ id: string }> }) {
   const result = await communityCatalogItem((await params).id);

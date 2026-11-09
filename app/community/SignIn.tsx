@@ -1,4 +1,4 @@
-import { signInLabels, type SignInProvider } from "@/community-server/lib/community/types";
+import { signInLabels, type SignInProvider } from "@/lib/community/types";
 
 export default function SignIn({ returnTo, error, providers = [] }: {
   returnTo: string;

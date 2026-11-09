@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { communitySignInPath } from "@/community-server/lib/community/return-path";
+import { communitySignInPath } from "@/lib/community/return-path";
 
 const links = [
   { href: "/community", label: "Registry" },

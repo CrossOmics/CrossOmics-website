@@ -1,7 +1,7 @@
 import { communityCatalog, communityCatalogItem, communitySession } from "@/lib/community/service";
-import { httpsUrl } from "@/community-server/lib/community/validation";
+import { httpsUrl } from "@/lib/community/https-url";
 import { redirect } from "next/navigation";
-import { communitySignInPath } from "@/community-server/lib/community/return-path";
+import { communitySignInPath } from "@/lib/community/return-path";
 import ContributionForm from "./ContributionForm";
 
 export default async function SubmitPage({ searchParams: query }: { searchParams: Promise<{ login?: string; catalogId?: string }> }) {

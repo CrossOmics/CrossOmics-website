@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { safeCommunityReturn } from "@/community-server/lib/community/return-path";
+import { safeCommunityReturn } from "@/lib/community/return-path";
 import { communitySession } from "@/lib/community/service";
 import SignIn from "../SignIn";
 

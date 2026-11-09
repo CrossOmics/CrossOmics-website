@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { impactMetrics } from "@/community-server/lib/community/types";
+import { impactMetrics } from "@/lib/community/types";
 import { communityRequest } from "../client";
 
 export default function ImpactForm({ contributionId }: { contributionId: string }) {
