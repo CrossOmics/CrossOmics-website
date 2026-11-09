@@ -3,7 +3,7 @@ import { communityServiceFetch } from "@/lib/community/service";
 
 export const dynamic = "force-dynamic";
 
-const routes = /^(?:auth\/(?:login|callback(?:\/(?:google|apple))?|logout)|v1\/(?:catalog|session|contributions|app-token|registry-import|bounties(?:\/[0-9a-f-]{36}(?:\/replies)?)?|contributions\/[0-9a-f-]{36}\/impact))$/i;
+const routes = /^(?:auth\/(?:login|callback(?:\/(?:google|apple))?|logout)|v1\/(?:catalog|session|contributions|app-token|registry-import|bounty-editors|bounties(?:\/[0-9a-f-]{36}(?:\/replies)?)?|contributions\/[0-9a-f-]{36}\/impact))$/i;
 
 async function forward(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const path = (await params).path.join("/");

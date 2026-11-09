@@ -246,3 +246,66 @@ test("bounty publishing is restricted to editors and closing stops new replies",
     await db.end();
   }
 });
+
+test("bounty administrators can grant and revoke editor access without granting admin access", {
+  skip: !process.env.COMMUNITY_TEST_DATABASE_URL || !process.env.COMMUNITY_TEST_SESSION_SECRET ||
+    !process.env.COMMUNITY_TEST_BOARD_EDITOR_ID || !process.env.COMMUNITY_TEST_BOUNTY_ADMIN_ID
+}, async () => {
+  const { createHmac, randomBytes, randomUUID } = await import("node:crypto");
+  const { Pool } = await import("pg");
+  const db = new Pool({ connectionString: process.env.COMMUNITY_TEST_DATABASE_URL });
+  const admin = { id: process.env.COMMUNITY_TEST_BOUNTY_ADMIN_ID, login: "bounty-admin" };
+  const editor = { id: process.env.COMMUNITY_TEST_BOARD_EDITOR_ID, login: "legacy-editor" };
+  const hash = randomBytes(32).toString("hex");
+  const member = { id: `google:${hash}`, login: `member-${hash.slice(0, 16)}` };
+  let bountyId;
+
+  async function request(path, identity, { method = "GET", body, origin = webOrigin } = {}) {
+    const headers = { origin };
+    if (identity) {
+      const payload = Buffer.from(JSON.stringify({ ...identity, exp: Date.now() + 60000 })).toString("base64url");
+      const signature = createHmac("sha256", process.env.COMMUNITY_TEST_SESSION_SECRET).update(payload).digest("base64url");
+      headers.cookie = `community_session=${payload}.${signature}`;
+    }
+    if (body !== undefined) headers["content-type"] = "application/json";
+    const response = await fetch(`${base}/api/community/v1/${path}`, {
+      method, headers, body: body === undefined ? undefined : JSON.stringify(body)
+    });
+    return { status: response.status, body: await response.json() };
+  }
+
+  const grant = { method: "POST", body: { id: member.id } };
+  const revoke = { method: "DELETE", body: { id: member.id } };
+  const draft = { title: `Test editor grant ${randomUUID()}`, category: "documentation", description: "Verify delegated bounty access." };
+  try {
+    assert.equal((await request("bounty-editors", undefined)).status, 401);
+    assert.equal((await request("bounty-editors", editor, grant)).status, 403);
+    assert.equal((await request("bounty-editors", admin, { ...grant, origin: "https://example.org" })).status, 403);
+    assert.equal((await request("bounty-editors", admin, { method: "POST", body: { id: member.login } })).status, 422);
+    assert.equal((await request("session", member)).body.canManageBounties, false);
+
+    const attempts = await Promise.all([request("bounty-editors", admin, grant), request("bounty-editors", admin, grant)]);
+    assert.deepEqual(attempts.map(({ status }) => status), [200, 200]);
+    const list = await request("bounty-editors", admin);
+    assert.equal(list.status, 200);
+    assert.ok(list.body.configuredIds.includes(editor.id));
+    assert.deepEqual(list.body.managedIds.filter((id) => id === member.id), [member.id]);
+    assert.equal((await request("session", member)).body.canManageBounties, true);
+    assert.equal((await request("bounty-editors", member)).status, 403);
+    assert.equal((await request("bounty-editors", member, grant)).status, 403);
+
+    const published = await request("bounties", member, { method: "POST", body: draft });
+    assert.equal(published.status, 201);
+    bountyId = published.body.id;
+    assert.equal((await request("bounty-editors", admin, revoke)).status, 200);
+    assert.equal((await request("bounty-editors", admin, revoke)).status, 200);
+    assert.equal((await request("session", member)).body.canManageBounties, false);
+    assert.equal((await request("bounties", member, { method: "POST", body: draft })).status, 403);
+    assert.equal((await request("bounty-editors", admin, { method: "DELETE", body: { id: editor.id } })).status, 409);
+    assert.equal((await request("session", editor)).body.canManageBounties, true);
+  } finally {
+    if (bountyId) await db.query("DELETE FROM community_bounties WHERE id = $1", [bountyId]);
+    await request("bounty-editors", admin, revoke).catch(() => {});
+    await db.end();
+  }
+});
