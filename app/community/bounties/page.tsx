@@ -15,8 +15,8 @@ export default async function BountiesPage({ searchParams }: { searchParams: Pro
     <>
       <header className="community-heading">
         <h1>Community bounties</h1>
-        <p>Find work CrossOmics would like help with, from maintaining a tool to building a workflow or running a benchmark.</p>
-        {session?.canManageBounties && (
+        <p>Find work the CrossOmics community would like help with, from maintaining a tool to building a workflow or running a benchmark.</p>
+        {session?.canPostBounties && (
           <div className="community-actions">
             <Link href="/community/bounties/new" className="community-primary">Post a bounty</Link>
           </div>
@@ -34,7 +34,7 @@ export default async function BountiesPage({ searchParams }: { searchParams: Pro
         {(q || status) && <Link className="community-link" href="/community/bounties">Clear filters</Link>}
       </form>
       {!data ? <p className="community-notice" role="status">{error}</p> : data.items.length === 0 ? (
-        <p className="community-notice">{q || status ? "No bounties match these filters." : "CrossOmics hasn’t posted any bounties yet."}</p>
+        <p className="community-notice">{q || status ? "No bounties match these filters." : "No one has posted a bounty yet."}</p>
       ) : (
         <>
           <ul className="community-bounty-list">

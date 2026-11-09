@@ -14,7 +14,7 @@ export default async function NewBountyPage() {
         <h1>Post a bounty</h1>
         <p>Describe a concrete task the community can help with.</p>
       </header>
-      {session.canManageBounties ? <NewBountyForm /> : <p className="community-notice">Only CrossOmics editors can post bounties.</p>}
+      {session.canPostBounties ? <NewBountyForm /> : <p className="community-notice">Record a contribution or get editor access to post a bounty.</p>}
     </>
   );
 }
