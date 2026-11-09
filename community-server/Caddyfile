@@ -1,0 +1,3 @@
+{$COMMUNITY_API_DOMAIN} {
+	reverse_proxy community:4100
+}
