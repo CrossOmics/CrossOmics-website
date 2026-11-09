@@ -43,7 +43,7 @@ docker compose up -d --build --wait
 ## DigitalOcean with a Duck DNS hostname
 
 1. Create a Droplet, install Docker and the Compose plugin, and allow inbound TCP ports 80 and 443. Keep SSH access limited to the addresses that administer the server. [DigitalOcean Droplet setup](https://docs.digitalocean.com/products/droplets/getting-started/recommended-droplet-setup/)
-2. Claim an available subdomain in Duck DNS and set its IPv4 address to the Droplet's public IP. Enter that hostname in `COMMUNITY_API_DOMAIN`, for example `crossomics-community.duckdns.org`. [Duck DNS](https://www.duckdns.org/)
+2. In Duck DNS, point `crossomics-community.duckdns.org` at the Droplet's public IPv4 address. The hostname is set in `COMMUNITY_API_DOMAIN` in the environment template. [Duck DNS](https://www.duckdns.org/)
 3. Fill in the other `.env` values above. Set `COMMUNITY_WEB_ORIGIN` to the website's origin, including `https://`. Then start the API, PostgreSQL and Caddy from this directory.
 
 ```sh
@@ -53,13 +53,13 @@ docker compose -f compose.yaml -f compose.https.yaml up -d --build --wait
 
 Caddy proxies the public hostname to the API on the Compose network and obtains and renews TLS certificates. Its certificate data persists in the `caddy-data` volume. Use the HTTPS overlay when Caddy can bind ports 80 and 443. The base Compose file works with an existing reverse proxy on the Droplet. [Caddy automatic HTTPS](https://caddyserver.com/docs/automatic-https)
 
-After DNS resolves and HTTPS is ready, substitute your claimed hostname in this check.
+After DNS resolves and HTTPS is ready, check the API from outside the Droplet.
 
 ```sh
 curl -fsS https://crossomics-community.duckdns.org/api/community/v1/bounties
 ```
 
-Set `COMMUNITY_SERVICE_URL` and `COMMUNITY_PUBLIC_SERVICE_URL` on the website host to the new HTTPS API origin. Use the website domain for OAuth return URLs.
+Set `COMMUNITY_SERVICE_URL` and `COMMUNITY_PUBLIC_SERVICE_URL` on the website host to `https://crossomics-community.duckdns.org`. Use the website domain for OAuth return URLs.
 
 ## Configure sign-in
 
