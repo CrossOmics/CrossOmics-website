@@ -2,7 +2,7 @@
 
 Marketing site for [Gardener](https://github.com/CrossOmics/Gardener-Agent), an AI co-pilot for single-cell RNA sequencing analysis.
 
-Built with **Next.js 14** (App Router) + **TypeScript** + **Framer Motion**.
+Built with **Next.js 15** (App Router) + **TypeScript** + **Framer Motion**.
 
 ## Quick Start
 
@@ -112,7 +112,51 @@ no longer referenced by any code.
 
 ## Deployment
 
-Static-friendly — works on Vercel, Netlify, or any Node host. No environment variables required.
+The website runs on its existing Next.js host with Node.js 22. It calls a separately deployed Community service for the registry, contributions and sign-in. The website only needs the Community service URL. PostgreSQL and Google, Apple, and GitHub sign-in credentials belong to the Community server.
+
+## Community Tracking
+
+Open `/community` to search the Gardener registry, explore algorithms and versions, or open its maintenance ranking. The Community navigation also links to the bounty board and sign-in page. Web and Gardener use the same shared contribution history and account. Contributions accept public HTTPS evidence from BioCode Commons and external projects. Each distinct record counts once. A recorded Impact value of zero means someone checked and observed no activity.
+
+Deploy the API and PostgreSQL to a separate machine using the [Community server instructions](community-server/README.md). Set `COMMUNITY_SERVICE_URL` on the website host and optionally set `COMMUNITY_PUBLIC_SERVICE_URL` to show the public API address in My history. Set the optional contact values to approved public links and email.
+
+### Shared API for Gardener
+
+A signed-in user generates a token under **My history → Manage Gardener access**, then enters the Community server address and token in **Gardener → Community → Contributions**. The desktop app encrypts the token using the system credential store and sends it only to the configured server as `Authorization: Bearer <token>` over HTTPS. Each account has one active token with a 90-day lifetime. The site shows a newly generated token once, stores its hash, and allows immediate revocation. Browser mutations use the session cookie and require a same-origin request.
+
+All routes below are relative to `/api/community/v1`. JSON writes use `Content-Type: application/json`.
+
+| Method and path | Request and result |
+|---|---|
+| `GET /catalog?q=&kind=` | Public catalog with `items` and `generatedAt`. Omit `kind` or use `tool` or `workflow`. Use `id` to look up a single registry item. |
+| `GET /session` | Identify the current browser session or validate a Gardener token. |
+| `GET /contributions?page=1` | Public feed. Optional `catalogId` filters to a registry entry. Returns `items`, `page`, and `hasMore`. |
+| `GET /contributions?mine=1&page=1` | Authenticated history, with `total` for the signed-in account when no catalog filter is applied. |
+| `POST /contributions` | Publish a record. Returns `{ item, reused }` with HTTP 201 for a new record and 200 for a repeated evidence link for the same account. |
+| `PUT /contributions/{id}/impact` | Save the latest reported observation for a metric. Requires record ownership. Returns `{ impact }`. |
+| `POST /registry-import` | Sync a Gardener registry PR using `{ number }`. The service verifies the PR author with GitHub before adding it to history. |
+
+Example contribution body
+
+```json
+{
+  "type": "bug_fix",
+  "subjectKind": "tool",
+  "subjectName": "Example aligner",
+  "summary": "Fixed parsing for empty FASTQ records.",
+  "occurredOn": "2026-10-15",
+  "projectUrl": "https://github.com/example/aligner",
+  "evidenceUrl": "https://github.com/example/aligner/pull/42"
+}
+```
+
+Contribution types are `new_pipeline`, `algorithm_update`, `bug_fix`, `optimization`, and `maintenance`. Item kinds are `pipeline`, `tool`, and `algorithm`. Include `catalogId` when the contribution refers to a known registry entry. The server assigns the author, source channel, and project scope. Contribution and impact evidence are self-reported. An impact body contains `metric` (`usage`, `stars`, or `citations`), a nonnegative integer `value`, and an HTTPS `evidenceUrl`. Errors include a `message` and may identify a `field`.
+
+After you connect Gardener, new CrossOmics registry pull requests also sync to shared history. In **Register → My submissions**, use **Sync** on older PRs or retry an interrupted sync. Open each workspace that holds submissions you want to sync. The local registry cache, pipeline links and PR status stay with the Gardener workspace.
+
+### Verify locally
+
+Run `npm run test:community` with the website at `http://localhost:3017` and the Community service at `http://localhost:4100`. Override those origins with `COMMUNITY_TEST_URL` and `COMMUNITY_TEST_SERVICE_URL`. For the authenticated test, configure an isolated test database and set `COMMUNITY_TEST_DATABASE_URL` and `COMMUNITY_TEST_SESSION_SECRET` to the values used by the service. The test creates and removes its own rows. Set `COMMUNITY_TEST_OAUTH=1` to check redirect and cookie forwarding with OAuth configuration present.
 
 ## License
 
