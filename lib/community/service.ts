@@ -31,6 +31,7 @@ export const communitySession = cache(async function () {
     contributor: Contributor | null;
     signInAvailable: boolean;
     signInProviders?: SignInProvider[];
+    canPostBounties?: boolean;
     canManageBounties?: boolean;
   }>("session", true).catch(() => null);
   if (!session) return null;
@@ -38,6 +39,7 @@ export const communitySession = cache(async function () {
   return {
     contributor: session.contributor,
     providers: session.signInProviders ?? fallback,
+    canPostBounties: (session.canPostBounties ?? session.canManageBounties) === true,
     canManageBounties: session.canManageBounties === true
   };
 });

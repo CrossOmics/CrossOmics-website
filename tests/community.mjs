@@ -185,7 +185,7 @@ test("Web and Gardener share records, deduplicate evidence and preserve impact z
   }
 });
 
-test("bounty publishing is restricted to editors and closing stops new replies", {
+test("contributors and editors can publish bounties, and editors control status", {
   skip: !process.env.COMMUNITY_TEST_DATABASE_URL || !process.env.COMMUNITY_TEST_SESSION_SECRET || !process.env.COMMUNITY_TEST_BOARD_EDITOR_ID
 }, async () => {
   const { createHmac, randomInt, randomUUID } = await import("node:crypto");
@@ -194,6 +194,7 @@ test("bounty publishing is restricted to editors and closing stops new replies",
   const editor = { id: process.env.COMMUNITY_TEST_BOARD_EDITOR_ID, login: "bounty-editor" };
   const member = { id: String(randomInt(1000000000, 9999999999)), login: "bounty-member" };
   let id;
+  let memberBountyId;
 
   function headers(identity) {
     const payload = Buffer.from(JSON.stringify({ ...identity, exp: Date.now() + 60000 })).toString("base64url");
@@ -238,11 +239,37 @@ test("bounty publishing is restricted to editors and closing stops new replies",
     assert.equal((await request(`/${id}`, "PATCH", member, { status: "closed" })).status, 403);
     assert.equal((await request(`/${id}`, "PATCH", editor, { status: "closed" })).status, 200);
     assert.equal((await request(`/${id}/replies`, "POST", member, reply)).status, 409);
+
+    const contribution = await fetch(`${base}/api/community/v1/contributions`, {
+      method: "POST",
+      headers: headers(member),
+      body: JSON.stringify({
+        type: "bug_fix", subjectKind: "tool", subjectName: "Example tool",
+        summary: "Fix an example tool to unlock bounty publishing.", occurredOn: "2025-02-28",
+        projectUrl: "https://example.org/tool", evidenceUrl: `https://example.org/tool/changes/${randomUUID()}`
+      })
+    });
+    assert.equal(contribution.status, 201);
+    const published = await request("", "POST", member, draft);
+    assert.equal(published.status, 201);
+    ({ id: memberBountyId } = await published.json());
+    assert.equal((await request(`/${memberBountyId}`, "PATCH", member, { status: "closed" })).status, 403);
+
+    const session = await fetch(`${base}/api/community/v1/session`, { headers: headers(member) });
+    const permissions = await session.json();
+    assert.equal(permissions.canPostBounties, true);
+    assert.equal(permissions.canManageBounties, false);
+    const listing = await fetch(`${base}/community/bounties`, { headers: headers(member) });
+    assert.match(await listing.text(), /href="\/community\/bounties\/new"[^>]*>Post a bounty/);
+    const form = await fetch(`${base}/community/bounties/new`, { headers: headers(member) });
+    assert.match(await form.text(), /Reward or recognition/);
   } finally {
     if (id) {
       await db.query("DELETE FROM community_bounty_replies WHERE bounty_id = $1", [id]);
       await db.query("DELETE FROM community_bounties WHERE id = $1", [id]);
     }
+    if (memberBountyId) await db.query("DELETE FROM community_bounties WHERE id = $1", [memberBountyId]);
+    await db.query("DELETE FROM community_contributions WHERE github_id = $1", [member.id]);
     await db.end();
   }
 });
