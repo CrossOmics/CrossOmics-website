@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { bountyStatuses } from "@/community-server/lib/community/types";
+import { bountyStatuses } from "@/lib/community/types";
 import { communityBounties, communitySession } from "@/lib/community/service";
 import { BountyPager, BountyTags } from "./BountyMeta";
 

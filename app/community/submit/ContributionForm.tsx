@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { FormEvent } from "react";
-import type { Contribution } from "@/community-server/lib/community/types";
-import { contributionTypes, subjectKinds } from "@/community-server/lib/community/types";
+import type { Contribution } from "@/lib/community/types";
+import { contributionTypes, subjectKinds } from "@/lib/community/types";
 import { communityRequest } from "../client";
 
 type CatalogOption = { id: string; name: string; kind: "workflow" | "tool"; projectUrl: string };

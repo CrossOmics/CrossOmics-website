@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { bountyCategories, bountyStatuses, type BountyStatus } from "@/community-server/lib/community/types";
+import { bountyCategories, bountyStatuses, type BountyStatus } from "@/lib/community/types";
 import { communityRequest } from "../client";
 
 export function NewBountyForm() {

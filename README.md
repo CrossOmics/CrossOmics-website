@@ -118,7 +118,7 @@ The website runs on its existing Next.js host with Node.js 22. It calls a separa
 
 Open `/community` to search the Gardener registry, explore algorithms and versions, or open its maintenance ranking. The Community navigation also links to the bounty board and sign-in page. Web and Gardener use the same shared contribution history and account. Contributions accept public HTTPS evidence from BioCode Commons and external projects. Each distinct record counts once. A recorded Impact value of zero means someone checked and observed no activity.
 
-Deploy the API and PostgreSQL to a separate machine using the [Community server instructions](community-server/README.md). Set `COMMUNITY_SERVICE_URL` on the website host and optionally set `COMMUNITY_PUBLIC_SERVICE_URL` to show the public API address in My history. Set the optional contact values to approved public links and email.
+Deploy the API and PostgreSQL to a separate machine using the [Community backend deployment instructions](https://github.com/CrossOmics/CrossOmics-website-backend#deploy-on-a-separate-server). Set `COMMUNITY_SERVICE_URL` on the website host and optionally set `COMMUNITY_PUBLIC_SERVICE_URL` to show the public API address in My history. Set the optional contact values to approved public links and email.
 
 ### Shared API for Gardener
 

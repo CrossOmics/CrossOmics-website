@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
-import { httpsUrl } from "@/community-server/lib/community/validation";
+import { httpsUrl } from "@/lib/community/https-url";
 import { communitySession } from "@/lib/community/service";
 import CommunityNav from "./CommunityNav";
 import "./community.css";

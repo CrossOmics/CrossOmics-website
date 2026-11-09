@@ -1,7 +1,7 @@
 import Link from "next/link";
-import type { Contribution } from "@/community-server/lib/community/types";
-import { contributionTypes, impactMetrics, subjectKinds } from "@/community-server/lib/community/types";
-import { httpsUrl } from "@/community-server/lib/community/validation";
+import type { Contribution } from "@/lib/community/types";
+import { contributionTypes, impactMetrics, subjectKinds } from "@/lib/community/types";
+import { httpsUrl } from "@/lib/community/https-url";
 import ImpactForm from "./mine/ImpactForm";
 
 export default function ContributionList({ items, mine = false }: { items: Contribution[]; mine?: boolean }) {

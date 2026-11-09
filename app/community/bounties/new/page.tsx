@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { communitySignInPath } from "@/community-server/lib/community/return-path";
+import { communitySignInPath } from "@/lib/community/return-path";
 import { communitySession } from "@/lib/community/service";
 import { NewBountyForm } from "../BountyForms";
 
