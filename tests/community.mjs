@@ -124,6 +124,13 @@ test("Web and Gardener share records, deduplicate evidence and preserve impact z
   };
 
   try {
+    const historyPage = await fetch(`${base}/community/mine`, { headers: browser });
+    assert.equal(historyPage.status, 200);
+    const historyHtml = await historyPage.text();
+    assert.match(historyHtml, /Your history is empty/);
+    assert.match(historyHtml, /Contributor ID/);
+    assert.ok(historyHtml.includes(`<code>${contributor.id}</code>`));
+
     const blocked = await api("app-token", { method: "POST", headers: { ...browser, origin: "https://example.org" } });
     assert.equal(blocked.status, 403);
     const issued = await api("app-token", { method: "POST", headers: browser });
