@@ -347,3 +347,6 @@
   .community-bounty-aside { max-width: none; }
   .community-search label:first-child { grid-column: 1 / -1; }
 }
+
+.community-registry-preview { margin-top: 16px; }
+.community-registry-preview pre { overflow: auto; max-height: 360px; margin: 12px 0; padding: 12px; background: white; }

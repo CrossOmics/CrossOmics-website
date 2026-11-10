@@ -48,7 +48,10 @@ export default async function CommunityPage({ searchParams: query }: { searchPar
             <h2 id="registry-title">Explore the registry</h2>
             <p>Browse the same pipeline catalog available in Gardener.</p>
           </div>
-          <a href={rankingUrl} className="community-link">Maintenance ranking <span aria-hidden>↗</span></a>
+          <div className="community-actions">
+            <a href={rankingUrl} className="community-link">Maintenance ranking <span aria-hidden>↗</span></a>
+            <Link href="/community/registry/submit" className="community-primary">Submit a pipeline</Link>
+          </div>
         </div>
         <form className="community-search" action="/community#registry">
           <label>Search the registry<input type="search" name="q" maxLength={120} defaultValue={q} placeholder="Try STAR, alignment, or single-cell" /></label>
