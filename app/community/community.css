@@ -350,3 +350,5 @@
 
 .community-registry-preview { margin-top: 16px; }
 .community-registry-preview pre { overflow: auto; max-height: 360px; margin: 12px 0; padding: 12px; background: white; }
+
+.community-credit-row { margin: 8px 0 12px; align-items: end; }

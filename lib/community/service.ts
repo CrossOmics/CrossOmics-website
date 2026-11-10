@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { cache } from "react";
+import type { RegistryItemV2, RegistrySubmissionV2 } from "./registry-v2";
 import type { Bounty, BountyReply, Contribution, Contributor, RegistryItem, SignInProvider } from "@/lib/community/types";
 
 export function communityServiceFetch(path: string, init: RequestInit = {}) {
@@ -16,13 +17,13 @@ class ServiceError extends Error {
   }
 }
 
-async function communityData<T>(path: string, authenticated = false): Promise<T> {
+async function communityData<T>(path: string, authenticated = false, version: "v1" | "v2" = "v1"): Promise<T> {
   const cookie = authenticated ? (await cookies()).get("community_session") : undefined;
-  const response = await communityServiceFetch(`v1/${path}`, {
+  const response = await communityServiceFetch(`${version}/${path}`, {
     headers: cookie ? { cookie: `${cookie.name}=${encodeURIComponent(cookie.value)}` } : undefined
   });
   const data = await response.json();
-  if (!response.ok) throw new ServiceError(response.status, data?.message || "Community Tracking is unavailable.");
+  if (!response.ok) throw new ServiceError(response.status, data?.message || data?.error || "Community Tracking is unavailable.");
   return data as T;
 }
 
@@ -32,6 +33,10 @@ export const communitySession = cache(async function () {
     signInAvailable: boolean;
     signInProviders?: SignInProvider[];
     registrySubmissionAvailable?: boolean;
+    registryV2Enabled?: boolean;
+    registryV2Available?: boolean;
+    canManageRegistry?: boolean;
+    desktopAuthAvailable?: boolean;
     canPostBounties?: boolean;
     canManageBounties?: boolean;
   }>("session", true).catch(() => null);
@@ -41,6 +46,10 @@ export const communitySession = cache(async function () {
     contributor: session.contributor,
     providers: session.signInProviders ?? fallback,
     registrySubmissionAvailable: session.registrySubmissionAvailable === true,
+    registryV2Enabled: (session.registryV2Enabled ?? session.registryV2Available) === true,
+    registryV2Available: session.registryV2Available === true,
+    canManageRegistry: session.canManageRegistry === true,
+    desktopAuthAvailable: session.desktopAuthAvailable === true,
     canPostBounties: (session.canPostBounties ?? session.canManageBounties) === true,
     canManageBounties: session.canManageBounties === true
   };
@@ -53,7 +62,7 @@ export async function communityCatalog(filters: { q?: string; kind?: string } = 
   try {
     return { data: await communityData<{ items: RegistryItem[]; generatedAt: string }>(`catalog?${query}`), error: "" };
   } catch (error) {
-    return { data: null, error: error instanceof ServiceError && error.status === 400
+    return { data: null, error: error instanceof ServiceError && (error.status === 400 || error.status === 422)
       ? error.message : "The registry is temporarily unavailable. Try refreshing this page." };
   }
 }
@@ -98,5 +107,39 @@ export async function communityBounty(id: string, page: string | undefined) {
     return { data, missing: false };
   } catch (error) {
     return { data: null, missing: error instanceof ServiceError && error.status === 404 };
+  }
+}
+
+export async function registryV2Catalog(filters: { q?: string; type?: string } = {}) {
+  const params = new URLSearchParams();
+  if (filters.q) params.set("q", filters.q);
+  if (filters.type) params.set("type", filters.type);
+  try {
+    return { data: await communityData<{ items: RegistryItemV2[]; generatedAt: string }>("catalog?" + params, false, "v2"), error: "" };
+  } catch (error) {
+    return { data: null, error: error instanceof ServiceError && (error.status === 400 || error.status === 422)
+      ? error.message : "The registry is temporarily unavailable. Try refreshing this page." };
+  }
+}
+
+export async function registryV2Item(id: string) {
+  try {
+    return await communityData<{ item: RegistryItemV2 | null }>("catalog/" + encodeURIComponent(id), false, "v2");
+  } catch (error) {
+    return error instanceof ServiceError && error.status === 404 ? { item: null } : null;
+  }
+}
+
+export function registryV2Submissions(all: boolean) {
+  return communityData<{ submissions: RegistrySubmissionV2[] }>(
+    "registry/submissions" + (all ? "?all=1" : ""), true, "v2"
+  ).catch(() => null);
+}
+
+export async function desktopAuthAttempt(id: string) {
+  try {
+    return await communityData<{ expiresAt: string }>("desktop-auth/attempts/" + encodeURIComponent(id), true);
+  } catch {
+    return null;
   }
 }

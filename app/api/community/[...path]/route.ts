@@ -3,11 +3,13 @@ import { communityServiceFetch } from "@/lib/community/service";
 
 export const dynamic = "force-dynamic";
 
+const desktopRoutes = /^v1\/desktop-auth\/(?:attempts\/[0-9a-f-]{36}(?:\/approve)?|sessions)$/i;
+const registryRoutes = /^v2\/(?:catalog(?:\/cp_[a-z0-9_]{1,61}(?:\/versions\/cv_[a-z0-9_]{1,124}\/(?:withdraw|credits))?)?|registry\/submissions(?:\/[0-9a-f-]{36}(?:\/review)?)?)$/i;
 const routes = /^(?:auth\/(?:login|callback(?:\/(?:google|apple))?|logout)|v1\/(?:catalog|session|contributions|app-token|registry-import|registry-submissions(?:\/(?:preview|callback))?|bounty-editors|bounties(?:\/[0-9a-f-]{36}(?:\/replies)?)?|contributions\/[0-9a-f-]{36}\/impact))$/i;
 
 async function forward(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const path = (await params).path.join("/");
-  if (!routes.test(path)) return Response.json({ message: "Community route not found." }, { status: 404 });
+  if (!routes.test(path) && !desktopRoutes.test(path) && !registryRoutes.test(path)) return Response.json({ message: "Community route not found." }, { status: 404 });
 
   const headers = new Headers();
   for (const name of ["origin", "content-type"]) {

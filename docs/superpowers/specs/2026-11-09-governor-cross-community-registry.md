@@ -1,6 +1,6 @@
 # Governor 与 Cross Community 改造规范
 
-**状态** 待评审 · **负责人** Justin · **日期** 2026-11-09
+**状态** 本地实现，待环境验收 · **负责人** Justin · **日期** 2026-11-09
 
 ## 1. 范围和现状
 
@@ -9,7 +9,7 @@
 | 系统 | 当前实现 | 本次目标 |
 | --- | --- | --- |
 | Cross | `CrossOmics-website` 为公开网站，`CrossOmics-website-backend` 为独立 Community API，使用自管 PostgreSQL。 | Cross 负责共享账户、目录、提交流程、贡献记录、悬赏及管理 API。Community 数据存入 Supabase。 |
-| Governor | 纪要称 Governor。本地能核对的是 Gardener 源码 `Biological-Agent` 和公开发布仓 `Gardener-Agent`。以下暂按 Governor 是纪要中所指的用户侧应用编写，正式源码仓和部署目标待确认。 | 独立部署用户应用、运行后端与 agent。原 Community 页面退出维护入口，保留用户发现、打开或导入公共 pipeline 的路径。 |
+| Governor | 已确认 Governor 的源码仓为 `CrossOmics/Biological-Agent`，对应本地 Gardener 代码。公开发布仓为 `Gardener-Agent`，具体部署目标待确认。 | 独立部署用户应用、运行后端与 agent。原 Community 页面退出维护入口，保留用户发现、打开或导入公共 pipeline 的路径。 |
 | Pipeline Registry | `pipeline-registry` 的 YAML、PR 审核和 GitHub Pages `index.json` 提供目录。Web 通过 Community API 读目录，Gardener 也有读取 Pages 和缓存的路径。 | Supabase 中已发布的 Registry 记录成为目录的唯一写入来源。GitHub 继续提供 pipeline 源码、版本提交和历史 PR 链接。 |
 
 Cross 与 Governor 各有自己的仓库、部署配置、运行凭据和发布节奏。前端继续通过网站的同源 API 代理访问 Cross。Governor 通过版本化 HTTPS API 查询公开目录和访问当前用户的 Community 数据。用户项目、分析数据、运行记录和 MCP 工具运行留在 Governor 的环境中。两端交换的数据限于公共目录元数据及用户授权访问的 Community 记录。
@@ -37,7 +37,7 @@ Cross 与 Governor 各有自己的仓库、部署配置、运行凭据和发布�
 - 原作者与维护者各至少一条。每条提供显示名，并可附 GitHub handle、ORCID 或公开主页。表单为衍生版本预填原作者，提交人可提出更正，由管理员审阅。提交者、原作者、维护者、审核者分别记录，GitHub 登录仅证明提交者的身份。
 - 提议将目录拆成 `registry_pipelines`、`registry_versions`、`registry_credits` 和 `registry_submissions`。保留现有 `cp_*` 与 `cv_*` 标识和 moved 跳转，以复合外键约束父版本属于同一 pipeline，并用数据库唯一约束保证每个 pipeline 只有一个 Origin、同一 repo＋commit 只发布一次。已发布版本的 repo、commit 和父版本为不可变来源信息，修正通过新增版本或有审计记录的元数据变更完成。
 - 提议先支持公开 GitHub 仓库，服务端核验完整 commit 可访问。规范化仓库地址并检查重复 repo＋commit。客户端传幂等键，服务端将其绑定到账户和请求摘要，重复提交返回同一记录，摘要冲突返回 `409`。
-- 提议由数据库保存 `submitted → published / rejected` 和审核人、时间、理由。普通 GitHub 登录用户提交后看到记录编号及状态，管理员在 Cross 发布或驳回，公开目录仅读取 `published`。写入版本、归属信息、状态和审计记录应在同一事务完成。团队若确认合规提交直接发布，可在同一服务端校验后走自动发布分支。是否保留站内审核待确认。
+- 提议由数据库保存 `submitted → published / rejected` 和审核人、时间、理由。普通 GitHub 登录用户提交后看到记录编号及状态，管理员在 Cross 发布或驳回，公开目录仅读取 `published`。写入版本、归属信息、状态和审计记录应在同一事务完成。已确认公开发布必须经过 Cross 管理员站内审核。
 - 接口草案使用 `GET /api/community/v2/catalog`、`GET /api/community/v2/catalog/{id}`、`POST /api/community/v2/registry/submissions`、`GET /api/community/v2/registry/submissions/{id}` 与管理员审核动作。详情返回条目、版本沿革和署名，提交返回编号和状态。普通用户只能访问自己的未发布提交。新接口使用明确的字段错误和 `401 / 403 / 404 / 409 / 422` 响应。
 
 **验收** 四种提交均能产生预期记录。验证缺署名、无效 commit、跨条目父版本、重复提交和未授权审核。公开搜索只出现已发布版本。旧链接仍能打开，署名和提交账号显示清晰。
@@ -74,7 +74,7 @@ Governor 的用户侧应用提供 **Sign in with GitHub**。提议沿用 Cross �
 
 注解只控制发现范围。现有项目作用域、鉴权、写入确认、执行权限、参数验证、取消和错误分类仍由运行时检查。未注解路由不出现在清单中。重名、缺少 schema 或缺少权限分类时，契约验证失败。对外已有名称或参数变更需有兼容适配或明确的版本切换。向 Zhenke 提供工具清单、参数及结构化错误示例，现有 GUI 流式传输协议由其对应工作项演进。
 
-**验收** 新增一个标注的同类后端接口只需修改路由和测试，就能被工具清单发现。验证真实 `tools/list`、`tools/call`、合法与非法参数、越权调用、取消与错误反馈。确认打包后清单和源码一致，未标注接口无法借通用调用旁路进入 MCP。
+**验收** 新增一个标注的同类后端接口只需修改路由和测试，就能被工具清单发现。验证真实 `tools/list`、`tools/call`、合法与非法参数、越权调用、取消与错误反馈。确认打包后清单和源码一致。试点的两个操作在支持契约的后端上必须保有注解，通用调用也应用同一要求。其余原有通用操作沿用已评审的作用域清单，逐项迁移。
 
 ## 7. 发布顺序与数据回退
 
@@ -88,8 +88,8 @@ Governor 的用户侧应用提供 **Sign in with GitHub**。提议沿用 Cross �
 
 ## 8. 评审时需要确认
 
-1. Governor 的正式源码仓、部署目标和设备类型。确认它是否就是本地 `Biological-Agent` 对应的 Gardener，以及拆出 Community 后保留的入口形态。
-2. Registry 提交后由管理员在站内发布，还是校验通过即发布。开放的旧 PR 由谁关闭或迁入。
+1. Governor 的部署目标和设备类型，以及拆出 Community 后保留的入口形态。
+2. 开放的旧 Registry PR 由谁关闭或迁入。
 3. 三位管理员的 GitHub 数字 ID，以及是否同时需要 Supabase Dashboard 权限。未来只读成员可读的数据范围。
 4. 最低支持的 Governor 版本、旧索引兼容期，以及已有桌面访问令牌的退役条件。
 

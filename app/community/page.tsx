@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { communityCatalog } from "@/lib/community/service";
+import { registryTypes } from "@/lib/community/registry-v2";
+import { communityCatalog, communitySession, registryV2Catalog } from "@/lib/community/service";
 const rankingUrl = "https://crossomics.github.io/pipeline-registry/ranking/";
 
 function RegistryDiagram() {
@@ -26,11 +27,16 @@ function RegistryDiagram() {
   );
 }
 
-export default async function CommunityPage({ searchParams: query }: { searchParams: Promise<{ q?: string; kind?: string }> }) {
+export default async function CommunityPage({ searchParams: query }: { searchParams: Promise<{ q?: string; kind?: string; type?: string }> }) {
   const searchParams = await query;
   const q = typeof searchParams.q === "string" ? searchParams.q : "";
   const kind = typeof searchParams.kind === "string" ? searchParams.kind : "";
-  const { data: catalog, error } = await communityCatalog({ q, kind });
+  const type = typeof searchParams.type === "string" ? searchParams.type : "";
+  const session = await communitySession();
+  const v2 = session?.registryV2Enabled === true;
+  const { data: catalog, error } = session === null
+    ? { data: null, error: "The registry is temporarily unavailable. Try refreshing this page." }
+    : v2 ? await registryV2Catalog({ q, type }) : await communityCatalog({ q, kind });
   const results = catalog?.items ?? [];
 
   return (
@@ -55,9 +61,12 @@ export default async function CommunityPage({ searchParams: query }: { searchPar
         </div>
         <form className="community-search" action="/community#registry">
           <label>Search the registry<input type="search" name="q" maxLength={120} defaultValue={q} placeholder="Try STAR, alignment, or single-cell" /></label>
-          <label>Entry type<select name="kind" defaultValue={kind}><option value="">All types</option><option value="workflow">Workflows</option><option value="tool">Tools</option></select></label>
+          {v2 ? <label>Version type<select name="type" defaultValue={type}>
+            <option value="">All types</option>
+            {Object.entries(registryTypes).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select></label> : <label>Entry type<select name="kind" defaultValue={kind}><option value="">All types</option><option value="workflow">Workflows</option><option value="tool">Tools</option></select></label>}
           <button className="community-primary">Search</button>
-          {(q || kind) && <Link className="community-link" href="/community#registry">Clear filters</Link>}
+          {(q || kind || type) && <Link className="community-link" href="/community#registry">Clear filters</Link>}
         </form>
         {!catalog ? (
           <p className="community-notice" role="status">{error}</p>
@@ -73,7 +82,9 @@ export default async function CommunityPage({ searchParams: query }: { searchPar
                   <li key={item.id}>
                     <Link href={`/community/catalog/${item.id}`} className="community-catalog-card">
                       <div className="community-card-top">
-                        <span className="community-tag">{item.kind === "workflow" ? "Workflow" : "Tool"}</span>
+                        <span className="community-tag">{v2
+                          ? (type && Object.hasOwn(registryTypes, type) ? registryTypes[type as keyof typeof registryTypes] : "Pipeline")
+                          : item.kind === "workflow" ? "Workflow" : "Tool"}</span>
                         <span aria-hidden>↗</span>
                       </div>
                       <h3>{item.name}</h3>
