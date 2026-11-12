@@ -39,7 +39,8 @@ export default function RegistryFormV2({ items, initialId }: { items: RegistryIt
       type, name: selected?.name ?? value("name"), description: selected?.description ?? value("description"),
       domain: selected?.domain ?? value("domain"), repository: value("repository"), label: value("label"),
       commit: value("commit"), authors: authors.map(parseCredit), maintainers: maintainers.map(parseCredit),
-      ...(origin ? {} : { pipelineId, parentVersionId: value("parentVersionId"), changeSummary: value("changeSummary") })
+      ...(origin ? {} : { pipelineId, parentVersionId: value("parentVersionId"), changeSummary: value("changeSummary"),
+        ...(value("evidenceUrl").trim() ? { evidenceUrl: value("evidenceUrl").trim() } : {}) })
     };
     inFlight.current = true;
     setPending(true);
@@ -100,6 +101,7 @@ export default function RegistryFormV2({ items, initialId }: { items: RegistryIt
               {parents.map((version) => <option key={version.id} value={version.id}>{version.label}</option>)}
             </select></label>
             <label className="community-field-wide">Change summary<textarea name="changeSummary" required maxLength={2000} rows={4} /></label>
+            <label className="community-field-wide">Evidence URL (optional)<input name="evidenceUrl" type="url" pattern="https://.*" maxLength={2048} placeholder="https://example.org/benchmark-results" /></label>
           </>}
           <label>Public GitHub repository<input name="repository" type="url" required maxLength={160} placeholder="https://github.com/owner/repository" /></label>
           <label>Version label<input name="label" required maxLength={120} placeholder="v1.0.0" /></label>

@@ -49,6 +49,7 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
         <ul className="community-record-list">
           {item.versions.map((version) => {
             const repo = httpsUrl(version.repo);
+            const evidence = "evidence_url" in version ? httpsUrl(version.evidence_url) : null;
             const parent = item.versions.find((candidate) => candidate.id === version.parent);
             return (
               <li key={version.id} className="community-record">
@@ -64,6 +65,7 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
                 </dl>}
                 {version.improvement && <p>{version.improvement}</p>}
                 {repo && <a href={repo} className="community-link">Version repository <span aria-hidden>↗</span></a>}
+                {evidence && <a href={evidence} className="community-link">Evidence <span aria-hidden>↗</span></a>}
                 <code>{version.commit}</code>
                 {session?.canManageRegistry && "legacyKind" in version &&
                   <CorrectVersionCredits pipelineId={item.id} versionId={version.id}

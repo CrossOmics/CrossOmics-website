@@ -15,11 +15,13 @@ export type RegistryDraftV2 = {
   pipelineId?: string;
   parentVersionId?: string;
   changeSummary?: string;
+  evidenceUrl?: string;
   authors: RegistryCredit[];
   maintainers: RegistryCredit[];
 };
 export type RegistryVersionV2 = Omit<RegistryItem["versions"][number], "kind"> & {
   type: RegistryType;
+  evidence_url?: string;
   legacyKind?: "original" | "optimization";
   authors: RegistryCredit[];
   maintainers: RegistryCredit[];

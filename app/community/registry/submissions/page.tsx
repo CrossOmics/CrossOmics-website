@@ -35,6 +35,7 @@ export default async function RegistrySubmissions({ searchParams }: { searchPara
               <ul className="community-record-list">
                 {history.submissions.map((item) => {
                   const repo = httpsUrl(item.repository);
+                  const evidence = httpsUrl(item.evidenceUrl);
                   return (
                     <li key={item.id} className="community-record">
                       <div className="community-actions">
@@ -45,6 +46,7 @@ export default async function RegistrySubmissions({ searchParams }: { searchPara
                       <p>Submitted by @{item.contributor.login} · {item.createdAt.slice(0, 10)}</p>
                       <p>{item.changeSummary || item.description}</p>
                       {repo && <a className="community-link" href={repo}>Source repository ↗</a>}
+                      {evidence && <a className="community-link" href={evidence}>Evidence ↗</a>}
                       <dl className="community-detail-grid">
                         <div><dt>Commit</dt><dd><code>{item.commit}</code></dd></div>
                         {item.type !== "origin" && item.pipelineId && <div><dt>Target pipeline</dt>
