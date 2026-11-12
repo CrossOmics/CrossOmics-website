@@ -33,3 +33,22 @@
 - An unauthenticated or read-only account attempting an admin action.
 - Wrong GitHub account, callback code reuse and cancellation.
 - An unannotated REST endpoint invoked through the agent bridge.
+
+
+## Task 7: Preserve optional Registry evidence links
+
+Add optional `evidenceUrl` for improved/update/fix submissions, validated as HTTPS, without breaking old clients or records. Preserve it through stored submission, administrator review, publication and public version metadata (`evidence_url`). Show an optional field in the website form and links in the review queue and published details. Origins do not need evidence. Use the existing JSON payload/metadata rather than a new SQL column. Worktrees: CrossOmics-website and sibling pipeline-submission-api/CrossOmics-website-backend. Do not edit migration scripts or README (Task 9).
+
+Tests first: invalid URLs rejected; an HTTPS URL survives submission, idempotent retry and administrator publication; omitted evidence preserves old request behavior. Use isolated local PostgreSQL and mocked GitHub requests, never live Supabase fixtures. Verify both builds and the changed v2 integration tests. Expected: all assertions and builds pass. Commit scoped changes in each repository and record commands/results in the task report.
+
+## Task 8: Finish reviewed input-source-group MCP annotations
+
+After integration with current Governor `origin/dev`, extend the annotation pilot to the remaining already reviewed model-callable input-source-group operations. Preserve existing operation names, scope/parameter validation and host-only confirmation for destructive actions. Read OpenAPI schemas instead of adding parallel manual tool schemas. Unannotated migrated operations must fail closed for named and generic invocation. Other route families continue their existing allowlist pending a separate migration.
+
+Tests first: the additional group operations appear in the contract and real agent discovery; removed annotations reject both named and generic calls; malformed metadata and forbidden operations remain rejected. Run backend contract/scope tests, agent bridge tests, Pi runtime build and Electron tests. Expected: all changed suites pass. Commit Governor changes and document the exact migrated family.
+
+## Task 9: Deliver safe Community backup and restore scripts
+
+Provide a user-runnable source export using Compose PostgreSQL and a restore into a provisioned Supabase target. Include the six durable v1 tables and optional desktop sessions; omit ephemeral OAuth attempts and preserve Registry v2 tables already imported at the target. Support older sources missing optional tables. Use a consistent snapshot, restrictive file permissions, atomic output, no silent overwrite, and fail before restoring into nonempty target Community tables. Validate table allowlist and restore in a transaction; preserve IDs, token hashes and timestamps. Do not print credentials. Document the final stop-writes, final backup, restore, reconcile and hosted Compose restart sequence, preserving existing OAuth/session variables. Do not stop the user's production service or switch traffic without access and a source snapshot.
+
+Tests first with local PostgreSQL: round-trip contributions, impact, bounties/replies, editor allowlist and token hashes; optional absent tables; reject a nonempty target with no partial writes. Expected: all data and refusal assertions pass. Commit scripts, tests and runbook. Prepare feature-branch PRs for all three repositories, base main for Web/API and dev for Governor. Production migration and three verified admin grants depend on server access/source backup and verified identities.
