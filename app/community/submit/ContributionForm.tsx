@@ -5,8 +5,8 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import type { Contribution } from "@/lib/community/types";
 import { contributionTypes, subjectKinds } from "@/lib/community/types";
-import { contributionSummary } from "@/lib/community/form-copy";
-import ItemTypeHelp from "./ItemTypeHelp";
+import { contributionSummary, contributionDescriptions, subjectDescriptions } from "@/lib/community/form-copy";
+import TypeHelp from "./TypeHelp";
 import { communityRequest } from "../client";
 
 type CatalogOption = { id: string; name: string; kind?: "workflow" | "tool"; projectUrl: string };
@@ -51,11 +51,15 @@ export default function ContributionForm({ catalog, selected }: { catalog: Catal
       <fieldset disabled={pending}>
         <legend>What did you contribute?</legend>
         <div className="community-form-grid">
-          <label>Contribution type
-            <select required name="type" value={type} onChange={(event) => setType(event.target.value as keyof typeof contributionTypes)}>
+          <div className="community-item-type-field">
+            <div className="community-item-type-label">
+              <label htmlFor="contribution-type">Contribution type</label>
+              <TypeHelp label="About contribution types" entries={(Object.keys(contributionTypes) as Array<keyof typeof contributionTypes>).map((value) => ({ name: contributionTypes[value], description: contributionDescriptions[value] }))} />
+            </div>
+            <select id="contribution-type" required name="type" value={type} onChange={(event) => setType(event.target.value as keyof typeof contributionTypes)}>
               {Object.entries(contributionTypes).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
             </select>
-          </label>
+          </div>
           <label>Date of contribution<input name="occurredOn" required type="date" /></label>
           {catalog.length > 0 && (
             <label className="community-field-wide">Related registry entry <span>(optional)</span>
@@ -73,7 +77,10 @@ export default function ContributionForm({ catalog, selected }: { catalog: Catal
             </label>
           )}
           <div className="community-item-type-field">
-            <div className="community-item-type-label"><label htmlFor="subject-kind">Item type</label><ItemTypeHelp /></div>
+            <div className="community-item-type-label">
+              <label htmlFor="subject-kind">Item type</label>
+              <TypeHelp label="About item types" entries={(Object.keys(subjectKinds) as Array<keyof typeof subjectKinds>).map((value) => ({ name: subjectKinds[value], description: subjectDescriptions[value] }))} />
+            </div>
             <select id="subject-kind" name="subjectKind" value={kind} onChange={(event) => setKind(event.target.value as keyof typeof subjectKinds)} required>
               {Object.entries(subjectKinds).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
             </select>
