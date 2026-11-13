@@ -7,7 +7,9 @@ import { communityRequest } from "../../client";
 import CreditFields, { emptyCredit, parseCredit, withEmptyCreditFields, type CreditInput } from "../CreditFields";
 
 const domains = ["transcriptomics", "epigenomics", "genomics", "proteomics", "metagenomics", "multi-omics", "imaging"];
-export default function RegistryFormV2({ items, initialId }: { items: RegistryItemV2[]; initialId?: string }) {
+export default function RegistryFormV2({ items, initialId, unavailableMessage }: {
+  items: RegistryItemV2[]; initialId?: string; unavailableMessage?: string;
+}) {
   const initial = items.find((item) => item.id === initialId);
   const [type, setType] = useState<RegistryType>(initial ? "update" : "origin");
   const [pipelineId, setPipelineId] = useState(initial?.id ?? "");
@@ -31,7 +33,7 @@ export default function RegistryFormV2({ items, initialId }: { items: RegistryIt
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (inFlight.current) return;
+    if (inFlight.current || unavailableMessage) return;
     const form = new FormData(event.currentTarget);
     const value = (key: string) => String(form.get(key) ?? "");
     const body: RegistryDraftV2 = {
@@ -71,10 +73,11 @@ export default function RegistryFormV2({ items, initialId }: { items: RegistryIt
 
   return (
     <form className="community-form" onSubmit={submit} onChange={() => { requestId.current = null; }} aria-busy={pending}>
-      <fieldset disabled={pending}>
+      {unavailableMessage && <p className="community-notice" role="status">{unavailableMessage}</p>}
+      <fieldset disabled={pending || Boolean(unavailableMessage)}>
         <legend>Registry details</legend>
         <div className="community-form-grid">
-          <label>Submission type<select value={type} onChange={(event) => {
+          <label>Entry type<select name="type" value={type} onChange={(event) => {
             const next = event.target.value as RegistryType;
             if ((next === "origin") !== origin) select(next === "origin" ? "" : initial?.id ?? "");
             setType(next);
@@ -111,7 +114,7 @@ export default function RegistryFormV2({ items, initialId }: { items: RegistryIt
         <CreditFields label="Maintainers" credits={maintainers} onChange={(value) => { requestId.current = null; setMaintainers(value); }} />
       </fieldset>
       <div className="community-form-footer">
-        <button className="community-primary" type="submit" disabled={pending}>Submit registration</button>
+        <button className="community-primary" type="submit" disabled={pending || Boolean(unavailableMessage)}>Submit registration</button>
         {error && <p className="community-error" role="alert">{error}</p>}
         {pending && <p role="status">Submitting your registration…</p>}
       </div>

@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:community": "node --test tests/community.mjs"
+    "test:community": "node --test tests/community.mjs",
+    "test:registry-submit": "node --test tests/registry-submit.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
