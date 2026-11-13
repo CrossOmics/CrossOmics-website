@@ -33,14 +33,14 @@ export default async function RegistrySubmitPage({ searchParams }: {
   const available = v2 && session?.registryV2Available === true;
   const catalog = available && signedInWithGitHub ? await registryV2Catalog() : null;
   const unavailableMessage = !available
-    ? "Pipeline submissions are temporarily unavailable. Please try again later."
+    ? "Project registration is temporarily unavailable. Please try again later."
     : catalog?.error || undefined;
   return (
     <>
       <header className="community-heading">
         <Link href="/community#registry" className="community-link">← Back to the registry</Link>
-        <h1>Submit a pipeline</h1>
-        <p>Register a new pipeline or submit an improved version, update, or fix. CrossOmics administrators review submissions before publication.</p>
+        <h1>Register a project</h1>
+        <p>Register a new pipeline, tool, or method, or submit a new version of an existing project. CrossOmics administrators review submissions before publication.</p>
         {v2 && signedInWithGitHub && <div className="community-actions">
           <Link className="community-link" href="/community/registry/submissions">My registry submissions</Link>
         </div>}

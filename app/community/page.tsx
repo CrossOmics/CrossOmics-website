@@ -52,11 +52,11 @@ export default async function CommunityPage({ searchParams: query }: { searchPar
         <div className="community-section-heading">
           <div>
             <h2 id="registry-title">Explore the registry</h2>
-            <p>Browse the same pipeline catalog available in Gardener.</p>
+            <p>Browse registered projects and their versions.</p>
           </div>
           <div className="community-actions">
             <a href={rankingUrl} className="community-link">Maintenance ranking <span aria-hidden>↗</span></a>
-            <Link href="/community/registry/submit" className="community-primary">Submit a pipeline</Link>
+            <Link href="/community/registry/submit" className="community-primary">Register a project</Link>
           </div>
         </div>
         <form className="community-search" action="/community#registry">
@@ -76,14 +76,14 @@ export default async function CommunityPage({ searchParams: query }: { searchPar
               <strong>{results.length} {results.length === 1 ? "entry" : "entries"}</strong>
               <span>Registry updated <time dateTime={catalog.generatedAt}>{catalog.generatedAt.slice(0, 10)}</time></span>
             </div>
-            {results.length === 0 ? <p className="community-notice">No entries match these filters.</p> : (
+            {results.length === 0 ? <p className="community-notice">{q || kind || type ? "No projects match these filters." : <>No projects registered yet. <Link href="/community/registry/submit">Register the first project</Link>.</>}</p> : (
               <ul className="community-catalog">
                 {results.map((item) => (
                   <li key={item.id}>
                     <Link href={`/community/catalog/${item.id}`} className="community-catalog-card">
                       <div className="community-card-top">
                         <span className="community-tag">{v2
-                          ? (type && Object.hasOwn(registryTypes, type) ? registryTypes[type as keyof typeof registryTypes] : "Pipeline")
+                          ? (type && Object.hasOwn(registryTypes, type) ? registryTypes[type as keyof typeof registryTypes] : "Project")
                           : item.kind === "workflow" ? "Workflow" : "Tool"}</span>
                         <span aria-hidden>↗</span>
                       </div>

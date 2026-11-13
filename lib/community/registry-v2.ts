@@ -1,6 +1,12 @@
 import type { Contributor, RegistryItem } from "./types";
 
-export const registryTypes = { origin: "Origin", improved: "Improved", update: "Update", fix: "Fix" } as const;
+export const registryTypes = { origin: "New project (first version)", improved: "Performance improvement", update: "Feature or compatibility update", fix: "Bug fix" } as const;
+export const registryTypeDescriptions = {
+  origin: "Register a project that is not in the catalog yet. Describe what it does; no earlier version is needed.",
+  improved: "Make an existing project faster or reduce its memory use. Choose the version you improved.",
+  update: "Add a feature or support for a new dependency, format, or platform. Choose the earlier version you updated.",
+  fix: "Correct a problem in an existing project. Choose the version with the problem and describe the fix."
+} as const;
 export type RegistryType = keyof typeof registryTypes;
 export type RegistryCredit = { name: string; github?: string; orcid?: string; url?: string };
 export type RegistryDraftV2 = {
@@ -18,6 +24,7 @@ export type RegistryDraftV2 = {
   evidenceUrl?: string;
   authors: RegistryCredit[];
   maintainers: RegistryCredit[];
+  citation?: string;
 };
 export type RegistryVersionV2 = Omit<RegistryItem["versions"][number], "kind"> & {
   type: RegistryType;
@@ -25,6 +32,7 @@ export type RegistryVersionV2 = Omit<RegistryItem["versions"][number], "kind"> &
   legacyKind?: "original" | "optimization";
   authors: RegistryCredit[];
   maintainers: RegistryCredit[];
+  citation?: string;
 };
 export type RegistryItemV2 = Omit<RegistryItem, "kind" | "versions"> & {
   kind?: RegistryItem["kind"];

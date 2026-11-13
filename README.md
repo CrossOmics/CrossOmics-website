@@ -103,6 +103,14 @@ no longer referenced by any code.
 
 ## Adding a New Section
 
+### Community form terminology
+
+- **Pipeline**: connected analysis steps; **Tool**: a runnable program; **Algorithm**: a computational method inside a tool.
+- A new project asks what it does. Existing updates, performance improvements and fixes ask about the corresponding work.
+- Registry types are displayed as New project, Performance improvement, Feature or compatibility update, and Bug fix. Their API values remain `origin`, `improved`, `update`, and `fix`.
+- Original author names are entered explicitly, separated with `;`, and are not inferred from the signed-in submitter. Citation text is optional and displayed in review and version details.
+- Deploy the matching Community backend before the website so citation data is accepted and retained.
+
 1. Add an entry to `NAV` in `lib/nav.ts` (`{ href, label }`) — this drives the
    header and the footer.
 2. Add the matching entry to `SECTIONS` in `lib/sections.ts`

@@ -10,7 +10,7 @@ export default function RegistryCredits({ credits }: { credits: RegistryCredit[]
       { label: "Profile", url: httpsUrl(credit.url) }
     ];
     return <span key={index}>
-      {index > 0 && ", "}{credit.name}
+      {index > 0 && "; "}{credit.name}
       {links.map(({ label, url }) => url && <span key={label}> · <a href={url} className="community-link">{label}</a></span>)}
     </span>;
   })}</>;

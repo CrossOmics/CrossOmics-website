@@ -20,7 +20,7 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
     <>
       <header className="community-heading">
         <Link href="/community#registry" className="community-link">← Back to registry</Link>
-        <span className="community-tag">{v2 ? "Pipeline" : item.kind === "workflow" ? "Workflow" : "Tool"}</span>
+        <span className="community-tag">{v2 ? "Project" : item.kind === "workflow" ? "Workflow" : "Tool"}</span>
         <h1>{item.name}</h1>
         <p>{item.description}</p>
         <div className="community-actions">
@@ -64,6 +64,7 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
                   <div><dt>Maintainers</dt><dd><RegistryCredits credits={version.maintainers} /></dd></div>
                 </dl>}
                 {version.improvement && <p>{version.improvement}</p>}
+                {"citation" in version && version.citation && <div><h4>How to cite this version</h4><p className="community-citation">{version.citation}</p></div>}
                 {repo && <a href={repo} className="community-link">Version repository <span aria-hidden>↗</span></a>}
                 {evidence && <a href={evidence} className="community-link">Evidence <span aria-hidden>↗</span></a>}
                 <code>{version.commit}</code>
