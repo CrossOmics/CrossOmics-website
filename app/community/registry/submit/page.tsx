@@ -52,7 +52,7 @@ export default async function RegistrySubmitPage({ searchParams }: {
         <RegistryForm pr={pr} />
       ) : !session ? (
         <p className="community-notice">Website submissions are temporarily unavailable. Try again shortly.</p>
-      ) : !signedInWithGitHub ? (
+      ) : !signedInWithGitHub || !session.contributor ? (
         <section className="community-notice">
           <h2>Sign in with GitHub</h2>
           <p>Your GitHub account identifies you as the submitter.</p>
@@ -61,7 +61,7 @@ export default async function RegistrySubmitPage({ searchParams }: {
           ) : <p>GitHub sign-in is currently unavailable.</p>}
         </section>
       ) : (
-        <RegistryFormV2 items={catalog?.data?.items ?? []} initialId={pipelineId} unavailableMessage={unavailableMessage} />
+        <RegistryFormV2 items={catalog?.data?.items ?? []} submitter={session.contributor} initialId={pipelineId} unavailableMessage={unavailableMessage} />
       )}
     </>
   );

@@ -100,6 +100,15 @@ test("ready service shows four entry types and keeps pipeline lineage", async ()
   assert.match(html, /value="cp_example" selected=""/);
   assert.match(html, /value="cv_example"/);
   assert.match(html, /Original authors/);
+  assert.match(html, /<legend>Original authors<\/legend>.*?<label>Name<input required=""[^>]*value="Original author"/s);
+  assert.match(html, /<button[^>]*type="submit">Submit registration<\/button>/);
+});
+
+test("Origin hides the original-author fields and keeps maintainer input", async () => {
+  const html = await page("ready");
+  assert.match(html, /value="origin" selected=""/);
+  assert.doesNotMatch(html, /<legend>Original authors<\/legend>/);
+  assert.match(html, /<legend>Maintainers<\/legend>/);
   assert.match(html, /<button[^>]*type="submit">Submit registration<\/button>/);
 });
 

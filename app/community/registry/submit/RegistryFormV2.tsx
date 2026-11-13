@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useRef, useState, type FormEvent } from "react";
 import { registryTypes, type RegistryDraftV2, type RegistryItemV2, type RegistrySubmissionV2, type RegistryType } from "@/lib/community/registry-v2";
+import type { Contributor } from "@/lib/community/types";
 import { communityRequest } from "../../client";
 import CreditFields, { emptyCredit, parseCredit, withEmptyCreditFields, type CreditInput } from "../CreditFields";
 
 const domains = ["transcriptomics", "epigenomics", "genomics", "proteomics", "metagenomics", "multi-omics", "imaging"];
-export default function RegistryFormV2({ items, initialId, unavailableMessage }: {
-  items: RegistryItemV2[]; initialId?: string; unavailableMessage?: string;
+export default function RegistryFormV2({ items, submitter, initialId, unavailableMessage }: {
+  items: RegistryItemV2[]; submitter: Contributor; initialId?: string; unavailableMessage?: string;
 }) {
   const initial = items.find((item) => item.id === initialId);
   const [type, setType] = useState<RegistryType>(initial ? "update" : "origin");
@@ -40,7 +41,9 @@ export default function RegistryFormV2({ items, initialId, unavailableMessage }:
       requestId: requestId.current ?? (requestId.current = crypto.randomUUID()),
       type, name: selected?.name ?? value("name"), description: selected?.description ?? value("description"),
       domain: selected?.domain ?? value("domain"), repository: value("repository"), label: value("label"),
-      commit: value("commit"), authors: authors.map(parseCredit), maintainers: maintainers.map(parseCredit),
+      commit: value("commit"),
+      authors: origin ? [{ name: submitter.login, github: submitter.login }] : authors.map(parseCredit),
+      maintainers: maintainers.map(parseCredit),
       ...(origin ? {} : { pipelineId, parentVersionId: value("parentVersionId"), changeSummary: value("changeSummary"),
         ...(value("evidenceUrl").trim() ? { evidenceUrl: value("evidenceUrl").trim() } : {}) })
     };
@@ -110,7 +113,7 @@ export default function RegistryFormV2({ items, initialId, unavailableMessage }:
           <label>Version label<input name="label" required maxLength={120} placeholder="v1.0.0" /></label>
           <label>Full commit SHA<input name="commit" required maxLength={40} pattern="[0-9a-fA-F]{40}" spellCheck={false} /></label>
         </div>
-        <CreditFields label="Original authors" credits={authors} onChange={(value) => { requestId.current = null; setAuthors(value); }} />
+        {!origin && <CreditFields label="Original authors" credits={authors} onChange={(value) => { requestId.current = null; setAuthors(value); }} />}
         <CreditFields label="Maintainers" credits={maintainers} onChange={(value) => { requestId.current = null; setMaintainers(value); }} />
       </fieldset>
       <div className="community-form-footer">
