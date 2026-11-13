@@ -226,6 +226,16 @@
 .community-form legend { padding: 0 6px; color: var(--community-ink); font-size: 17px; font-weight: 650; }
 .community-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .community-field-wide { grid-column: 1 / -1; }
+.community-item-type-field { display: grid; gap: 6px; }
+.community-item-type-label { display: flex; align-items: center; gap: 6px; }
+.community-item-type-info { display: inline-flex; position: relative; }
+.community-info-button { display: inline-grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 0; background: transparent; color: var(--community-quiet); font-size: 18px; cursor: help; }
+.community-item-type-tooltip { position: absolute; z-index: 10; inset-inline-start: 0; top: 100%; width: min(350px, calc(100vw - 120px)); padding: 14px; border: 1px solid var(--community-border); border-radius: 8px; background: var(--bg); color: var(--community-quiet); box-shadow: 0 6px 18px rgb(24 46 74 / .12); font-size: 14px; font-weight: 400; }
+.community-item-type-tooltip dl { margin: 0; }
+.community-item-type-tooltip dl > div + div { margin-top: 10px; }
+.community-item-type-tooltip dt { color: var(--community-ink); font-weight: 600; }
+.community-item-type-tooltip dd { margin: 3px 0 0; line-height: 1.5; }
+@media (pointer: coarse) { .community-info-button { min-width: 44px; min-height: 44px; } }
 .community-form fieldset p { margin-top: 12px; font-size: 14px; }
 .community-form-footer { display: grid; gap: 12px; justify-items: start; font-size: 14px; }
 .community-main .community-error { color: #9f2626; }

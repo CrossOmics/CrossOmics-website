@@ -1,7 +1,7 @@
 export const subjectDescriptions = {
-  pipeline: "A workflow that connects several analysis steps, for example alignment, counting, and quality checks.",
-  tool: "A program you can run, for example STAR, MAFFT, or Scanpy.",
-  algorithm: "A computational method used inside a tool, for example a sequence-alignment or clustering method."
+  pipeline: "Connects several analysis steps, such as alignment, counting, and quality checks.",
+  tool: "Software you can run, such as STAR, MAFFT, or Scanpy.",
+  algorithm: "A method used inside a tool, such as sequence alignment or clustering."
 } as const;
 
 export function contributionSummary(type: string) {

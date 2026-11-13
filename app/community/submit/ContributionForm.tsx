@@ -5,7 +5,8 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import type { Contribution } from "@/lib/community/types";
 import { contributionTypes, subjectKinds } from "@/lib/community/types";
-import { contributionSummary, subjectDescriptions } from "@/lib/community/form-copy";
+import { contributionSummary } from "@/lib/community/form-copy";
+import ItemTypeHelp from "./ItemTypeHelp";
 import { communityRequest } from "../client";
 
 type CatalogOption = { id: string; name: string; kind?: "workflow" | "tool"; projectUrl: string };
@@ -71,13 +72,13 @@ export default function ContributionForm({ catalog, selected }: { catalog: Catal
               </select>
             </label>
           )}
-          <label>Item type
-            <select name="subjectKind" value={kind} onChange={(event) => setKind(event.target.value as keyof typeof subjectKinds)} required aria-describedby="subject-kind-help">
+          <div className="community-item-type-field">
+            <div className="community-item-type-label"><label htmlFor="subject-kind">Item type</label><ItemTypeHelp /></div>
+            <select id="subject-kind" name="subjectKind" value={kind} onChange={(event) => setKind(event.target.value as keyof typeof subjectKinds)} required>
               {Object.entries(subjectKinds).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
             </select>
-          </label>
+          </div>
           <label>Item name<input name="subjectName" value={name} onChange={(event) => setName(event.target.value)} maxLength={120} required /></label>
-          <p className="community-field-wide" id="subject-kind-help">{subjectDescriptions[kind]}</p>
           <label className="community-field-wide">{summaryCopy.label}
             <textarea name="summary" rows={4} maxLength={2000} required placeholder={summaryCopy.placeholder} />
           </label>
