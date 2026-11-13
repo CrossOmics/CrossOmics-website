@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { communityRequest } from "../../client";
 
 const fields = ["name", "kind", "domain", "description", "repository", "label", "commit"] as const;
@@ -14,6 +14,7 @@ const domains = {
   imaging: "Imaging"
 };
 const errors: Record<string, string> = {
+  processing: "This authorization is still being processed. Return to the original tab for the result.",
   expired: "The authorization expired. Preview your submission and try again.",
   denied: "GitHub did not grant public repository access. Preview your submission to try again.",
   account: "Authorize with the same GitHub account you used to sign in to Community.",
@@ -33,6 +34,7 @@ export default function RegistryForm({ pr, result }: { pr?: string; result?: str
   const [draft, setDraft] = useState(emptyDraft);
   const [preview, setPreview] = useState<Preview | null>(null);
   const [busy, setBusy] = useState(false);
+  const authorizing = useRef(false);
   const [error, setError] = useState(result && Object.hasOwn(errors, result) ? errors[result] : "");
 
   useEffect(() => {
@@ -46,6 +48,17 @@ export default function RegistryForm({ pr, result }: { pr?: string; result?: str
       // Browser storage is optional. A fresh form still works.
     }
   }, [pr]);
+
+  useEffect(() => {
+    function restore(event: PageTransitionEvent) {
+      if (event.persisted && authorizing.current) {
+        authorizing.current = false;
+        setBusy(false);
+      }
+    }
+    window.addEventListener("pageshow", restore);
+    return () => window.removeEventListener("pageshow", restore);
+  }, []);
 
   if (pr) return (
     <section className="community-notice" role="status">
@@ -78,7 +91,8 @@ export default function RegistryForm({ pr, result }: { pr?: string; result?: str
   }
 
   async function authorize() {
-    if (!preview) return;
+    if (!preview || authorizing.current) return;
+    authorizing.current = true;
     setBusy(true);
     setError("");
     try {
@@ -89,6 +103,7 @@ export default function RegistryForm({ pr, result }: { pr?: string; result?: str
       window.location.assign(authorizationUrl);
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : errors.retry);
+      authorizing.current = false;
       setBusy(false);
     }
   }

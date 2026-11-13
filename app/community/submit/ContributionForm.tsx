@@ -7,14 +7,14 @@ import type { Contribution } from "@/lib/community/types";
 import { contributionTypes, subjectKinds } from "@/lib/community/types";
 import { communityRequest } from "../client";
 
-type CatalogOption = { id: string; name: string; kind: "workflow" | "tool"; projectUrl: string };
+type CatalogOption = { id: string; name: string; kind?: "workflow" | "tool"; projectUrl: string };
 
 export default function ContributionForm({ catalog, selected }: { catalog: CatalogOption[]; selected?: CatalogOption }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<{ item: Contribution; reused: boolean } | null>(null);
   const [name, setName] = useState(selected?.name ?? "");
-  const [kind, setKind] = useState(selected?.kind === "workflow" ? "pipeline" : "tool");
+  const [kind, setKind] = useState(selected && selected.kind !== "tool" ? "pipeline" : "tool");
   const [projectUrl, setProjectUrl] = useState(selected?.projectUrl ?? "");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -60,7 +60,7 @@ export default function ContributionForm({ catalog, selected }: { catalog: Catal
                 const entry = catalog.find((item) => item.id === event.target.value);
                 if (entry) {
                   setName(entry.name);
-                  setKind(entry.kind === "workflow" ? "pipeline" : "tool");
+                  setKind(entry.kind === "tool" ? "tool" : "pipeline");
                   setProjectUrl(entry.projectUrl);
                 }
               }}>

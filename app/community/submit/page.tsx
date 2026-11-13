@@ -1,4 +1,4 @@
-import { communityCatalog, communityCatalogItem, communitySession } from "@/lib/community/service";
+import { communityCatalog, communityCatalogItem, communitySession, registryV2Catalog, registryV2Item } from "@/lib/community/service";
 import { httpsUrl } from "@/lib/community/https-url";
 import { redirect } from "next/navigation";
 import { communitySignInPath } from "@/lib/community/return-path";
@@ -13,8 +13,8 @@ export default async function SubmitPage({ searchParams: query }: { searchParams
     redirect(communitySignInPath(`/community/submit${catalogId ? `?${query}` : ""}`, searchParams.login));
   }
   const [registry, selection] = await Promise.all([
-    communityCatalog(),
-    catalogId ? communityCatalogItem(catalogId) : null
+    session.registryV2Enabled ? registryV2Catalog() : communityCatalog(),
+    catalogId ? (session.registryV2Enabled ? registryV2Item(catalogId) : communityCatalogItem(catalogId)) : null
   ]);
   const catalog = (registry?.data?.items ?? []).map(({ id, name, kind, repositories }) => ({
     id, name, kind, projectUrl: httpsUrl(repositories.find((repo) => repo.primary)?.url) ?? ""

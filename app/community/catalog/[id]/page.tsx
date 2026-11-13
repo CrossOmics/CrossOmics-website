@@ -1,10 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { communityCatalogItem } from "@/lib/community/service";
+import { registryTypes } from "@/lib/community/registry-v2";
+import RegistryCredits from "../../RegistryCredits";
+import { communityCatalogItem, communitySession, registryV2Item } from "@/lib/community/service";
+import WithdrawVersion from "./WithdrawVersion";
+import CorrectVersionCredits from "./CorrectVersionCredits";
 import { httpsUrl } from "@/lib/community/https-url";
 
 export default async function RegistryDetail({ params }: { params: Promise<{ id: string }> }) {
-  const result = await communityCatalogItem((await params).id);
+  const [{ id }, session] = await Promise.all([params, communitySession()]);
+  const v2 = session?.registryV2Enabled === true;
+  const result = session === null ? null : v2 ? await registryV2Item(id) : await communityCatalogItem(id);
   if (!result) return <p className="community-notice">The registry is temporarily unavailable. Try refreshing this page.</p>;
   const { item } = result;
   if (!item) notFound();
@@ -14,12 +20,13 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
     <>
       <header className="community-heading">
         <Link href="/community#registry" className="community-link">← Back to registry</Link>
-        <span className="community-tag">{item.kind === "workflow" ? "Workflow" : "Tool"}</span>
+        <span className="community-tag">{v2 ? "Pipeline" : item.kind === "workflow" ? "Workflow" : "Tool"}</span>
         <h1>{item.name}</h1>
         <p>{item.description}</p>
         <div className="community-actions">
           {project && <a className="community-secondary" href={project}>Source repository <span aria-hidden>↗</span></a>}
           <Link className="community-secondary" href={`/community/activity?catalogId=${item.id}`}>View contributions</Link>
+          {v2 && <Link className="community-secondary" href={"/community/registry/submit?pipelineId=" + item.id}>Submit a version</Link>}
           <Link className="community-primary" href={`/community/submit?catalogId=${item.id}`}>Log a contribution</Link>
         </div>
       </header>
@@ -42,18 +49,29 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
         <ul className="community-record-list">
           {item.versions.map((version) => {
             const repo = httpsUrl(version.repo);
+            const evidence = "evidence_url" in version ? httpsUrl(version.evidence_url) : null;
             const parent = item.versions.find((candidate) => candidate.id === version.parent);
             return (
               <li key={version.id} className="community-record">
                 <div className="community-actions">
                   <h3>{version.label}</h3>
-                  <span className="community-tag">{version.kind === "optimization" ? "Optimization" : "Original"}</span>
+                  <span className="community-tag">{"type" in version ? registryTypes[version.type] : version.kind === "optimization" ? "Optimization" : "Original"}</span>
                   {version.withdrawn && <span className="community-tag">Withdrawn</span>}
                 </div>
                 <p>{[version.released_at, parent && `Based on ${parent.label}`].filter(Boolean).join(" · ")}</p>
+                {"authors" in version && <dl className="community-detail-grid">
+                  <div><dt>Original authors</dt><dd><RegistryCredits credits={version.authors} /></dd></div>
+                  <div><dt>Maintainers</dt><dd><RegistryCredits credits={version.maintainers} /></dd></div>
+                </dl>}
                 {version.improvement && <p>{version.improvement}</p>}
                 {repo && <a href={repo} className="community-link">Version repository <span aria-hidden>↗</span></a>}
+                {evidence && <a href={evidence} className="community-link">Evidence <span aria-hidden>↗</span></a>}
                 <code>{version.commit}</code>
+                {session?.canManageRegistry && "legacyKind" in version &&
+                  <CorrectVersionCredits pipelineId={item.id} versionId={version.id}
+                    existingAuthors={version.authors} existingMaintainers={version.maintainers} />}
+                {v2 && session?.canManageRegistry && !version.withdrawn &&
+                  <WithdrawVersion pipelineId={item.id} versionId={version.id} />}
               </li>
             );
           })}
