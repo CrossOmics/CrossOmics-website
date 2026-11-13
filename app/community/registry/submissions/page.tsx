@@ -19,7 +19,7 @@ export default async function RegistrySubmissions({ searchParams }: { searchPara
   return (
     <>
       <header className="community-heading">
-        <Link className="community-link" href="/community/registry/submit">← Submit a pipeline</Link>
+        <Link className="community-link" href="/community/registry/submit">← Register a project</Link>
         <h1>{all ? "Registry review queue" : "My registry submissions"}</h1>
         <p>{all ? "Review the source, version lineage, and credits before publishing." : "Track your submissions and their review status."}</p>
         {admin && <div className="community-actions">
@@ -45,6 +45,7 @@ export default async function RegistrySubmissions({ searchParams }: { searchPara
                       </div>
                       <p>Submitted by @{item.contributor.login} · {item.createdAt.slice(0, 10)}</p>
                       <p>{item.changeSummary || item.description}</p>
+                      {item.citation && <div><h3>Citation information</h3><p className="community-citation">{item.citation}</p></div>}
                       {repo && <a className="community-link" href={repo}>Source repository ↗</a>}
                       {evidence && <a className="community-link" href={evidence}>Evidence ↗</a>}
                       <dl className="community-detail-grid">

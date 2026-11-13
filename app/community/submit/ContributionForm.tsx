@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import type { Contribution } from "@/lib/community/types";
 import { contributionTypes, subjectKinds } from "@/lib/community/types";
+import { contributionSummary, subjectDescriptions } from "@/lib/community/form-copy";
 import { communityRequest } from "../client";
 
 type CatalogOption = { id: string; name: string; kind?: "workflow" | "tool"; projectUrl: string };
@@ -14,7 +15,9 @@ export default function ContributionForm({ catalog, selected }: { catalog: Catal
   const [error, setError] = useState("");
   const [result, setResult] = useState<{ item: Contribution; reused: boolean } | null>(null);
   const [name, setName] = useState(selected?.name ?? "");
-  const [kind, setKind] = useState(selected && selected.kind !== "tool" ? "pipeline" : "tool");
+  const [kind, setKind] = useState<keyof typeof subjectKinds>(selected?.kind === "tool" ? "tool" : "pipeline");
+  const [type, setType] = useState<keyof typeof contributionTypes>("new_pipeline");
+  const summaryCopy = contributionSummary(type);
   const [projectUrl, setProjectUrl] = useState(selected?.projectUrl ?? "");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -48,8 +51,7 @@ export default function ContributionForm({ catalog, selected }: { catalog: Catal
         <legend>What did you contribute?</legend>
         <div className="community-form-grid">
           <label>Contribution type
-            <select required name="type" defaultValue="">
-              <option value="" disabled>Choose a type</option>
+            <select required name="type" value={type} onChange={(event) => setType(event.target.value as keyof typeof contributionTypes)}>
               {Object.entries(contributionTypes).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
             </select>
           </label>
@@ -70,13 +72,14 @@ export default function ContributionForm({ catalog, selected }: { catalog: Catal
             </label>
           )}
           <label>Item type
-            <select name="subjectKind" value={kind} onChange={(event) => setKind(event.target.value)} required>
+            <select name="subjectKind" value={kind} onChange={(event) => setKind(event.target.value as keyof typeof subjectKinds)} required aria-describedby="subject-kind-help">
               {Object.entries(subjectKinds).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
             </select>
           </label>
           <label>Item name<input name="subjectName" value={name} onChange={(event) => setName(event.target.value)} maxLength={120} required /></label>
-          <label className="community-field-wide">What changed?
-            <textarea name="summary" rows={4} maxLength={2000} required placeholder="Describe the change and what it enables or fixes." />
+          <p className="community-field-wide" id="subject-kind-help">{subjectDescriptions[kind]}</p>
+          <label className="community-field-wide">{summaryCopy.label}
+            <textarea name="summary" rows={4} maxLength={2000} required placeholder={summaryCopy.placeholder} />
           </label>
         </div>
       </fieldset>

@@ -79,10 +79,10 @@ async function page(mode, query = "") {
 }
 
 function entryTypes(html) {
-  const select = html.match(/<label>Entry type<select[^>]*>(.*?)<\/select>/s)?.[1];
-  assert.ok(select, "The submission form must expose an Entry type selector");
+  const select = html.match(/<label>Registration type<select[^>]*>(.*?)<\/select>/s)?.[1];
+  assert.ok(select, "The submission form must explain the registration type");
   assert.deepEqual([...select.matchAll(/<option value="([^"]+)"[^>]*>([^<]+)<\/option>/g)].map((match) => [match[1], match[2]]),
-    [["origin", "Origin"], ["improved", "Improved"], ["update", "Update"], ["fix", "Fix"]]);
+    [["origin", "New project (first version)"], ["improved", "Performance improvement"], ["update", "Feature or compatibility update"], ["fix", "Bug fix"]]);
 }
 
 test("legacy service shows four types with submission controls disabled", async () => {
@@ -99,15 +99,19 @@ test("ready service shows four entry types and keeps pipeline lineage", async ()
   assert.match(html, /value="update" selected=""/);
   assert.match(html, /value="cp_example" selected=""/);
   assert.match(html, /value="cv_example"/);
-  assert.match(html, /Original authors/);
-  assert.match(html, /<legend>Original authors<\/legend>.*?<label>Name<input required=""[^>]*value="Original author"/s);
+  assert.match(html, /Author names/);
+  assert.match(html, /name="authorNames"[^>]*value="Original author"/);
   assert.match(html, /<button[^>]*type="submit">Submit registration<\/button>/);
 });
 
-test("Origin hides the original-author fields and keeps maintainer input", async () => {
+test("new project asks for actual authors and citation without requiring a change summary", async () => {
   const html = await page("ready");
   assert.match(html, /value="origin" selected=""/);
-  assert.doesNotMatch(html, /<legend>Original authors<\/legend>/);
+  assert.match(html, /Author names/);
+  assert.match(html, /Separate names with a semicolon/);
+  assert.match(html, /Citation information \(optional\)/);
+  assert.doesNotMatch(html, /name="changeSummary"/);
+  assert.match(html, /no earlier version is needed/);
   assert.match(html, /<legend>Maintainers<\/legend>/);
   assert.match(html, /<button[^>]*type="submit">Submit registration<\/button>/);
 });

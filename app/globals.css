@@ -422,6 +422,7 @@ img { max-width: 100%; display: block; }
 }
 .news-title { font-size: 21px; font-weight: 600; line-height: 1.3; letter-spacing: -0.01em; }
 .news-authors { font-size: 14px; line-height: 1.6; color: var(--muted); }
+.community-citation { white-space: pre-wrap; overflow-wrap: anywhere; }
 .news-venue { font-size: 13.5px; line-height: 1.6; font-style: italic; color: var(--muted); }
 .news-arrow {
   align-self: center;

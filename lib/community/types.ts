@@ -1,5 +1,5 @@
 export const contributionTypes = {
-  new_pipeline: "New pipeline",
+  new_pipeline: "New project",
   algorithm_update: "Algorithm update",
   bug_fix: "Bug fix",
   optimization: "Optimization",

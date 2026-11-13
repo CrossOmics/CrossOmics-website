@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRef, useState, type FormEvent } from "react";
-import { registryTypes, type RegistryDraftV2, type RegistryItemV2, type RegistrySubmissionV2, type RegistryType } from "@/lib/community/registry-v2";
+import { registryTypes, registryTypeDescriptions, type RegistryDraftV2, type RegistryItemV2, type RegistrySubmissionV2, type RegistryType } from "@/lib/community/registry-v2";
 import type { Contributor } from "@/lib/community/types";
 import { communityRequest } from "../../client";
 import CreditFields, { emptyCredit, parseCredit, withEmptyCreditFields, type CreditInput } from "../CreditFields";
@@ -15,6 +15,8 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
   const [type, setType] = useState<RegistryType>(initial ? "update" : "origin");
   const [pipelineId, setPipelineId] = useState(initial?.id ?? "");
   const [authors, setAuthors] = useState<CreditInput[]>(() => seedCredits(initial, "authors"));
+  const [authorNames, setAuthorNames] = useState(() => seedCredits(initial, "authors").map((credit) => credit.name).filter(Boolean).join("; "));
+  const [citation, setCitation] = useState(() => initial?.versions.find((version) => version.type === "origin")?.citation ?? "");
   const [maintainers, setMaintainers] = useState<CreditInput[]>(() => seedCredits(initial, "maintainers"));
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
@@ -29,6 +31,8 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
     const item = items.find((candidate) => candidate.id === id);
     setPipelineId(id);
     setAuthors(seedCredits(item, "authors"));
+    setAuthorNames(seedCredits(item, "authors").map((credit) => credit.name).filter(Boolean).join("; "));
+    setCitation(item?.versions.find((version) => version.type === "origin")?.citation ?? "");
     setMaintainers(seedCredits(item, "maintainers"));
   }
 
@@ -42,8 +46,12 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
       type, name: selected?.name ?? value("name"), description: selected?.description ?? value("description"),
       domain: selected?.domain ?? value("domain"), repository: value("repository"), label: value("label"),
       commit: value("commit"),
-      authors: origin ? [{ name: submitter.login, github: submitter.login }] : authors.map(parseCredit),
+      authors: authorNames.split(/[;；]/).map((name) => name.trim()).filter(Boolean).map((name) => {
+        const existing = authors.find((credit) => credit.name.trim() === name);
+        return existing ? parseCredit(existing) : { name };
+      }),
       maintainers: maintainers.map(parseCredit),
+      ...(citation.trim() ? { citation: citation.trim() } : {}),
       ...(origin ? {} : { pipelineId, parentVersionId: value("parentVersionId"), changeSummary: value("changeSummary"),
         ...(value("evidenceUrl").trim() ? { evidenceUrl: value("evidenceUrl").trim() } : {}) })
     };
@@ -80,23 +88,24 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
       <fieldset disabled={pending || Boolean(unavailableMessage)}>
         <legend>Registry details</legend>
         <div className="community-form-grid">
-          <label>Entry type<select name="type" value={type} onChange={(event) => {
+          <label>Registration type<select name="type" value={type} aria-describedby="registration-type-help" onChange={(event) => {
             const next = event.target.value as RegistryType;
             if ((next === "origin") !== origin) select(next === "origin" ? "" : initial?.id ?? "");
             setType(next);
           }}>
             {Object.entries(registryTypes).map(([key, label]) => <option value={key} key={key}>{label}</option>)}
           </select></label>
+          <p id="registration-type-help" className="community-field-wide">{registryTypeDescriptions[type]}</p>
           {origin ? <>
-            <label>Pipeline name<input name="name" required maxLength={120} /></label>
+            <label>Project name<input name="name" required maxLength={120} /></label>
             <label>Domain<select name="domain" required defaultValue="">
               <option value="">Choose a domain</option>
               {domains.map((domain) => <option value={domain} key={domain}>{domain}</option>)}
             </select></label>
             <label className="community-field-wide">Description<textarea name="description" required maxLength={2000} rows={4} /></label>
           </> : <>
-            <label>Pipeline<select required value={pipelineId} onChange={(event) => select(event.target.value)}>
-              <option value="">Choose a pipeline</option>
+            <label>Existing project<select required value={pipelineId} onChange={(event) => select(event.target.value)}>
+              <option value="">Choose a project</option>
               {items.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
             </select></label>
             <label>Based on version<select name="parentVersionId" key={pipelineId} required defaultValue="" onChange={(event) => {
@@ -113,7 +122,12 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
           <label>Version label<input name="label" required maxLength={120} placeholder="v1.0.0" /></label>
           <label>Full commit SHA<input name="commit" required maxLength={40} pattern="[0-9a-fA-F]{40}" spellCheck={false} /></label>
         </div>
-        {!origin && <CreditFields label="Original authors" credits={authors} onChange={(value) => { requestId.current = null; setAuthors(value); }} />}
+        <label>Author names<input name="authorNames" required value={authorNames} maxLength={2600}
+          placeholder="Jane Smith; John Doe" aria-describedby="author-names-help" onChange={(event) => setAuthorNames(event.target.value)} /></label>
+        <p id="author-names-help">Separate names with a semicolon (;). List the original authors, who may be different from the person submitting this form.</p>
+        <label>Citation information (optional)<textarea name="citation" value={citation} maxLength={4000} rows={3}
+          placeholder="Paper or software citation, DOI, URL, or BibTeX" onChange={(event) => setCitation(event.target.value)} /></label>
+        <p>Submitting as @{submitter.login}. Authors and maintainers are recorded separately.</p>
         <CreditFields label="Maintainers" credits={maintainers} onChange={(value) => { requestId.current = null; setMaintainers(value); }} />
       </fieldset>
       <div className="community-form-footer">
