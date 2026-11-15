@@ -1,12 +1,9 @@
 export type NavEntry = { href: string; label: string };
 
 export const NAV: NavEntry[] = [
-  { href: "/about", label: "About" },
-  { href: "/tutorial", label: "Tutorial" },
-  { href: "/research", label: "Research" },
-  { href: "/approach", label: "Approach" },
-  { href: "/roadmap", label: "Roadmap" },
-  { href: "/community", label: "Community" }
+  { href: "/", label: "Registry" },
+  { href: "/community/bounties", label: "Bounties" },
+  { href: "/community/activity", label: "Contributions" }
 ];
 
-export const GITHUB_URL = "https://github.com/CrossOmics/Gardener-Agent";
+export const GITHUB_URL = "https://github.com/CrossOmics/pipeline-registry";

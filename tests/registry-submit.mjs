@@ -8,6 +8,7 @@ import { basename, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
+const gardenerTarget = process.env.GARDENER_TEST_TARGET ?? "https://gardener.example.test";
 let service, web, workspace, base, output = "", catalogUnavailable = false;
 const pipeline = {
   id: "cp_example", name: "Example pipeline", description: "Example analysis", domain: "genomics",
@@ -38,18 +39,21 @@ before(async () => {
       }));
     } else if (request.url?.startsWith("/api/community/v2/catalog")) {
       response.writeHead(catalogUnavailable ? 503 : 200).end(JSON.stringify({ items: [pipeline], generatedAt: "2026-11-13T00:00:00Z" }));
+    } else if (request.url?.startsWith("/api/community/auth/callback")) {
+      response.setHeader("set-cookie", "community_session=fixture; Path=/; HttpOnly; Secure; SameSite=Lax");
+      response.writeHead(307, { location: "https://www.cross-omics.com/community/mine" }).end();
     } else response.writeHead(404).end("{}");
   });
   const serviceUrl = await listen(service);
   // Run the real Next page without touching an existing dev server, build, or .env.
   workspace = await mkdtemp(join(tmpdir(), "community-submit-test-"));
   await cp(root, workspace, { recursive: true, filter: (source) =>
-    !["node_modules", ".next", ".git"].includes(basename(source)) && !basename(source).startsWith(".env") });
+    !["node_modules", ".next", ".git", ".superpowers"].includes(basename(source)) && !basename(source).startsWith(".env") });
   await symlink(join(root, "node_modules"), join(workspace, "node_modules"), "dir");
   const reservation = createServer();
   base = await listen(reservation);
   await new Promise((resolve) => reservation.close(resolve));
-  const env = { ...process.env, COMMUNITY_SERVICE_URL: serviceUrl, NEXT_TELEMETRY_DISABLED: "1" };
+  const env = { ...process.env, COMMUNITY_SERVICE_URL: serviceUrl, GARDENER_WEBSITE_URL: gardenerTarget, NEXT_TELEMETRY_DISABLED: "1" };
   web = spawn(process.execPath, [join(root, "node_modules/next/dist/bin/next"), "dev", "--hostname", "127.0.0.1", "--port", new URL(base).port], { cwd: workspace, env });
   web.stdout.on("data", (chunk) => { output += chunk; });
   web.stderr.on("data", (chunk) => { output += chunk; });
@@ -153,4 +157,60 @@ test("failed legacy authorization callbacks explain the outcome without restorin
   const html = await page("legacy", "?result=denied");
   assert.match(html, /GitHub did not grant public repository access/);
   assert.doesNotMatch(html, /Authorize and open PR|Preview registration/);
+});
+
+test("Community root is the registry and keeps query filters", async () => {
+  const response = await fetch(base + "/?q=example&type=fix");
+  assert.equal(response.status, 200);
+  const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+  assert.match(html, /Community Tracking/);
+  assert.match(html, /Example pipeline/);
+  assert.match(html, /action="\/#registry"/);
+  assert.match(html, /name="q"[^>]*value="example"/);
+  assert.match(html, /value="fix" selected=""/);
+  assert.match(html, /returnTo=%2Fcommunity%3Fq%3Dexample%26type%3Dfix/);
+  assert.doesNotMatch(html, /href="\/tutorial|An Operating System/);
+  if (gardenerTarget) assert.match(html, /href="https:\/\/gardener\.example\.test\/?"/);
+});
+
+test("old Community index redirects to root preserving repeated query parameters", async () => {
+  const response = await fetch(base + "/community?q=example&type=fix&tag=a&tag=b", { redirect: "manual" });
+  assert.equal(response.status, 307);
+  assert.equal(response.headers.get("location"), "/?q=example&type=fix&tag=a&tag=b");
+});
+
+test("migrated product routes redirect to Gardener or clearly report missing configuration", async () => {
+  for (const path of ["/about", "/tutorial", "/tutorial/setup/sphere-node", "/future", "/value"]) {
+    const response = await fetch(base + path + "?tag=a&tag=b", { redirect: "manual" });
+    if (gardenerTarget) {
+      assert.equal(response.status, 307, path);
+      assert.equal(response.headers.get("location"), gardenerTarget + path + "?tag=a&tag=b", path);
+    } else {
+      assert.equal(response.status, 200, path);
+      assert.match(await response.text(), /Gardener website is temporarily unavailable/);
+      assert.equal(response.headers.get("location"), null);
+    }
+  }
+});
+
+test("unmigrated paths and unknown API routes do not redirect", async () => {
+  for (const path of ["/not-migrated", "/tutorial/not-a-page", "/api/community/not-a-route"]) {
+    const response = await fetch(base + path, { redirect: "manual" });
+    assert.equal(response.status, 404, path);
+    assert.equal(response.headers.get("location"), null);
+  }
+});
+
+test("Community proxy still forwards identity and OAuth response headers and limits bodies", async () => {
+  const session = await fetch(base + "/api/community/v1/session", { headers: { cookie: "community_session=ready" } });
+  assert.equal(session.status, 200);
+  assert.equal((await session.json()).contributor.id, "123456");
+  const callback = await fetch(base + "/api/community/auth/callback?state=fixture", { redirect: "manual" });
+  assert.equal(callback.status, 307);
+  assert.equal(callback.headers.get("location"), "https://www.cross-omics.com/community/mine");
+  assert.match(callback.headers.getSetCookie()[0], /community_session=fixture.*HttpOnly.*Secure/);
+  const oversized = await fetch(base + "/api/community/v2/registry/submissions", {
+    method: "POST", headers: { "content-type": "application/json", origin: base }, body: JSON.stringify({data:"a".repeat(17000)})
+  });
+  assert.equal(oversized.status, 413);
 });

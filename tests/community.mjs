@@ -30,7 +30,7 @@ test("publishing and personal history require authentication", async () => {
 test("community tracker is reachable from the existing site", async () => {
   const home = await fetch(base);
   assert.equal(home.status, 200);
-  assert.match(await home.text(), /href="\/community"[^>]*>Explore the community/);
+  assert.match(await home.text(), /Community Tracking/);
   const response = await fetch(`${base}/community`);
   assert.equal(response.status, 200);
   const html = await response.text();

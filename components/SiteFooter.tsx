@@ -1,16 +1,19 @@
 import Link from "next/link";
 import { NAV, GITHUB_URL } from "@/lib/nav";
+import { gardenerWebsiteUrl } from "@/lib/site-links.mjs";
 
 export default function SiteFooter() {
+  const gardener = gardenerWebsiteUrl();
   return (
     <footer className="site-footer">
       <div className="site-footer-inner container">
-        <Link href="/" className="site-logo">CrossOmics</Link>
+        <Link href="/" className="site-logo">CrossOmics Community</Link>
 
         <nav className="site-footer-nav" aria-label="Footer">
           {NAV.map((n) => (
             <Link key={n.href} href={n.href}>{n.label}</Link>
           ))}
+          {gardener && <a href={gardener}>Gardener ↗</a>}
           <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">GitHub</a>
         </nav>
 
