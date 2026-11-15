@@ -2,7 +2,7 @@
 
 The Community website at [www.cross-omics.com](https://www.cross-omics.com/): pipeline discovery, registration and review, bounties, contributions, and shared Community accounts.
 
-Gardener product pages and tutorials are maintained separately in [CrossOmics/Gardener-website](https://github.com/CrossOmics/Gardener-website), with their own Vercel project. The desktop app, execution backend, and agent remain in their existing repositories.
+Gardener product pages and tutorials are maintained separately in [CrossOmics/Gardener-website](https://github.com/CrossOmics/Gardener-website), at [crossomics-gardener.vercel.app](https://crossomics-gardener.vercel.app/), with their own Vercel project. The desktop app, execution backend, and agent remain in their existing repositories.
 
 ## Development
 
@@ -23,7 +23,7 @@ Keep the existing `cross-omics-website` Vercel project and its domain bindings:
 - `cross-omics.com`: existing redirect to www.
 - `COMMUNITY_SERVICE_URL`: existing Community API origin, in Production and Preview.
 - `COMMUNITY_PUBLIC_SERVICE_URL`: public Community API address used by Gardener users.
-- `GARDENER_WEBSITE_URL`: actual HTTPS origin of the separate Gardener Vercel project; set only after the new website is verified.
+- `GARDENER_WEBSITE_URL`: `https://crossomics-gardener.vercel.app`, configured in Production and Preview after verifying the separate Gardener deployment.
 
 Retain existing approved contact settings. Do not copy database URLs, signing secrets, or OAuth client secrets to either frontend. Community authentication continues through `/api/community/auth/...`, so existing provider callback registrations and the backend `COMMUNITY_WEB_ORIGIN` stay unchanged.
 

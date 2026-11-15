@@ -59,7 +59,7 @@
 **Interfaces:** Gardener 实际生产 URL → Community `GARDENER_WEBSITE_URL`；Community 当前服务配置及正式域名归属不变。
 
 - [x] 对两个仓库做一次独立完整 review；重要问题用 RED→GREEN 修复并运行相关完整套件。
-- [ ] 创建公开 Gardener GitHub 仓库、推送已测试版本，导入独立 Vercel 项目；验证首页、教程、资源与外链，记录实际 URL。
+- [x] 创建公开 Gardener GitHub 仓库、推送已测试版本，导入独立 Vercel 项目；验证首页、教程、资源与外链，记录实际 URL。
 - [ ] 配置 Community 的公共 Gardener URL，推送拆站分支和 PR，验证 Vercel 预览及旧链接兼容。
 - [ ] 按用户已授权的整体部署范围，在检查通过且无平台限制时完成切换；若现有保护要求用户合并，提供具体 PR 和剩余操作。
 - [ ] 在真实浏览器检查两个站点，保存截图；不使用生产凭据写入测试数据，报告 OAuth/桌面实际验证边界。
