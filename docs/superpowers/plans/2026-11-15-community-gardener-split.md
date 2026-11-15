@@ -33,11 +33,11 @@
 
 **Interfaces:** 公开 Community 地址固定 `https://www.cross-omics.com/`；官网内部路由保持原路径。新仓只构建官网，没有 Community 代理。
 
-- [ ] 编写 HTTP 测试：主页/教程成功、Community 入口为绝对地址、`/api/community/v1/session` 为 404、教程图片成功；针对原合站运行，确认隔离断言失败。
-- [ ] 提取现有内容、组件与资源，移除 Community 文件和数据库测试依赖，更新外链和站点标识，注明源提交。
-- [ ] 运行 `npm ci`、`npm run build`，启动官网并运行 `npm test`。
+- [x] 编写 HTTP 测试：主页/教程成功、Community 入口为绝对地址、`/api/community/v1/session` 为 404、教程图片成功；针对原合站运行，确认隔离断言失败。
+- [x] 提取现有内容、组件与资源，移除 Community 文件和数据库测试依赖，更新外链和站点标识，注明源提交。
+- [x] 运行 `npm ci`、`npm run build`，启动官网并运行 `npm test`。
   Expected: 构建成功，官网及隔离测试全部通过。
-- [ ] 提交新仓初始版本；保留路径和源 SHA 供后续 review。
+- [x] 提交新仓初始版本；保留路径和源 SHA 供后续 review。
 
 ### Task 2: Convert the original website to Community
 
@@ -45,12 +45,12 @@
 
 **Interfaces:** `gardenerWebsiteUrl(value)` 返回可信 HTTPS origin 或 null；`legacyGardenerUrl(segments,query,value)` 仅为已迁产品路径产生外站目标，拒绝本站和非法地址。`CommunityRegistry` 提供根首页内容，既有子页继续使用 CommunityLayout。
 
-- [ ] 编写测试并观察失败：根 Registry、旧 Community 重定向参数、旧产品嵌套路由和查询、缺配置提示、非法/本站目标、代理限制保持。
-- [ ] 实现根首页与共用 Registry 内容，保留子路由；改导航/元信息，加入已迁路径的安全临时重定向和无配置状态。
-- [ ] 更新测试中原 Gardener 首页预期为 Community 首页；保留注册、OAuth 和既有 API 的回归断言。
-- [ ] 运行 `npm run test:registry-submit`、`node --test tests/site-links.mjs`、`npm run build` 和本地 `npm run test:community`。
+- [x] 编写测试并观察失败：根 Registry、旧 Community 重定向参数、旧产品嵌套路由和查询、缺配置提示、非法/本站目标、代理限制保持。
+- [x] 实现根首页与共用 Registry 内容，保留子路由；改导航/元信息，加入已迁路径的安全临时重定向和无配置状态。
+- [x] 更新测试中原 Gardener 首页预期为 Community 首页；保留注册、OAuth 和既有 API 的回归断言。
+- [x] 运行 `npm run test:registry-submit`、`node --test tests/site-links.mjs`、`npm run build` 和本地 `npm run test:community`。
   Expected: 所有已配置检查通过，明确列出缺少可选 OAuth/数据库夹具的 skip。
-- [ ] 提交 Community 拆站实现。
+- [x] 提交 Community 拆站实现。
 
 ### Task 3: Review, deploy Gardener, and deliver the Community cutover
 
@@ -58,7 +58,7 @@
 
 **Interfaces:** Gardener 实际生产 URL → Community `GARDENER_WEBSITE_URL`；Community 当前服务配置及正式域名归属不变。
 
-- [ ] 对两个仓库做一次独立完整 review；重要问题用 RED→GREEN 修复并运行相关完整套件。
+- [x] 对两个仓库做一次独立完整 review；重要问题用 RED→GREEN 修复并运行相关完整套件。
 - [ ] 创建公开 Gardener GitHub 仓库、推送已测试版本，导入独立 Vercel 项目；验证首页、教程、资源与外链，记录实际 URL。
 - [ ] 配置 Community 的公共 Gardener URL，推送拆站分支和 PR，验证 Vercel 预览及旧链接兼容。
 - [ ] 按用户已授权的整体部署范围，在检查通过且无平台限制时完成切换；若现有保护要求用户合并，提供具体 PR 和剩余操作。
