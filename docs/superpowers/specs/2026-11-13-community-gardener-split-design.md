@@ -1,6 +1,6 @@
 # Community 与 Gardener 官网拆分
 
-状态：方案待用户确认；已确认采用两个独立前端仓库、两个 Vercel 项目。
+状态：2026-11-15 用户确认按设计直接实施；采用两个独立前端仓库、两个 Vercel 项目。
 
 ## 目的与边界
 
@@ -75,7 +75,7 @@
 
 - 两个仓库各自 `npm ci` / `npm run build` 成功，分别由独立 Vercel 项目构建。
 - Community 首页显示真实目录或明确错误状态；筛选、详情、悬赏、贡献、个人历史、提交和审核路径可访问。
-- 保留 Origin / Improved / Update / Fix 及 Origin 隐藏原作者、其他类型必填原作者的行为。
+- 保留最新 main 已合入的四种注册类型，以及作者、引用信息和文案说明；拆站不改写注册表单逻辑。
 - `/community?q=...` 正确进入根目录并保留筛选；现有 Community 子页和 OAuth callback 路径不改变。
 - Gardener 官网包含现有产品内容、教程和静态资源，Community 链接指向主站，产品内部链接留在 Gardener。
 - Community 上的旧产品路径正确跳到新站；没有 Community/Gardener 相互循环跳转。
