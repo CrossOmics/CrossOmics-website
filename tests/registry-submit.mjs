@@ -31,12 +31,15 @@ before(async () => {
     if (request.url === "/api/community/v1/session") {
       if (mode === "session-error") { response.writeHead(503).end("{}"); return; }
       response.end(JSON.stringify({
-        contributor: mode === "anonymous" ? null : { id: mode === "google" ? "google:test-user" : "123456", login: "test-user" },
-        signInAvailable: true, signInProviders: ["github", "google", "apple"],
+        contributor: ["anonymous", "login-old", "login-none"].includes(mode) ? null : { id: ["google", "apple"].includes(mode) ? mode + ":" + "a".repeat(64) : "123456", login: "test-user" },
+        ...(mode === "login-old" ? {} : { sessionDurationDays: 30 }),
+        signInAvailable: mode !== "login-none", signInProviders: mode === "login-none" ? [] : ["github", "google", "apple"],
         registrySubmissionAvailable: true, registryV2Enabled: mode !== "legacy",
         registryV2Available: !["legacy", "unavailable"].includes(mode),
         canManageRegistry: false, desktopAuthAvailable: true, canPostBounties: false, canManageBounties: false
       }));
+    } else if (request.url?.startsWith("/api/community/v2/registry/submissions")) {
+      response.end(JSON.stringify({ submissions: [] }));
     } else if (request.url?.startsWith("/api/community/v2/catalog")) {
       response.writeHead(catalogUnavailable ? 503 : 200).end(JSON.stringify({ items: [pipeline], generatedAt: "2026-11-13T00:00:00Z" }));
     } else if (request.url?.startsWith("/api/community/auth/callback")) {
@@ -136,11 +139,55 @@ test("catalog failure disables the form instead of offering an empty substitute 
   } finally { catalogUnavailable = false; }
 });
 
-test("Google users must authenticate with GitHub while preserving the target pipeline", async () => {
-  const html = await page("google", "?pipelineId=cp_example");
-  assert.match(html, /provider=github/);
+test("Google and Apple can submit projects and read history without switching accounts", async () => {
+  for (const provider of ["google", "apple"]) {
+    const html = await page(provider, "?pipelineId=cp_example");
+    entryTypes(html);
+    assert.match(html, /value="cp_example" selected=""/);
+    assert.match(html, /Submit registration/);
+    assert.doesNotMatch(html, /provider=github|Sign in with GitHub/);
+    const history = await fetch(base + "/community/registry/submissions", { headers: { cookie: "community_session=" + provider } });
+    assert.equal(history.status, 200);
+    assert.match(await history.text(), /No submissions yet/);
+  }
+});
+
+test("anonymous registration uses the dedicated sign-in page and keeps the target project", async () => {
+  const response = await fetch(base + "/community/registry/submit?pipelineId=cp_example", { redirect: "manual" });
+  assert.equal(response.status, 307);
+  assert.equal(response.headers.get("location"), "/community/sign-in?returnTo=%2Fcommunity%2Fregistry%2Fsubmit%3FpipelineId%3Dcp_example");
+});
+
+async function loginPage(mode = "anonymous", query = "") {
+  return fetch(base + "/community/sign-in" + query, { headers: { cookie: "community_session=" + mode }, redirect: "manual" });
+}
+
+test("dedicated login has three provider actions and duration without the Community toolbar", async () => {
+  const response = await loginPage("anonymous", "?returnTo=%2Fcommunity%2Fregistry%2Fsubmit%3FpipelineId%3Dcp_example");
+  assert.equal(response.status, 200);
+  const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+  assert.ok(html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").includes("Sign in to Community"));
+  assert.match(html, /30 days/);
+  for (const provider of ["github", "google", "apple"]) {
+    assert.match(html, new RegExp("provider=" + provider));
+  }
   assert.match(html, /returnTo=%2Fcommunity%2Fregistry%2Fsubmit%3FpipelineId%3Dcp_example/);
-  assert.doesNotMatch(html, /<form/);
+  assert.doesNotMatch(html, /aria-label="Community"|Log a contribution|Choose a sign-in method/);
+});
+
+test("login handles old backend duration, unavailable providers and expired attempts", async () => {
+  assert.match(await (await loginPage("login-old")).text(), /7 days/);
+  assert.match(await (await loginPage("login-none")).text(), /Sign-in is unavailable/);
+  assert.match(await (await loginPage("anonymous", "?login=expired")).text(), /expired/);
+  assert.doesNotMatch(await (await loginPage("session-error")).text(), /provider=github|provider=google|provider=apple/);
+});
+
+test("already signed in users return safely without repeating OAuth", async () => {
+  const good = await loginPage("google", "?returnTo=%2Fcommunity%2Fregistry%2Fsubmit%3FpipelineId%3Dcp_example");
+  assert.equal(good.status, 307);
+  assert.equal(good.headers.get("location"), "/community/registry/submit?pipelineId=cp_example");
+  const bad = await loginPage("apple", "?returnTo=https%3A%2F%2Fevil.example");
+  assert.equal(bad.headers.get("location"), "/community/mine");
 });
 
 test("session failure does not expose a submission form", async () => {

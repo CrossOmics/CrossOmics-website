@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { communitySignInPath } from "@/lib/community/return-path";
 import Link from "next/link";
 import { communitySession, registryV2Submissions } from "@/lib/community/service";
 import { registryTypes } from "@/lib/community/registry-v2";
@@ -6,16 +8,16 @@ import RegistryCredits from "../../RegistryCredits";
 import ReviewForm from "./ReviewForm";
 
 const path = "/community/registry/submissions";
-const login = "/api/community/auth/login?" + new URLSearchParams({ provider: "github", returnTo: path });
 const statuses = { submitted: "Awaiting review", published: "Published", rejected: "Rejected" };
 
 export default async function RegistrySubmissions({ searchParams }: { searchParams: Promise<{ all?: string }> }) {
   const [session, { all: filter }] = await Promise.all([communitySession(), searchParams]);
-  const github = /^[1-9]\d{0,19}$/.test(session?.contributor?.id ?? "");
+  if (session && !session.contributor) redirect(communitySignInPath(path + (filter === "1" ? "?all=1" : "")));
+  const signedIn = Boolean(session?.contributor);
   const available = session?.registryV2Available === true;
   const admin = session?.canManageRegistry === true;
   const all = admin && filter === "1";
-  const history = github && available ? await registryV2Submissions(all) : null;
+  const history = signedIn && available ? await registryV2Submissions(all) : null;
   return (
     <>
       <header className="community-heading">
@@ -29,7 +31,6 @@ export default async function RegistrySubmissions({ searchParams }: { searchPara
         </div>}
       </header>
       {!available ? <p className="community-notice">The registry submission history is unavailable.</p> :
-        !github ? <a className="community-primary" href={login}>Sign in with GitHub</a> :
           !history ? <p className="community-notice" role="status">Submissions are temporarily unavailable.</p> :
             !history.submissions.length ? <p className="community-notice">No submissions yet.</p> :
               <ul className="community-record-list">

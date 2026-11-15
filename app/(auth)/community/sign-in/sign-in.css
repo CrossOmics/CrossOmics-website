@@ -1,0 +1,45 @@
+.account-page { min-height: 100vh; display: flex; flex-direction: column; color: #182e4a; }
+.account-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 90px; }
+.account-brand { font-size: 23px; font-weight: 650; letter-spacing: -.045em; }
+.account-brand span { font-size: 15px; font-weight: 450; letter-spacing: -.01em; margin-left: 8px; color: #586b80; }
+.account-back { font-size: 14px; color: #4f6074; }
+.account-back:hover, .account-footer a:hover { color: #0b57d0; text-decoration: underline; text-underline-offset: 4px; }
+.account-main { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 430px); align-items: center; gap: clamp(40px, 7vw, 100px); padding-block: 56px 80px; }
+.account-intro h1 { font-size: clamp(44px, 5.4vw, 72px); font-weight: 620; line-height: 1.07; letter-spacing: -.06em; }
+.account-intro > p { max-width: 35ch; font-size: 19px; line-height: 1.55; margin-top: 24px; color: #4f6074; }
+.account-benefits { display: grid; gap: 20px; list-style: none; margin-top: 36px; }
+.account-benefits li { display: grid; padding-left: 18px; border-left: 2px solid #d8e2ee; gap: 2px; }
+.account-benefits strong { font-size: 15px; font-weight: 600; }
+.account-benefits span { font-size: 14px; color: #4f6074; }
+.account-lineage { display: flex; align-items: center; max-width: 380px; margin-top: 40px; color: #61748c; font-size: 12px; }
+.account-lineage span { padding: 6px 12px; border: 1px solid #d8e2ee; border-radius: 5px; }
+.account-lineage span:last-child { border-color: #aac6ef; color: #0b57d0; background: #eff5fc; }
+.account-lineage i { flex: 1; height: 1px; background: #b8c9dc; min-width: 10px; }
+.account-panel-wrap { min-width: 0; }
+.account-panel { background: white; padding: clamp(26px, 3vw, 38px); border: 1px solid #d8e2ee; border-radius: 16px; box-shadow: 0 12px 42px #182e4a08; }
+.account-panel h2 { font-size: 26px; letter-spacing: -.04em; line-height: 1.25; font-weight: 600; }
+.account-panel-description { margin-top: 8px; font-size: 15px; color: #4f6074; }
+.account-providers { display: grid; gap: 12px; margin-top: 28px; }
+.account-provider { min-height: 52px; display: grid; grid-template-columns: 22px 1fr 22px; gap: 12px; align-items: center; padding: 12px 16px; border: 1px solid #c6d3e2; border-radius: 8px; font-size: 15px; font-weight: 550; text-align: center; }
+.account-provider:hover { border-color: #7598c5; background: #f5f8fc; }
+.account-provider svg { width: 22px; height: 22px; }
+.account-provider span { grid-column: 2; }
+.account-retention { display: flex; align-items: flex-start; gap: 10px; border-top: 1px solid #e6ecf3; margin-top: 28px; padding-top: 22px; color: #586b80; font-size: 12px; line-height: 1.65; }
+.account-retention svg { flex: 0 0 18px; width: 18px; height: 18px; margin-top: 2px; }
+.account-authorization-note { max-width: 45ch; margin: 18px auto 0; text-align: center; color: #61748c; font-size: 12px; line-height: 1.7; padding-inline: 12px; }
+.account-error { margin-top: 18px; padding: 12px 14px; background: #fff5ec; color: #874319; border: 1px solid #efd4bc; border-radius: 8px; font-size: 14px; }
+.account-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; padding-block: 22px; color: #61748c; font-size: 12px; }
+@media (max-width: 760px) {
+  .account-header { min-height: 76px; }
+  .account-brand { font-size: 21px; }
+  .account-brand span { display: block; margin: 0; font-size: 12px; }
+  .account-back { font-size: 12px; }
+  .account-main { grid-template-columns: minmax(0, 1fr); gap: 30px; max-width: 500px; padding-block: 28px 48px; }
+  .account-intro h1 { font-size: 42px; }
+  .account-intro h1 br { display: none; }
+  .account-intro h1 br::after { content: ' '; }
+  .account-intro > p { margin-top: 16px; font-size: 16px; }
+  .account-benefits, .account-lineage { display: none; }
+  .account-panel { padding: 26px; }
+  .account-provider { padding-inline: 12px; font-size: 14px; }
+}

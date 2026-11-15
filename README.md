@@ -56,3 +56,11 @@ COMMUNITY_TEST_URL=http://localhost:3000 COMMUNITY_TEST_SERVICE_URL=http://local
 ```
 
 Optional database and OAuth cases require their existing `COMMUNITY_TEST_*` fixtures. Real provider/desktop sign-in should also be checked by the account owner after deployment.
+
+## Community sign-in
+
+`/community/sign-in` is a standalone login page for Google, Apple and GitHub. The signed HttpOnly cookie persists across page visits and browser restarts until its expiry or sign-out. The backend sets new sessions to 30 days and reports `sessionDurationDays`; an older backend without that field displays the previous 7-day duration.
+
+Any supported Community identity can register a project and view its own submissions. Registry v2 uses site moderation and does not create GitHub PRs. A GitHub write operation requires separate operation-specific authorization and does not replace the Community identity or merge provider accounts.
+
+Deploy the paired backend change and run its `db/002-registry-community-identity.sql` migration before deploying this frontend. Use the backend's `scripts/apply-community-login.py` and deployment commands in its README. Existing OAuth client settings and callback URLs stay the same. Real provider sign-in and browser-restart persistence should be smoke-tested by an account owner after deployment.

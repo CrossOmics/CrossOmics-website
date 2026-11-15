@@ -31,6 +31,7 @@ export const communitySession = cache(async function () {
   const session = await communityData<{
     contributor: Contributor | null;
     signInAvailable: boolean;
+    sessionDurationDays?: number;
     signInProviders?: SignInProvider[];
     registrySubmissionAvailable?: boolean;
     registryV2Enabled?: boolean;
@@ -44,6 +45,8 @@ export const communitySession = cache(async function () {
   const fallback: SignInProvider[] = session.signInAvailable ? ["github"] : [];
   return {
     contributor: session.contributor,
+    sessionDurationDays: Number.isInteger(session.sessionDurationDays) && session.sessionDurationDays! >= 1 && session.sessionDurationDays! <= 90
+      ? session.sessionDurationDays! : 7,
     providers: session.signInProviders ?? fallback,
     registrySubmissionAvailable: session.registrySubmissionAvailable === true,
     registryV2Enabled: (session.registryV2Enabled ?? session.registryV2Available) === true,

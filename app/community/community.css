@@ -295,11 +295,6 @@
   white-space: nowrap;
 }
 
-.community-sign-in { width: min(100%, 600px); margin: 32px auto; }
-.community-sign-in > .community-link { display: inline-block; margin-top: 16px; }
-.community-sign-in .community-actions { margin-top: 14px; }
-.community-sign-in .community-heading { padding-bottom: 20px; }
-
 .community-bounty-list { border-top: 1px solid var(--community-border); }
 .community-bounty-row {
   display: grid;
