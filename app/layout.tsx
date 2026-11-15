@@ -11,8 +11,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "CrossOmics — Gardener",
-  description: "An AI co-pilot for single-cell RNA sequencing analysis. Local-first, lineage-tracked, and scalable from laptop to HPC."
+  title: "CrossOmics Community",
+  description: "Discover community pipelines, submit improvements, find bounties, and track contributions to computational biology."
 };
 
 // Matches `color-scheme: only light` in globals.css — keeps browser-level dark mode

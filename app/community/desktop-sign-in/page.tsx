@@ -33,7 +33,7 @@ export default async function DesktopSignIn({ searchParams }: { searchParams: Pr
       ) : (
         <div className="community-actions"><a className="community-primary" href={login}>Sign in with GitHub</a></div>
       )}
-      <Link className="community-link" href="/community">Back to Community</Link>
+      <Link className="community-link" href="/">Back to Community</Link>
     </>
   );
 }

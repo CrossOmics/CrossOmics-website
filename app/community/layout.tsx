@@ -26,7 +26,7 @@ export default async function CommunityLayout({ children }: { children: ReactNod
     <div className="page">
       <SiteHeader />
       <main className="community-main container">
-        <nav className="community-breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><span aria-hidden>/</span><Link href="/community">Community Tracking</Link></nav>
+        <nav className="community-breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><span aria-hidden>/</span><Link href="/">Community Tracking</Link></nav>
         <CommunityNav signedIn={Boolean(session?.contributor)} />
         {children}
         {(discord || slack || mailto) && (

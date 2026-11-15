@@ -15,7 +15,7 @@ export default async function CommunitySignInPage({ searchParams }: { searchPara
         <p>Join the discussion, record your work, and see your contribution history across Web and Gardener.</p>
       </header>
       <SignIn returnTo={returnTo} error={params.login} providers={session?.providers} />
-      <Link href="/community" className="community-link">Browse the registry</Link>
+      <Link href="/" className="community-link">Browse the registry</Link>
     </div>
   );
 }

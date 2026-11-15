@@ -5,7 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { communitySignInPath } from "@/lib/community/return-path";
 
 const links = [
-  { href: "/community", label: "Registry" },
+  { href: "/", label: "Registry" },
   { href: "/community/bounties", label: "Bounties" },
   { href: "/community/activity", label: "Contributions" }
 ];
@@ -14,12 +14,14 @@ export default function CommunityNav({ signedIn }: { signedIn: boolean }) {
   const path = usePathname();
   const query = useSearchParams();
   const signInPage = path === "/community/sign-in";
-  const returnTo = query.size ? `${path}?${query.toString()}` : path;
+  // The old index remains an allowed OAuth return path and redirects to root.
+  const returnPath = path === "/" ? "/community" : path;
+  const returnTo = query.size ? `${returnPath}?${query.toString()}` : returnPath;
   return (
     <nav className="community-nav" aria-label="Community">
       <div className="community-nav-links">
         {links.map(({ href, label }) => {
-          const active = path === href || (href === "/community" ? path.startsWith("/community/catalog/") : path.startsWith(`${href}/`));
+          const active = path === href || (href === "/" ? path.startsWith("/community/catalog/") : path.startsWith(`${href}/`));
           return <Link key={href} href={href} aria-current={active ? "page" : undefined}>{label}</Link>;
         })}
       </div>

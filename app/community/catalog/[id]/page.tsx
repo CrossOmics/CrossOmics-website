@@ -19,7 +19,7 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
   return (
     <>
       <header className="community-heading">
-        <Link href="/community#registry" className="community-link">← Back to registry</Link>
+        <Link href="/#registry" className="community-link">← Back to registry</Link>
         <span className="community-tag">{v2 ? "Project" : item.kind === "workflow" ? "Workflow" : "Tool"}</span>
         <h1>{item.name}</h1>
         <p>{item.description}</p>

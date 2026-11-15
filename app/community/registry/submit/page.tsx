@@ -38,7 +38,7 @@ export default async function RegistrySubmitPage({ searchParams }: {
   return (
     <>
       <header className="community-heading">
-        <Link href="/community#registry" className="community-link">← Back to the registry</Link>
+        <Link href="/#registry" className="community-link">← Back to the registry</Link>
         <h1>Register a project</h1>
         <p>Register a new pipeline, tool, or method, or submit a new version of an existing project. CrossOmics administrators review submissions before publication.</p>
         {v2 && signedInWithGitHub && <div className="community-actions">
