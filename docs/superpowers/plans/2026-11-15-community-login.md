@@ -52,5 +52,5 @@
 
 - [x] Fresh independent review of whole change, fix Important/Critical findings with regression tests.
 - [x] Verify migration rerun and existing data preserved, provider isolation, current callbacks and deployment commands.
-- [ ] Push both branches and create PRs with validation and deployment ordering. Do not claim backend production deployment or real provider sign-in was tested.
-- [ ] Save browser screenshots and deliver exact migration/deployment commands and PR links.
+- [x] Push both branches and create PRs with validation and deployment ordering. Do not claim backend production deployment or real provider sign-in was tested.
+- [x] Save browser screenshots and deliver exact migration/deployment commands and PR links.

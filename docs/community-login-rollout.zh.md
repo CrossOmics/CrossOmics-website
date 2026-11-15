@@ -9,6 +9,8 @@
 - 旧版PR API仅在实际创建PR时单独请求GitHub授权。授权不会替换原Community会话；令牌只在请求中使用并尝试撤销，不永久保存。
 - 不按邮箱自动合并账号。主动退出Google后改用GitHub登录，仍是另一个身份；一次PR授权不是账号合并。
 
+配套PR：[后端 #6](https://github.com/CrossOmics/CrossOmics-website-backend/pull/6)、[前端 #26](https://github.com/CrossOmics/CrossOmics-website/pull/26)。
+
 ## 部署顺序
 
 先合入后端PR，再在Droplet执行迁移并更新后端。确认会话接口返回 `sessionDurationDays: 30` 后，再合入前端PR，由现有Vercel项目部署。无需修改域名、OAuth callback、Google/Apple/GitHub客户端凭据或Vercel环境变量。
