@@ -223,7 +223,11 @@ test("Community root is the registry and keeps query filters", async () => {
   assert.match(html, /value="fix" selected=""/);
   assert.match(html, /returnTo=%2Fcommunity%3Fq%3Dexample%26type%3Dfix/);
   assert.doesNotMatch(html, /href="\/tutorial|An Operating System/);
-  if (gardenerTarget) assert.match(html, /href="https:\/\/gardener\.example\.test\/?"/);
+  const header = html.match(/<header\b[^>]*>[\s\S]*?<\/header>/)?.[0];
+  const footer = html.match(/<footer\b[^>]*>[\s\S]*?<\/footer>/)?.[0];
+  assert.ok(header);
+  assert.doesNotMatch(header, /Gardener/);
+  if (gardenerTarget) assert.match(footer, /href="https:\/\/gardener\.example\.test\/?"/);
 });
 
 test("old Community index redirects to root preserving repeated query parameters", async () => {
