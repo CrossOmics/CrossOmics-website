@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { registryTypes } from "@/lib/community/registry-v2";
 import RegistryCredits from "../../RegistryCredits";
 import { communityCatalogItem, communitySession, registryV2Item } from "@/lib/community/service";
+import EditProjectMetadata from "./EditProjectMetadata";
+import RegistryMetadata from "../../RegistryMetadata";
 import WithdrawVersion from "./WithdrawVersion";
 import CorrectVersionCredits from "./CorrectVersionCredits";
 import { httpsUrl } from "@/lib/community/https-url";
@@ -33,17 +35,15 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
       <dl className="community-detail-grid">
         <div><dt>Domain</dt><dd>{item.domain}</dd></div>
         <div><dt>Status</dt><dd>{item.status}</dd></div>
-        <div><dt>Modalities</dt><dd>{item.modalities.join(", ") || "Unspecified"}</dd></div>
+        {item.modalities?.some(value => value.trim()) && <div><dt>Modalities</dt><dd>{item.modalities.join(", ")}</dd></div>}
         <div><dt>Recent citations</dt><dd>{citations == null ? "Data unavailable" : citations.toLocaleString("en-US")}</dd></div>
       </dl>
-      <section className="community-section">
-        <h2>Algorithms and data</h2>
-        <dl className="community-detail-grid">
-          <div><dt>Algorithms</dt><dd>{item.algorithms.join(", ") || "Unspecified"}</dd></div>
-          <div><dt>Inputs</dt><dd>{item.inputs.join(", ") || "Unspecified"}</dd></div>
-          <div><dt>Outputs</dt><dd>{item.outputs.join(", ") || "Unspecified"}</dd></div>
-        </dl>
-      </section>
+      {[item.algorithms, item.inputs, item.outputs].some(values => values?.some(value => value.trim())) &&
+        <section className="community-section">
+          <h2>Algorithms and data</h2>
+          <RegistryMetadata metadata={{ algorithms: item.algorithms, inputs: item.inputs, outputs: item.outputs }} />
+        </section>}
+      {v2 && session?.canManageRegistry && <EditProjectMetadata pipelineId={item.id} metadata={item} />}
       <section className="community-section">
         <h2>Versions</h2>
         <ul className="community-record-list">

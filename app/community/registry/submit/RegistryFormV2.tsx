@@ -5,6 +5,7 @@ import { useRef, useState, type FormEvent } from "react";
 import { registryTypes, registryTypeDescriptions, type RegistryDraftV2, type RegistryItemV2, type RegistrySubmissionV2, type RegistryType } from "@/lib/community/registry-v2";
 import type { Contributor } from "@/lib/community/types";
 import { communityRequest } from "../../client";
+import RegistryMetadataFields, { readRegistryMetadata, changedRegistryMetadata } from "../RegistryMetadataFields";
 import CreditFields, { emptyCredit, parseCredit, withEmptyCreditFields, type CreditInput } from "../CreditFields";
 
 const domains = ["transcriptomics", "epigenomics", "genomics", "proteomics", "metagenomics", "multi-omics", "imaging"];
@@ -46,6 +47,7 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
       type, name: selected?.name ?? value("name"), description: selected?.description ?? value("description"),
       domain: selected?.domain ?? value("domain"), repository: value("repository"), label: value("label"),
       commit: value("commit"),
+      ...(selected ? changedRegistryMetadata(readRegistryMetadata(form), selected) : readRegistryMetadata(form)),
       authors: authorNames.split(/[;；]/).map((name) => name.trim()).filter(Boolean).map((name) => {
         const existing = authors.find((credit) => credit.name.trim() === name);
         return existing ? parseCredit(existing) : { name };
@@ -122,6 +124,7 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
           <label>Version label<input name="label" required maxLength={120} placeholder="v1.0.0" /></label>
           <label>Full commit SHA<input name="commit" required maxLength={40} pattern="[0-9a-fA-F]{40}" spellCheck={false} /></label>
         </div>
+        <RegistryMetadataFields key={origin ? "origin" : pipelineId} metadata={selected} />
         <label>Author names<input name="authorNames" required value={authorNames} maxLength={2600}
           placeholder="Jane Smith; John Doe" aria-describedby="author-names-help" onChange={(event) => setAuthorNames(event.target.value)} /></label>
         <p id="author-names-help">Separate names with a semicolon (;). List the original authors, who may be different from the person submitting this form.</p>

@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const gardenerTarget = process.env.GARDENER_TEST_TARGET ?? "https://gardener.example.test";
-let service, web, workspace, base, output = "", catalogUnavailable = false;
+let service, web, workspace, base, output = "", catalogUnavailable = false, detailMetadata = false;
 const pipeline = {
   id: "cp_example", name: "Example pipeline", description: "Example analysis", domain: "genomics",
   status: "active", modalities: [], algorithms: [], keywords: [], inputs: [], outputs: [],
@@ -36,12 +36,16 @@ before(async () => {
         signInAvailable: mode !== "login-none", signInProviders: mode === "login-none" ? [] : ["github", "google", "apple"],
         registrySubmissionAvailable: true, registryV2Enabled: mode !== "legacy",
         registryV2Available: !["legacy", "unavailable"].includes(mode),
-        canManageRegistry: false, desktopAuthAvailable: true, canPostBounties: false, canManageBounties: false
+        canManageRegistry: mode === "admin", desktopAuthAvailable: true, canPostBounties: false, canManageBounties: false
       }));
     } else if (request.url?.startsWith("/api/community/v1/bounties")) {
       response.end(JSON.stringify({ items: [], page: 1, hasMore: false }));
     } else if (request.url?.startsWith("/api/community/v2/registry/submissions")) {
       response.end(JSON.stringify({ submissions: [] }));
+    } else if (request.url?.match(/^\/api\/community\/v2\/catalog\/cp_example$/)) {
+      response.end(JSON.stringify({ item: detailMetadata ? { ...pipeline, modalities: ["RNA-seq"], inputs: ["FASTQ"] } : pipeline }));
+    } else if (request.url?.endsWith("/metadata")) {
+      response.end(JSON.stringify({ updated: true }));
     } else if (request.url?.startsWith("/api/community/v2/catalog")) {
       response.writeHead(catalogUnavailable ? 503 : 200).end(JSON.stringify({ items: [pipeline], generatedAt: "2026-11-13T00:00:00Z" }));
     } else if (request.url?.startsWith("/api/community/auth/callback")) {
@@ -285,4 +289,37 @@ test("all authenticated accounts see the bounty form without contributions or ed
     assert.match(html, /<button[^>]*type="submit"[^>]*>Post bounty/);
     assert.doesNotMatch(html, /Record a contribution|editor access to post/);
   }
+});
+
+
+test("project registration offers optional metadata with examples", async () => {
+  const html = await page("ready");
+  for (const field of ["modalities", "algorithms", "inputs", "outputs"]) {
+    assert.match(html, new RegExp('name="' + field + '"'));
+    assert.doesNotMatch(html, new RegExp('name="' + field + '"[^>]*required'));
+  }
+});
+
+test("project details hide empty metadata and show only populated fields", async () => {
+  for (const mode of ["ready", "metadata", "admin"]) {
+    detailMetadata = mode === "metadata";
+    const response = await fetch(base + "/community/catalog/cp_example", { headers: { cookie: "community_session=" + mode } });
+    assert.equal(response.status, 200);
+    const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+    assert.doesNotMatch(html, /Unspecified/);
+    assert.equal(html.includes("<h2>Algorithms and data</h2>"), mode === "metadata");
+    assert.equal(html.includes("<dt>Modalities</dt>"), mode === "metadata");
+    assert.equal(html.includes("<dt>Inputs</dt>"), mode === "metadata");
+    assert.doesNotMatch(html, /<dt>Algorithms<\/dt>|<dt>Outputs<\/dt>/);
+    assert.equal(html.includes("Edit project metadata"), mode === "admin");
+  }
+});
+
+test("project metadata correction is forwarded by the authenticated proxy", async () => {
+  const response = await fetch(base + "/api/community/v2/catalog/cp_example/metadata", {
+    method: "POST", headers: { "content-type": "application/json", origin: base, cookie: "community_session=admin" },
+    body: JSON.stringify({ modalities: [], algorithms: [], inputs: [], outputs: [], reason: "Manual verified" })
+  });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).updated, true);
 });
