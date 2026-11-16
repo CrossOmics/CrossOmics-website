@@ -193,7 +193,15 @@ test("already signed in users return safely without repeating OAuth", async () =
   assert.equal(good.status, 307);
   assert.equal(good.headers.get("location"), "/community/registry/submit?pipelineId=cp_example");
   const bad = await loginPage("apple", "?returnTo=https%3A%2F%2Fevil.example");
-  assert.equal(bad.headers.get("location"), "/community/mine");
+  assert.equal(bad.headers.get("location"), "/community");
+  const direct = await loginPage("google");
+  assert.equal(direct.status, 307);
+  assert.equal(direct.headers.get("location"), "/community");
+  const home = await fetch(base + "/community/sign-in", { headers: { cookie: "community_session=google" } });
+  assert.equal(new URL(home.url).pathname, "/");
+  const anonymous = await loginPage();
+  const html = (await anonymous.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+  assert.equal((html.match(/returnTo=%2Fcommunity&amp;provider=/g) ?? []).length, 3);
 });
 
 test("session failure does not expose a submission form", async () => {
@@ -221,7 +229,7 @@ test("Community root is the registry and keeps query filters", async () => {
   assert.match(html, /action="\/#registry"/);
   assert.match(html, /name="q"[^>]*value="example"/);
   assert.match(html, /value="fix" selected=""/);
-  assert.match(html, /returnTo=%2Fcommunity%3Fq%3Dexample%26type%3Dfix/);
+  assert.match(html, /href="\/community\/sign-in\?returnTo=%2Fcommunity"/);
   assert.doesNotMatch(html, /href="\/tutorial|An Operating System/);
   const header = html.match(/<header\b[^>]*>[\s\S]*?<\/header>/)?.[0];
   const footer = html.match(/<footer\b[^>]*>[\s\S]*?<\/footer>/)?.[0];

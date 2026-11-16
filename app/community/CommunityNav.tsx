@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { communitySignInPath } from "@/lib/community/return-path";
 
 const links = [
@@ -12,11 +12,8 @@ const links = [
 
 export default function CommunityNav({ signedIn }: { signedIn: boolean }) {
   const path = usePathname();
-  const query = useSearchParams();
-  const signInPage = path === "/community/sign-in";
-  // The old index remains an allowed OAuth return path and redirects to root.
-  const returnPath = path === "/" ? "/community" : path;
-  const returnTo = query.size ? `${returnPath}?${query.toString()}` : returnPath;
+  // This allowed OAuth return path redirects to the Community home at /.
+  const signInHref = communitySignInPath("/community");
   return (
     <nav className="community-nav" aria-label="Community">
       <div className="community-nav-links">
@@ -29,7 +26,7 @@ export default function CommunityNav({ signedIn }: { signedIn: boolean }) {
         {signedIn ? (
           <Link href="/community/mine" className="community-secondary" aria-current={path === "/community/mine" ? "page" : undefined}>My history</Link>
         ) : (
-          <Link href={signInPage ? returnTo : communitySignInPath(returnTo)} className="community-secondary" aria-current={signInPage ? "page" : undefined}>Sign in</Link>
+          <Link href={signInHref} className="community-secondary">Sign in</Link>
         )}
         <Link href="/community/submit" className="community-primary" aria-current={path === "/community/submit" ? "page" : undefined}>
           <span aria-hidden>＋</span> Log a contribution
