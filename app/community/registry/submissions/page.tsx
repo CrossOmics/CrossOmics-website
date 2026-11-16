@@ -5,6 +5,7 @@ import { communitySession, registryV2Submissions } from "@/lib/community/service
 import { registryTypes } from "@/lib/community/registry-v2";
 import { httpsUrl } from "@/lib/community/https-url";
 import RegistryCredits from "../../RegistryCredits";
+import RegistryMetadata from "../../RegistryMetadata";
 import ReviewForm from "./ReviewForm";
 
 const path = "/community/registry/submissions";
@@ -58,6 +59,7 @@ export default async function RegistrySubmissions({ searchParams }: { searchPara
                         <div><dt>Original authors</dt><dd><RegistryCredits credits={item.authors} /></dd></div>
                         <div><dt>Maintainers</dt><dd><RegistryCredits credits={item.maintainers} /></dd></div>
                       </dl>
+                      <RegistryMetadata metadata={item} />
                       {item.reason && <p>Review reason · {item.reason}</p>}
                       {item.status === "published" && item.pipelineId &&
                         <Link className="community-link" href={"/community/catalog/" + item.pipelineId}>View published entry</Link>}

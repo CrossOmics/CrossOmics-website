@@ -9,7 +9,8 @@ export const registryTypeDescriptions = {
 } as const;
 export type RegistryType = keyof typeof registryTypes;
 export type RegistryCredit = { name: string; github?: string; orcid?: string; url?: string };
-export type RegistryDraftV2 = {
+export type RegistryMetadata = { modalities: string[]; algorithms: string[]; inputs: string[]; outputs: string[] };
+export type RegistryDraftV2 = Partial<RegistryMetadata> & {
   requestId: string;
   type: RegistryType;
   name: string;
