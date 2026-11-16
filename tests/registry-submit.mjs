@@ -38,6 +38,8 @@ before(async () => {
         registryV2Available: !["legacy", "unavailable"].includes(mode),
         canManageRegistry: false, desktopAuthAvailable: true, canPostBounties: false, canManageBounties: false
       }));
+    } else if (request.url?.startsWith("/api/community/v1/bounties")) {
+      response.end(JSON.stringify({ items: [], page: 1, hasMore: false }));
     } else if (request.url?.startsWith("/api/community/v2/registry/submissions")) {
       response.end(JSON.stringify({ submissions: [] }));
     } else if (request.url?.startsWith("/api/community/v2/catalog")) {
@@ -260,4 +262,27 @@ test("Community proxy still forwards identity and OAuth response headers and lim
     method: "POST", headers: { "content-type": "application/json", origin: base }, body: JSON.stringify({data:"a".repeat(17000)})
   });
   assert.equal(oversized.status, 413);
+});
+
+test("everyone sees the bounty publishing entry and anonymous visitors return after sign-in", async () => {
+  for (const mode of ["anonymous", "google", "apple", "ready"]) {
+    const response = await fetch(base + "/community/bounties", { headers: { cookie: "community_session=" + mode } });
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.match(html, /href="\/community\/bounties\/new"[^>]*>Post a bounty/);
+  }
+  const anonymous = await fetch(base + "/community/bounties/new", { redirect: "manual" });
+  assert.equal(anonymous.status, 307);
+  assert.equal(anonymous.headers.get("location"), "/community/sign-in?returnTo=%2Fcommunity%2Fbounties%2Fnew");
+});
+
+test("all authenticated accounts see the bounty form without contributions or editor access", async () => {
+  for (const mode of ["google", "apple", "ready"]) {
+    const response = await fetch(base + "/community/bounties/new", { headers: { cookie: "community_session=" + mode } });
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.match(html, /Reward or recognition/);
+    assert.match(html, /<button[^>]*type="submit"[^>]*>Post bounty/);
+    assert.doesNotMatch(html, /Record a contribution|editor access to post/);
+  }
 });

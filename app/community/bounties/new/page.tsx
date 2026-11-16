@@ -14,7 +14,7 @@ export default async function NewBountyPage() {
         <h1>Post a bounty</h1>
         <p>Describe a concrete task the community can help with.</p>
       </header>
-      {session.canPostBounties ? <NewBountyForm /> : <p className="community-notice">Record a contribution or get editor access to post a bounty.</p>}
+      <NewBountyForm />
     </>
   );
 }
