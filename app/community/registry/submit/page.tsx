@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { communitySignInPath } from "@/lib/community/return-path";
 import Link from "next/link";
 import { communitySession, registryV2Catalog } from "@/lib/community/service";
 import RegistryForm from "./RegistryForm";
@@ -21,17 +23,17 @@ export default async function RegistrySubmitPage({ searchParams }: {
   searchParams: Promise<{ pr?: string; result?: string; pipelineId?: string }>;
 }) {
   const [session, query] = await Promise.all([communitySession(), searchParams]);
-  const signedInWithGitHub = /^[1-9]\d{0,19}$/.test(session?.contributor?.id ?? "");
+  const signedIn = Boolean(session?.contributor);
   const pipelineId = typeof query.pipelineId === "string" && /^cp_[a-z0-9_]{1,61}$/.test(query.pipelineId)
     ? query.pipelineId : undefined;
   const returnTo = pipelineId ? path + "?" + new URLSearchParams({ pipelineId }) : path;
-  const loginUrl = "/api/community/auth/login?" + new URLSearchParams({ provider: "github", returnTo });
+  if (session && !session.contributor) redirect(communitySignInPath(returnTo));
   const pr = typeof query.pr === "string" && /^[1-9]\d{0,15}$/.test(query.pr) ? query.pr : null;
-  const legacyResult = signedInWithGitHub && !pr && typeof query.result === "string" && Object.hasOwn(legacyResults, query.result)
+  const legacyResult = signedIn && !pr && typeof query.result === "string" && Object.hasOwn(legacyResults, query.result)
     ? legacyResults[query.result] : null;
   const v2 = session?.registryV2Enabled === true;
   const available = v2 && session?.registryV2Available === true;
-  const catalog = available && signedInWithGitHub ? await registryV2Catalog() : null;
+  const catalog = available && signedIn ? await registryV2Catalog() : null;
   const unavailableMessage = !available
     ? "Project registration is temporarily unavailable. Please try again later."
     : catalog?.error || undefined;
@@ -41,27 +43,19 @@ export default async function RegistrySubmitPage({ searchParams }: {
         <Link href="/#registry" className="community-link">← Back to the registry</Link>
         <h1>Register a project</h1>
         <p>Register a new pipeline, tool, or method, or submit a new version of an existing project. CrossOmics administrators review submissions before publication.</p>
-        {v2 && signedInWithGitHub && <div className="community-actions">
+        {v2 && signedIn && <div className="community-actions">
           <Link className="community-link" href="/community/registry/submissions">My registry submissions</Link>
         </div>}
       </header>
       {legacyResult && <p className="community-notice" role="alert">{legacyResult}{" "}
         <a className="community-link" href="https://github.com/CrossOmics/pipeline-registry/pulls">Check Registry pull requests on GitHub</a> before starting a new submission.
       </p>}
-      {pr && signedInWithGitHub ? (
+      {pr && signedIn ? (
         <RegistryForm pr={pr} />
       ) : !session ? (
         <p className="community-notice">Website submissions are temporarily unavailable. Try again shortly.</p>
-      ) : !signedInWithGitHub || !session.contributor ? (
-        <section className="community-notice">
-          <h2>Sign in with GitHub</h2>
-          <p>Your GitHub account identifies you as the submitter.</p>
-          {session.providers.includes("github") ? (
-            <div className="community-actions"><a className="community-primary" href={loginUrl}>Sign in with GitHub</a></div>
-          ) : <p>GitHub sign-in is currently unavailable.</p>}
-        </section>
       ) : (
-        <RegistryFormV2 items={catalog?.data?.items ?? []} submitter={session.contributor} initialId={pipelineId} unavailableMessage={unavailableMessage} />
+        <RegistryFormV2 items={catalog?.data?.items ?? []} submitter={session.contributor!} initialId={pipelineId} unavailableMessage={unavailableMessage} />
       )}
     </>
   );
