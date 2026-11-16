@@ -62,9 +62,9 @@ export default async function CommunityRegistry({ searchParams: query }: { searc
         <form className="community-search" action="/#registry">
           <label>Search the registry<input type="search" name="q" maxLength={120} defaultValue={q} placeholder="Try STAR, alignment, or single-cell" /></label>
           {v2 ? <label>Version type<select name="type" defaultValue={type}>
-            <option value="">All types</option>
+            <option value="">All</option>
             {Object.entries(registryTypes).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-          </select></label> : <label>Entry type<select name="kind" defaultValue={kind}><option value="">All types</option><option value="workflow">Workflows</option><option value="tool">Tools</option></select></label>}
+          </select></label> : <label>Entry type<select name="kind" defaultValue={kind}><option value="">All</option><option value="workflow">Workflows</option><option value="tool">Tools</option></select></label>}
           <button className="community-primary">Search</button>
           {(q || kind || type) && <Link className="community-link" href="/#registry">Clear filters</Link>}
         </form>
