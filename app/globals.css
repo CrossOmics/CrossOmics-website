@@ -193,7 +193,7 @@ img { max-width: 100%; display: block; }
 .site-nav a:hover { color: var(--fg); }
 .site-nav a.is-active { color: var(--accent); border-bottom-color: var(--accent); }
 
-.site-header-cta { padding: 8px 18px; font-size: 14px; flex-shrink: 0; }
+.site-header-cta { margin-left: auto; padding: 8px 18px; font-size: 14px; flex-shrink: 0; }
 
 .site-footer {
   border-top: 1px solid var(--line);
