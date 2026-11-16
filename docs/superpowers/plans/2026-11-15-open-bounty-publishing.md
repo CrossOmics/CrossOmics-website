@@ -22,20 +22,30 @@ Anonymous/cross-origin requests remain denied; all three providers work without 
 **Files:** backend lib/community/bounties.ts, tests/bounties.mjs, scripts/test-community-login.py, README.md, .env.example.
 **Interfaces:** bountyPermissions(null) remains false/false; any authenticated identity gets canPostBounties=true. requireBountyPublisher uses requireWebIdentity(request,true). Editor lookup failure must fail closed for management without revoking basic publication.
 
-- [ ] Add local PostgreSQL regressions for three provider identities without contributions, origin/auth denial, author attribution, management isolation and managed editor revocation.
-- [ ] Observe failure against current backend, remove contribution/editor publication gate and retain editor-only management.
-- [ ] Run isolated API suites and build. Expected: all pass; no migration required.
+- [x] Add local PostgreSQL regressions for three provider identities without contributions, origin/auth denial, author attribution, management isolation and managed editor revocation.
+- [x] Observe failure against current backend, remove contribution/editor publication gate and retain editor-only management.
+- [x] Run isolated API suites and build. Expected: all pass; no migration required.
 
 ### Task 2: Frontend entry point
 
 **Files:** bounty list/new pages, tests/registry-submit.mjs, tests/community.mjs, README.md.
 **Interfaces:** Post a bounty points to /community/bounties/new; anonymous login preserves this return path; signed-in users see NewBountyForm even without legacy eligibility flags.
 
-- [ ] Write failing board/form/login-return tests, implement public entry + authenticated form, update obsolete integration expectations.
-- [ ] Run complete fixture tests and build. Expected: all pass, editor-only status UI untouched.
+- [x] Write failing board/form/login-return tests, implement public entry + authenticated form, update obsolete integration expectations.
+- [x] Run complete fixture tests and build. Expected: all pass, editor-only status UI untouched.
 
 ### Task 3: Review and delivery
 
-- [ ] Fresh read-only review; fix important findings with regression coverage.
-- [ ] Push both branches and create paired PRs; verify frontend preview.
-- [ ] Explain backend rebuild then frontend deployment, with no database migration or whitelist changes.
+- [x] Fresh read-only review; fix important findings with regression coverage.
+- [x] Push both branches and create paired PRs; verify frontend preview.
+- [x] Explain backend rebuild then frontend deployment, with no database migration or whitelist changes.
+
+## Verification and handoff
+
+Web26/26; backend7unit+7Registry/bounty integration+5legacy/login tests passed; both production builds passed. Old gates reproduced new-provider publishing failures before the fix. Independent whole-change review found no Critical, Important or actionable minor issues. Vercel preview Ready; actual browser confirmed visible Post a bounty and anonymous redirect preserving /community/bounties/new.
+
+Backend PR: https://github.com/CrossOmics/CrossOmics-website-backend/pull/7
+Web PR: https://github.com/CrossOmics/CrossOmics-website/pull/27
+Preview: https://cross-omics-website-git-codex-open-5c3154-jre2000kr-s-projects.vercel.app/community/bounties
+
+Neither PR has been merged or deployed to production by this task. Operator rebuilds backend with existing Supabase/HTTPS Compose overlays, then releases frontend. No schema migration or environment values change. Production OAuth/database state and live write behavior were not exercised; all write tests used local isolated fixtures.
