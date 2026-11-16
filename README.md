@@ -64,3 +64,7 @@ Optional database and OAuth cases require their existing `COMMUNITY_TEST_*` fixt
 Any supported Community identity can register a project and view its own submissions. Registry v2 uses site moderation and does not create GitHub PRs. A GitHub write operation requires separate operation-specific authorization and does not replace the Community identity or merge provider accounts.
 
 Deploy the paired backend change and run its `db/002-registry-community-identity.sql` migration before deploying this frontend. Use the backend's `scripts/apply-community-login.py` and deployment commands in its README. Existing OAuth client settings and callback URLs stay the same. Real provider sign-in and browser-restart persistence should be smoke-tested by an account owner after deployment.
+
+## Bounty publishing
+
+Every signed-in Community account can post a bounty, without a prior contribution or editor membership. The board always shows **Post a bounty**; anonymous visitors sign in before reaching the form. Status management remains editor-only. Deploy the paired backend update before this frontend. No database migration or environment changes are needed.

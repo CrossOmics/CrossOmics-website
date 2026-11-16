@@ -192,7 +192,7 @@ test("Web and Gardener share records, deduplicate evidence and preserve impact z
   }
 });
 
-test("contributors and editors can publish bounties, and editors control status", {
+test("all signed-in users can publish bounties, and editors control status", {
   skip: !process.env.COMMUNITY_TEST_DATABASE_URL || !process.env.COMMUNITY_TEST_SESSION_SECRET || !process.env.COMMUNITY_TEST_BOARD_EDITOR_ID
 }, async () => {
   const { createHmac, randomInt, randomUUID } = await import("node:crypto");
@@ -226,7 +226,9 @@ test("contributors and editors can publish bounties, and editors control status"
 
   try {
     assert.equal((await request("", "POST", undefined, draft)).status, 401);
-    assert.equal((await request("", "POST", member, draft)).status, 403);
+    const firstMemberPost = await request("", "POST", member, { ...draft, title: `New member bounty ${randomUUID()}` });
+    assert.equal(firstMemberPost.status, 201);
+    ({ id: memberBountyId } = await firstMemberPost.json());
     const created = await request("", "POST", editor, draft);
     assert.equal(created.status, 201);
     ({ id } = await created.json());
@@ -247,19 +249,6 @@ test("contributors and editors can publish bounties, and editors control status"
     assert.equal((await request(`/${id}`, "PATCH", editor, { status: "closed" })).status, 200);
     assert.equal((await request(`/${id}/replies`, "POST", member, reply)).status, 409);
 
-    const contribution = await fetch(`${base}/api/community/v1/contributions`, {
-      method: "POST",
-      headers: headers(member),
-      body: JSON.stringify({
-        type: "bug_fix", subjectKind: "tool", subjectName: "Example tool",
-        summary: "Fix an example tool to unlock bounty publishing.", occurredOn: "2025-02-28",
-        projectUrl: "https://example.org/tool", evidenceUrl: `https://example.org/tool/changes/${randomUUID()}`
-      })
-    });
-    assert.equal(contribution.status, 201);
-    const published = await request("", "POST", member, draft);
-    assert.equal(published.status, 201);
-    ({ id: memberBountyId } = await published.json());
     assert.equal((await request(`/${memberBountyId}`, "PATCH", member, { status: "closed" })).status, 403);
 
     const session = await fetch(`${base}/api/community/v1/session`, { headers: headers(member) });
@@ -293,6 +282,7 @@ test("bounty administrators can grant and revoke editor access without granting 
   const hash = randomBytes(32).toString("hex");
   const member = { id: `google:${hash}`, login: `member-${hash.slice(0, 16)}` };
   let bountyId;
+  let postRevocationId;
 
   async function request(path, identity, { method = "GET", body, origin = webOrigin } = {}) {
     const headers = { origin };
@@ -334,11 +324,14 @@ test("bounty administrators can grant and revoke editor access without granting 
     assert.equal((await request("bounty-editors", admin, revoke)).status, 200);
     assert.equal((await request("bounty-editors", admin, revoke)).status, 200);
     assert.equal((await request("session", member)).body.canManageBounties, false);
-    assert.equal((await request("bounties", member, { method: "POST", body: draft })).status, 403);
+    const afterRevocation = await request("bounties", member, { method: "POST", body: draft });
+    assert.equal(afterRevocation.status, 201);
+    postRevocationId = afterRevocation.body.id;
     assert.equal((await request("bounty-editors", admin, { method: "DELETE", body: { id: editor.id } })).status, 409);
     assert.equal((await request("session", editor)).body.canManageBounties, true);
   } finally {
     if (bountyId) await db.query("DELETE FROM community_bounties WHERE id = $1", [bountyId]);
+    if (postRevocationId) await db.query("DELETE FROM community_bounties WHERE id = $1", [postRevocationId]);
     await request("bounty-editors", admin, revoke).catch(() => {});
     await db.end();
   }

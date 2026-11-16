@@ -1,26 +1,21 @@
 import Link from "next/link";
 import { bountyStatuses } from "@/lib/community/types";
-import { communityBounties, communitySession } from "@/lib/community/service";
+import { communityBounties } from "@/lib/community/service";
 import { BountyPager, BountyTags } from "./BountyMeta";
 
 export default async function BountiesPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; page?: string }> }) {
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q : "";
   const status = typeof params.status === "string" ? params.status : "";
-  const [{ data, error }, session] = await Promise.all([
-    communityBounties({ q, status, page: params.page }),
-    communitySession()
-  ]);
+  const { data, error } = await communityBounties({ q, status, page: params.page });
   return (
     <>
       <header className="community-heading">
         <h1>Community bounties</h1>
         <p>Find work the CrossOmics community would like help with, from maintaining a tool to building a workflow or running a benchmark.</p>
-        {session?.canPostBounties && (
-          <div className="community-actions">
-            <Link href="/community/bounties/new" className="community-primary">Post a bounty</Link>
-          </div>
-        )}
+        <div className="community-actions">
+          <Link href="/community/bounties/new" className="community-primary">Post a bounty</Link>
+        </div>
       </header>
       <form className="community-search" action="/community/bounties">
         <label>Search bounties<input type="search" name="q" maxLength={120} defaultValue={q} placeholder="Try a tool, workflow, or benchmark" /></label>
