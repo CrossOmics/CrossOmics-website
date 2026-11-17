@@ -10,7 +10,7 @@ Spec: ../specs/2026-11-16-tool-classification.md
 - [x] Backend: establish canonical taxonomy; preserve existing storage keys; update registry parsing/presentation/filtering and kind enforcement; unify Contribution parsing/read/write. Extend isolated DB/API and parser regressions, RED→GREEN. Document deployment and legacy compatibility.
 - [x] Frontend: reusable Tool type constant/normalizer; tool-only catalog and forms; replace Project vocabulary; unify contribution menu/remove item-kind selector; normalize transitional API responses; regression tests and production build.
 - [x] Verify both independently, browser-test forms/filter/history against disposable fixtures, final review.
-- [ ] Push frontend PR; backend PR #9 is open. Production deployment remains operator-managed.
+- [x] Push separate PRs: frontend #32 and backend #9. Production deployment remains operator-managed.
 
 ## Review focus
 - Legacy improved/fix and contribution subtypes must normalize to Update, not disappear.
