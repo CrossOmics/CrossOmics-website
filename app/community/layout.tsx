@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Community Tracking | CrossOmics",
-  description: "Explore community pipelines, tools and algorithms, and record the work that keeps them useful."
+  description: "Explore computational biology tools and record the work that keeps them useful."
 };
 
 export default async function CommunityLayout({ children }: { children: ReactNode }) {

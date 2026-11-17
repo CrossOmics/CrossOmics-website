@@ -12,7 +12,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "CrossOmics Community",
-  description: "Discover community pipelines, submit improvements, find bounties, and track contributions to computational biology."
+  description: "Discover community tools, submit improvements, find bounties, and track contributions to computational biology."
 };
 
 // Matches `color-scheme: only light` in globals.css — keeps browser-level dark mode

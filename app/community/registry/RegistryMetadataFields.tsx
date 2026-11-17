@@ -20,7 +20,7 @@ export function changedRegistryMetadata(metadata: RegistryMetadata, previous: Pa
 
 export default function RegistryMetadataFields({ metadata = {} }: { metadata?: Partial<RegistryMetadata> }) {
   return <fieldset>
-    <legend>Project data and methods (optional)</legend>
+    <legend>Tool data and methods (optional)</legend>
     <p>Describe supported data, methods, and file formats. Enter one value per line, up to 20 values of 120 characters each. Leave unknown information blank.</p>
     <div className="community-form-grid">
       {fields.map(([key, label, example]) => <label key={key}>{label} (optional)

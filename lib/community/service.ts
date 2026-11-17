@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { cache } from "react";
-import type { RegistryItemV2, RegistrySubmissionV2 } from "./registry-v2";
+import { normalizeRegistryItem, normalizeRegistrySubmission, type RegistryItemV2, type RegistrySubmissionV2 } from "./registry-v2";
+import { normalizeToolType, isToolKind } from "./tool-types";
 import type { Bounty, BountyReply, Contribution, Contributor, RegistryItem, SignInProvider } from "@/lib/community/types";
 
 export function communityServiceFetch(path: string, init: RequestInit = {}) {
@@ -63,7 +64,8 @@ export async function communityCatalog(filters: { q?: string; kind?: string } = 
   if (filters.q) query.set("q", filters.q);
   if (filters.kind) query.set("kind", filters.kind);
   try {
-    return { data: await communityData<{ items: RegistryItem[]; generatedAt: string }>(`catalog?${query}`), error: "" };
+    const data = await communityData<{ items: RegistryItem[]; generatedAt: string }>(`catalog?${query}`);
+    return { data: { ...data, items: data.items.filter(item => isToolKind(item.kind)) }, error: "" };
   } catch (error) {
     return { data: null, error: error instanceof ServiceError && (error.status === 400 || error.status === 422)
       ? error.message : "The registry is temporarily unavailable. Try refreshing this page." };
@@ -73,7 +75,8 @@ export async function communityCatalog(filters: { q?: string; kind?: string } = 
 export async function communityCatalogItem(id: string) {
   const query = new URLSearchParams({ id });
   try {
-    return await communityData<{ item: RegistryItem }>(`catalog?${query}`);
+    const data = await communityData<{ item: RegistryItem }>(`catalog?${query}`);
+    return { item: data.item && isToolKind(data.item.kind) ? data.item : null };
   } catch (error) {
     if (error instanceof ServiceError && error.status === 404) return { item: null };
     return null;
@@ -87,7 +90,11 @@ export function communityContributions(filters: { mine?: boolean; page?: string;
   if (filters.catalogId) query.set("catalogId", filters.catalogId);
   return communityData<{ items: Contribution[]; page: number; hasMore: boolean; total?: number }>(
     `contributions?${query}`, filters.mine
-  ).catch(() => null);
+  ).then(data => ({ ...data, items: data.items.map(item => {
+    const type = normalizeToolType(item.type);
+    if (!type) throw new Error("Unsupported contribution type.");
+    return { ...item, type };
+  }) })).catch(() => null);
 }
 
 export async function communityBounties(filters: { q?: string; status?: string; page?: string }) {
@@ -118,7 +125,8 @@ export async function registryV2Catalog(filters: { q?: string; type?: string } =
   if (filters.q) params.set("q", filters.q);
   if (filters.type) params.set("type", filters.type);
   try {
-    return { data: await communityData<{ items: RegistryItemV2[]; generatedAt: string }>("catalog?" + params, false, "v2"), error: "" };
+    const data = await communityData<{ items: RegistryItemV2[]; generatedAt: string }>("catalog?" + params, false, "v2");
+    return { data: { ...data, items: data.items.filter(item => isToolKind(item.kind)).map(normalizeRegistryItem) }, error: "" };
   } catch (error) {
     return { data: null, error: error instanceof ServiceError && (error.status === 400 || error.status === 422)
       ? error.message : "The registry is temporarily unavailable. Try refreshing this page." };
@@ -127,7 +135,8 @@ export async function registryV2Catalog(filters: { q?: string; type?: string } =
 
 export async function registryV2Item(id: string) {
   try {
-    return await communityData<{ item: RegistryItemV2 | null }>("catalog/" + encodeURIComponent(id), false, "v2");
+    const data = await communityData<{ item: RegistryItemV2 | null }>("catalog/" + encodeURIComponent(id), false, "v2");
+    return { item: data.item && isToolKind(data.item.kind) ? normalizeRegistryItem(data.item) : null };
   } catch (error) {
     return error instanceof ServiceError && error.status === 404 ? { item: null } : null;
   }
@@ -136,7 +145,7 @@ export async function registryV2Item(id: string) {
 export function registryV2Submissions(all: boolean) {
   return communityData<{ submissions: RegistrySubmissionV2[] }>(
     "registry/submissions" + (all ? "?all=1" : ""), true, "v2"
-  ).catch(() => null);
+  ).then(data => ({ ...data, submissions: data.submissions.map(normalizeRegistrySubmission) })).catch(() => null);
 }
 
 export async function desktopAuthAttempt(id: string) {

@@ -118,7 +118,7 @@ export default function RegistryForm({ pr, result }: { pr?: string; result?: str
             <label>Public GitHub repository<input type="url" required maxLength={160} placeholder="https://github.com/owner/repository"
               value={draft.repository} onChange={(event) => update("repository", event.target.value)} /></label>
             <label>Entry type<select required value={draft.kind} onChange={(event) => update("kind", event.target.value)}>
-              <option value="">Choose a type</option><option value="tool">Tool</option><option value="workflow">Workflow</option>
+              <option value="">Choose a type</option><option value="tool">Tool</option>
             </select></label>
             <label>Domain<select required value={draft.domain} onChange={(event) => update("domain", event.target.value)}>
               <option value="">Choose a domain</option>
