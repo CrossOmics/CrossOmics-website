@@ -355,7 +355,7 @@ test("registry and contribution forms share Original/Update and offer only tools
   entryTypes(registry);
   assert.match(registry, /Tool name/);
   assert.doesNotMatch(registry, /Project name|>Workflow<|>Performance improvement<|>Bug fix</);
-  const contributionResponse = await fetch(base + "/community/submit", { headers: { cookie: "community_session=ready" } });
+  const contributionResponse = await fetch(base + "/community/submit?mode=record", { headers: { cookie: "community_session=ready" } });
   assert.equal(contributionResponse.status, 200);
   const contribution = (await contributionResponse.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
   const menu = contribution.match(/<select id="contribution-type"[^>]*>(.*?)<\/select>/s)?.[1];
@@ -373,7 +373,7 @@ test("registry and contribution forms share Original/Update and offer only tools
 test("tool catalog excludes workflow entries and uses Tool registration vocabulary", async () => {
   const response = await fetch(base + "/", { headers: { cookie: "community_session=ready" } });
   const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
-  assert.match(html, /Register a tool/);
+  assert.match(html, /Submit a Contribution/);
   assert.doesNotMatch(html, /Workflow fixture|Register a project|>Workflows<|>Project<\/span>|>Tool<\/span>/);
 });
 
@@ -406,4 +406,47 @@ test("Original/Update filtering works before backend rollout and groups legacy u
     if (type === "original") { assert.match(html, /Example tool/); assert.doesNotMatch(html, /Legacy improved tool|Legacy fix tool/); }
     else { assert.match(html, /Legacy improved tool/); assert.match(html, /Legacy fix tool/); assert.doesNotMatch(html, />Example tool</); }
   }
+});
+
+
+test("Community navigation uses task labels with a single submission entry", async () => {
+  const response = await fetch(base + "/", { headers: { cookie: "community_session=ready" } });
+  const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+  const nav = html.match(/<nav[^>]*aria-label="Community"[^>]*>(.*?)<\/nav>/s)?.[1];
+  assert.ok(nav);
+  for (const label of ["Submit a Contribution", "Explore Existing Tools", "Maintenance Needed", "Tools Wanted"]) assert.match(nav, new RegExp(label));
+  assert.equal([...nav.matchAll(/href="\/community\/submit"/g)].length, 1);
+  assert.match(nav, /href="https:\/\/crossomics.github.io\/pipeline-registry\/ranking\/"/);
+  assert.doesNotMatch(nav, />Registry<|>Bounties<|>Contributions<|Log a contribution/);
+  const registry = html.match(/<section[^>]*id="registry"[\s\S]*?<\/section>/)?.[0];
+  assert.ok(registry);
+  assert.doesNotMatch(registry, /Register a tool|Maintenance ranking/);
+});
+
+
+test("one submission hub explains reviewed tools versus directly published records", async () => {
+  for (const mode of ["ready", "google", "apple"]) {
+    const response = await fetch(base + "/community/submit?catalogId=cp_example", { headers: { cookie: "community_session=" + mode } });
+    const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+    assert.match(html, /Submit a Contribution/);
+    assert.match(html, /Submit a Tool or Update/);
+    assert.match(html, /Record a Contribution/);
+    assert.match(html, /Administrator review/);
+    assert.match(html, /Published directly/);
+    assert.match(html, /href="\/community\/registry\/submit\?pipelineId=cp_example"/);
+    assert.match(html, /href="\/community\/submit\?mode=record&amp;catalogId=cp_example"/);
+    assert.doesNotMatch(html, /id="contribution-type"/);
+  }
+});
+
+test("record mode preserves sign-in destination and existing Tool selection", async () => {
+  const anonymous = await fetch(base + "/community/submit?mode=record&catalogId=cp_example", { redirect: "manual" });
+  assert.equal(anonymous.status, 307);
+  assert.equal(anonymous.headers.get("location"), "/community/sign-in?returnTo=%2Fcommunity%2Fsubmit%3Fmode%3Drecord%26catalogId%3Dcp_example");
+  const response = await fetch(base + "/community/submit?mode=record&catalogId=cp_example", { headers: { cookie: "community_session=ready" } });
+  const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+  assert.match(html, /Record a Contribution/);
+  assert.match(html, /id="contribution-type"/);
+  assert.match(html, /value="cp_example" selected=""/);
+  assert.match(html, /value="Example tool"/);
 });

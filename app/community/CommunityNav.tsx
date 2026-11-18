@@ -1,14 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { NAV } from "@/lib/nav";
 import { usePathname } from "next/navigation";
 import { communitySignInPath } from "@/lib/community/return-path";
 
-const links = [
-  { href: "/", label: "Registry" },
-  { href: "/community/bounties", label: "Bounties" },
-  { href: "/community/activity", label: "Contributions" }
-];
 
 export default function CommunityNav({ signedIn }: { signedIn: boolean }) {
   const path = usePathname();
@@ -17,8 +13,9 @@ export default function CommunityNav({ signedIn }: { signedIn: boolean }) {
   return (
     <nav className="community-nav" aria-label="Community">
       <div className="community-nav-links">
-        {links.map(({ href, label }) => {
-          const active = path === href || (href === "/" ? path.startsWith("/community/catalog/") : path.startsWith(`${href}/`));
+        {NAV.map(({ href, label, external }) => {
+          const active = path === href || (href === "/" ? path.startsWith("/community/catalog/") : href === "/community/submit" ? path.startsWith("/community/registry/") : path.startsWith(`${href}/`));
+          if (external) return <a key={href} href={href}>{label} <span aria-hidden>↗</span></a>;
           return <Link key={href} href={href} aria-current={active ? "page" : undefined}>{label}</Link>;
         })}
       </div>
@@ -28,9 +25,6 @@ export default function CommunityNav({ signedIn }: { signedIn: boolean }) {
         ) : (
           <Link href={signInHref} className="community-secondary">Sign in</Link>
         )}
-        <Link href="/community/submit" className="community-primary" aria-current={path === "/community/submit" ? "page" : undefined}>
-          <span aria-hidden>＋</span> Log a contribution
-        </Link>
       </div>
     </nav>
   );

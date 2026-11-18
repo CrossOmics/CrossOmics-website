@@ -11,8 +11,9 @@ export default function SiteFooter() {
 
         <nav className="site-footer-nav" aria-label="Footer">
           {NAV.map((n) => (
-            <Link key={n.href} href={n.href}>{n.label}</Link>
+            n.external ? <a key={n.href} href={n.href}>{n.label} ↗</a> : <Link key={n.href} href={n.href}>{n.label}</Link>
           ))}
+          <Link href="/community/activity">Contribution History</Link>
           {gardener && <a href={gardener}>Gardener ↗</a>}
           <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">GitHub</a>
         </nav>

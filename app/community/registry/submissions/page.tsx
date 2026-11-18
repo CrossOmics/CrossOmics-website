@@ -22,8 +22,8 @@ export default async function RegistrySubmissions({ searchParams }: { searchPara
   return (
     <>
       <header className="community-heading">
-        <Link className="community-link" href="/community/registry/submit">← Register a tool</Link>
-        <h1>{all ? "Registry review queue" : "My registry submissions"}</h1>
+        <Link className="community-link" href="/community/submit">← Submit a Contribution</Link>
+        <h1>{all ? "Tool Review Queue" : "My Tool Submissions"}</h1>
         <p>{all ? "Review the source, version lineage, and credits before publishing." : "Track your submissions and their review status."}</p>
         {admin && <div className="community-actions">
           <Link className="community-secondary" href={all ? path : path + "?all=1"}>

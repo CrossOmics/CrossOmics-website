@@ -15,7 +15,7 @@ export default async function ActivityPage({ searchParams: query }: { searchPara
   return (
     <>
       <header className="community-heading">
-        <h1>Community contributions</h1>
+        <h1>Contribution History</h1>
         <p>Browse evidence submitted by contributors working on BioCode Commons and external projects.</p>
         {catalogId && <div className="community-actions"><span className="community-tag">{item?.name ?? catalogId}</span><Link href="/community/activity" className="community-link">Show all contributions</Link></div>}
       </header>

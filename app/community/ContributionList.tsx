@@ -9,8 +9,8 @@ export default function ContributionList({ items, mine = false }: { items: Contr
   if (!items.length) return (
     <div className="community-notice">
       <h2>{mine ? "Your history is empty" : "No contributions to show"}</h2>
-      <p>{mine ? "Log a contribution to start your history." : "A contribution appears here when someone publishes it."}</p>
-      <Link href="/community/submit" className="community-link">Log a contribution</Link>
+      <p>{mine ? "Submit a contribution to start your history." : "A contribution appears here when someone publishes it."}</p>
+      <Link href="/community/submit" className="community-link">Submit a Contribution</Link>
     </div>
   );
   return (

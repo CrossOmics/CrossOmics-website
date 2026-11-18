@@ -41,7 +41,7 @@ export default function ContributionForm({ catalog, selected }: { catalog: Catal
       <p>{result.item.subjectName} is in your history. You can add impact evidence there as it becomes available.</p>
       <div className="community-actions">
         <Link href="/community/mine" className="community-primary">View my history</Link>
-        <button type="button" className="community-secondary" onClick={() => setResult(null)}>Log another contribution</button>
+        <button type="button" className="community-secondary" onClick={() => setResult(null)}>Record another contribution</button>
       </div>
     </section>
   );
