@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { toolTypeLabel } from "@/lib/community/tool-types";
 import RegistryCredits from "../../RegistryCredits";
-import { communityCatalogItem, communitySession, registryV2Item } from "@/lib/community/service";
+import { communityCatalogItem, communitySession, registryV2Item, toolManagement } from "@/lib/community/service";
+import { orderedToolVersions, toolMaintainers } from "@/lib/community/tool-maintenance";
+import type { RegistryItemV2 } from "@/lib/community/registry-v2";
 import EditProjectMetadata from "./EditProjectMetadata";
 import RegistryMetadata from "../../RegistryMetadata";
 import WithdrawVersion from "./WithdrawVersion";
@@ -18,6 +20,10 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
   if (!item) notFound();
   const project = httpsUrl(item.repositories.find((repo) => repo.primary)?.url);
   const citations = item.metrics?.recent_citations;
+  const managed = v2 && session?.contributor ? await toolManagement(item.id) : null;
+  const v2Item = v2 ? item as RegistryItemV2 : null;
+  const versions = v2Item ? orderedToolVersions(v2Item) : item.versions;
+  const maintainers = v2Item ? toolMaintainers(v2Item) : [];
   return (
     <>
       <header className="community-heading">
@@ -27,11 +33,14 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
         <div className="community-actions">
           {project && <a className="community-secondary" href={project}>Source repository <span aria-hidden>↗</span></a>}
           <Link className="community-secondary" href={`/community/activity?catalogId=${item.id}`}>View contributions</Link>
-          <Link className="community-primary" href={`/community/submit?catalogId=${item.id}`}>Submit a Contribution</Link>
+          {v2 && <Link className="community-primary" href={`/community/registry/submit?pipelineId=${item.id}`}>Submit an update</Link>}
+          <Link className="community-secondary" href={`/community/submit?mode=record&catalogId=${item.id}`}>Record work on this tool</Link>
+          {managed?.data && <Link className="community-secondary" href={`/community/catalog/${item.id}/manage`}>Manage this tool</Link>}
         </div>
       </header>
       <dl className="community-detail-grid">
         <div><dt>Domain</dt><dd>{item.domain}</dd></div>
+        {maintainers.length > 0 && <div><dt>Maintainers</dt><dd><RegistryCredits credits={maintainers} /></dd></div>}
         <div><dt>Status</dt><dd>{item.status}</dd></div>
         {item.modalities?.some(value => value.trim()) && <div><dt>Modalities</dt><dd>{item.modalities.join(", ")}</dd></div>}
         <div><dt>Recent citations</dt><dd>{citations == null ? "Data unavailable" : citations.toLocaleString("en-US")}</dd></div>
@@ -41,11 +50,11 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
           <h2>Algorithms and data</h2>
           <RegistryMetadata metadata={{ algorithms: item.algorithms, inputs: item.inputs, outputs: item.outputs }} />
         </section>}
-      {v2 && session?.canManageRegistry && <EditProjectMetadata pipelineId={item.id} metadata={item} />}
+      {v2 && session?.canManageRegistry && !managed?.data && <EditProjectMetadata pipelineId={item.id} metadata={item} />}
       <section className="community-section">
         <h2>Versions</h2>
         <ul className="community-record-list">
-          {item.versions.map((version) => {
+          {versions.map((version) => {
             const repo = httpsUrl(version.repo);
             const evidence = "evidence_url" in version ? httpsUrl(version.evidence_url) : null;
             const parent = item.versions.find((candidate) => candidate.id === version.parent);
@@ -54,12 +63,12 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
                 <div className="community-actions">
                   <h3>{version.label}</h3>
                   <span className="community-tag">{toolTypeLabel("type" in version ? version.type : version.kind)}</span>
+                  {!version.withdrawn && v2Item?.recommendedVersionIds?.includes(version.id) && <span className="community-tag community-recommended">Recommended</span>}
                   {version.withdrawn && <span className="community-tag">Withdrawn</span>}
                 </div>
                 <p>{[version.released_at, parent && `Based on ${parent.label}`].filter(Boolean).join(" · ")}</p>
                 {"authors" in version && <dl className="community-detail-grid">
                   <div><dt>Original authors</dt><dd><RegistryCredits credits={version.authors} /></dd></div>
-                  <div><dt>Maintainers</dt><dd><RegistryCredits credits={version.maintainers} /></dd></div>
                 </dl>}
                 {version.improvement && <p>{version.improvement}</p>}
                 {"citation" in version && version.citation && <div><h4>How to cite this version</h4><p className="community-citation">{version.citation}</p></div>}

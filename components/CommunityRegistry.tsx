@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { normalizeToolType, isToolKind } from "@/lib/community/tool-types";
-import { registryTypes } from "@/lib/community/registry-v2";
 import { communityCatalog, communitySession, registryV2Catalog } from "@/lib/community/service";
 
 function RegistryDiagram() {
@@ -30,15 +29,13 @@ function RegistryDiagram() {
 export default async function CommunityRegistry({ searchParams: query }: { searchParams: Promise<{ q?: string; kind?: string; type?: string }> }) {
   const searchParams = await query;
   const q = typeof searchParams.q === "string" ? searchParams.q : "";
-  const requestedType = typeof searchParams.type === "string" ? searchParams.type : "";
-  const type = normalizeToolType(requestedType) ?? requestedType;
   const session = await communitySession();
   const v2 = session?.registryV2Enabled === true;
   const { data: catalog, error } = session === null
     ? { data: null, error: "The registry is temporarily unavailable. Try refreshing this page." }
     : v2 ? await registryV2Catalog({ q }) : await communityCatalog({ q, kind: "tool" });
   const results = (catalog?.items ?? []).filter(item => isToolKind(item.kind) &&
-    (!type || item.versions.some(version => normalizeToolType("type" in version ? version.type : version.kind) === type)));
+    item.versions.some(version => !version.withdrawn && normalizeToolType("type" in version ? version.type : version.kind) === "original"));
 
   return (
     <>
@@ -57,13 +54,9 @@ export default async function CommunityRegistry({ searchParams: query }: { searc
           </div>
         </div>
         <form className="community-search" action="/#registry">
-          <label>Search the registry<input type="search" name="q" maxLength={120} defaultValue={q} placeholder="Try STAR, alignment, or single-cell" /></label>
-          <label>Type<select name="type" defaultValue={type}>
-            <option value="">All</option>
-            {Object.entries(registryTypes).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-          </select></label>
+          <label>Search Tools<input type="search" name="q" maxLength={120} defaultValue={q} placeholder="Try STAR, alignment, or single-cell" /></label>
           <button className="community-primary">Search</button>
-          {(q || type) && <Link className="community-link" href="/#registry">Clear filters</Link>}
+          {q && <Link className="community-link" href="/#registry">Clear filters</Link>}
         </form>
         {!catalog ? (
           <p className="community-notice" role="status">{error}</p>
@@ -73,7 +66,7 @@ export default async function CommunityRegistry({ searchParams: query }: { searc
               <strong>{results.length} {results.length === 1 ? "entry" : "entries"}</strong>
               <span>Registry updated <time dateTime={catalog.generatedAt}>{catalog.generatedAt.slice(0, 10)}</time></span>
             </div>
-            {results.length === 0 ? <p className="community-notice">{q || type ? "No tools match these filters." : <>No tools registered yet. <Link href="/community/registry/submit">Register the first tool</Link>.</>}</p> : (
+            {results.length === 0 ? <p className="community-notice">{q ? "No tools match these filters." : <>No tools registered yet. <Link href="/community/registry/submit">Register the first tool</Link>.</>}</p> : (
               <ul className="community-catalog">
                 {results.map((item) => (
                   <li key={item.id}>

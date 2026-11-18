@@ -14,7 +14,6 @@ export default function CorrectVersionCredits({ pipelineId, versionId, existingA
 }) {
   const router = useRouter();
   const [authors, setAuthors] = useState(() => existingAuthors.length ? existingAuthors.map(withEmptyCreditFields) : [emptyCredit]);
-  const [maintainers, setMaintainers] = useState(() => existingMaintainers.length ? existingMaintainers.map(withEmptyCreditFields) : [emptyCredit]);
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<{ text: string; error: boolean }>();
 
@@ -28,7 +27,7 @@ export default function CorrectVersionCredits({ pipelineId, versionId, existingA
     try {
       await communityRequest(
         "catalog/" + encodeURIComponent(pipelineId) + "/versions/" + encodeURIComponent(versionId) + "/credits",
-        "POST", { authors: authors.map(parseCredit), maintainers: maintainers.map(parseCredit), reason }, "v2"
+        "POST", { authors: authors.map(parseCredit), maintainers: existingMaintainers, reason }, "v2"
       );
       form.reset();
       setMessage({ text: "Credits updated.", error: false });
@@ -42,11 +41,11 @@ export default function CorrectVersionCredits({ pipelineId, versionId, existingA
 
   return (
     <details className="community-app-access">
-      <summary>Correct imported credits</summary>
+      <summary>Correct imported author credits</summary>
       <form onSubmit={save} className="community-form" aria-busy={pending}>
         <fieldset disabled={pending}>
           <CreditFields label="Original authors" credits={authors} onChange={setAuthors} />
-          <CreditFields label="Maintainers" credits={maintainers} onChange={setMaintainers} />
+          <p>Tool maintainers are managed separately on the Tool management page.</p>
           <label>Source and reason for correction<textarea name="reason" required maxLength={1000} rows={3} /></label>
         </fieldset>
         <div className="community-actions">

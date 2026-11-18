@@ -36,6 +36,8 @@ export type RegistryVersionV2 = Omit<RegistryItem["versions"][number], "kind"> &
 };
 export type RegistryItemV2 = Omit<RegistryItem, "kind" | "versions"> & {
   kind?: RegistryItem["kind"];
+  maintainers?: RegistryCredit[];
+  recommendedVersionIds?: string[];
   versions: RegistryVersionV2[];
 };
 export type RegistrySubmissionV2 = Omit<RegistryDraftV2, "requestId"> & {

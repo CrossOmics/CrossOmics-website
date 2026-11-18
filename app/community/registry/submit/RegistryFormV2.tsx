@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { toolMaintainers } from "@/lib/community/tool-maintenance";
 import { registryRequestType } from "@/lib/community/tool-types";
 import { useRef, useState, type FormEvent } from "react";
 import { registryTypes, registryTypeDescriptions, type RegistryDraftV2, type RegistryItemV2, type RegistrySubmissionV2, type RegistryType } from "@/lib/community/registry-v2";
@@ -53,7 +54,7 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
         const existing = authors.find((credit) => credit.name.trim() === name);
         return existing ? parseCredit(existing) : { name };
       }),
-      maintainers: maintainers.map(parseCredit),
+      maintainers: origin ? maintainers.map(parseCredit) : [],
       ...(citation.trim() ? { citation: citation.trim() } : {}),
       ...(origin ? {} : { pipelineId, parentVersionId: value("parentVersionId"), changeSummary: value("changeSummary"),
         ...(value("evidenceUrl").trim() ? { evidenceUrl: value("evidenceUrl").trim() } : {}) })
@@ -113,7 +114,7 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
             </select></label>
             <label>Based on version<select name="parentVersionId" key={pipelineId} required defaultValue="" onChange={(event) => {
               const parent = parents.find((version) => version.id === event.target.value);
-              if (parent?.maintainers.length) setMaintainers(parent.maintainers.map(withEmptyCreditFields));
+              if (parent && selected) setMaintainers(toolMaintainers(selected).map(withEmptyCreditFields));
             }}>
               <option value="">Choose a version</option>
               {parents.map((version) => <option key={version.id} value={version.id}>{version.label}</option>)}
@@ -132,7 +133,8 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
         <label>Citation information (optional)<textarea name="citation" value={citation} maxLength={4000} rows={3}
           placeholder="Paper or software citation, DOI, URL, or BibTeX" onChange={(event) => setCitation(event.target.value)} /></label>
         <p>Submitting as @{submitter.login}. Authors and maintainers are recorded separately.</p>
-        <CreditFields label="Maintainers" credits={maintainers} onChange={(value) => { requestId.current = null; setMaintainers(value); }} />
+        {origin && <p>These maintainer credits belong to the whole Tool. Management access is assigned separately by an administrator.</p>}
+        {origin ? <CreditFields label="Maintainers" credits={maintainers} onChange={(value) => { requestId.current = null; setMaintainers(value); }} /> : <p>Maintainers belong to the Tool. Submitting an update does not change its maintainers or grant management access.</p>}
       </fieldset>
       <div className="community-form-footer">
         <button className="community-primary" type="submit" disabled={pending || Boolean(unavailableMessage)}>Submit registration</button>
@@ -145,6 +147,6 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
 
 function seedCredits(item: RegistryItemV2 | undefined, field: "authors" | "maintainers") {
   const origin = item?.versions.find((version) => version.type === "original");
-  const values = origin?.[field] ?? [];
+  const values = item && field === "maintainers" ? toolMaintainers(item) : origin?.[field] ?? [];
   return values.length ? values.map(withEmptyCreditFields) : [emptyCredit];
 }

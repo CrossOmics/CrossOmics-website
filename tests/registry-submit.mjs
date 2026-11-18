@@ -19,6 +19,9 @@ const pipeline = {
     improvement: null, withdrawn: false, authors: [{ name: "Original author" }], maintainers: [{ name: "Maintainer" }] }]
 };
 
+const managed = { ...pipeline, id: "cp_managed", name: "Managed tool", maintainers: [{ name: "Tool maintainer" }], recommendedVersionIds: ["cv_recommended"],
+  versions: [...pipeline.versions, { ...pipeline.versions[0], id: "cv_recommended", type: "update", label: "Recommended update", parent: "cv_example", maintainers: [{ name: "Version-only maintainer" }] }] };
+
 async function listen(server) {
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   return `http://127.0.0.1:${server.address().port}`;
@@ -38,6 +41,17 @@ before(async () => {
         registryV2Available: !["legacy", "unavailable"].includes(mode),
         canManageRegistry: mode === "admin", desktopAuthAvailable: true, canPostBounties: false, canManageBounties: false
       }));
+    } else if (request.url?.startsWith("/api/community/v2/me/contributions")) {
+      const params = new URL(request.url,"http://fixture").searchParams;
+      const section = params.get("section") || "original";
+      const submission = { ...pipeline, id: "00000000-0000-4000-8000-000000000003", name: "My submitted tool", type: section === "original" ? "original" : "update", label: "v1", repository: "https://github.com/example/tool", status: "published", contributor: { id: "123456", login: "test-user" }, createdAt: "2026-11-18T00:00:00Z", pipelineId: "cp_example", authors: [], maintainers: [] };
+      const entries = section === "maintained" ? [{kind:"maintained",tool:managed}] : [{kind:"submission",submission}];
+      response.end(JSON.stringify({ section, entries, page: Number(params.get("page") || 1), hasMore: section !== "maintained", total: 21, counts:{original:21,update:2,maintained:1} }));
+    } else if (request.url === "/api/community/v2/catalog/cp_managed/management") {
+      if (!["admin","maintainer"].includes(mode)) {response.writeHead(403).end("{}");return;}
+      response.end(JSON.stringify({item:managed,canAssignMaintainers:mode === "admin",maintainers:[{name:"Tool maintainer",...(mode === "admin" ? {contributorId:"123456"} : {})}]}));
+    } else if (request.url === "/api/community/v2/catalog/cp_managed") {
+      response.end(JSON.stringify({item:managed}));
     } else if (request.url?.startsWith("/api/community/v1/catalog")) {
       response.end(JSON.stringify({ items: [pipeline, { ...pipeline, id: "cp_unknown", name: "Untyped tool fixture", kind: undefined }, { ...pipeline, id: "cp_workflow", name: "Workflow fixture", kind: "workflow" }], generatedAt: "2026-11-13T00:00:00Z" }));
     } else if (request.url?.startsWith("/api/community/v1/contributions")) {
@@ -124,6 +138,7 @@ test("ready service shows two entry types and keeps pipeline lineage", async () 
   assert.match(html, /value="update" selected=""/);
   assert.match(html, /value="cp_example" selected=""/);
   assert.match(html, /value="cv_example"/);
+  assert.doesNotMatch(html, /<legend>Maintainers<\/legend>/);
   assert.match(html, /Author names/);
   assert.match(html, /name="authorNames"[^>]*value="Original author"/);
   assert.match(html, /<button[^>]*type="submit">Submit registration<\/button>/);
@@ -237,11 +252,10 @@ test("Community root is the registry and keeps query filters", async () => {
   assert.equal(response.status, 200);
   const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
   assert.match(html, /Community Tracking/);
-  assert.doesNotMatch(html, />Example tool</);
-  assert.match(html, /No tools match these filters/);
+  assert.match(html, /Example tool/);
   assert.match(html, /action="\/#registry"/);
   assert.match(html, /name="q"[^>]*value="example"/);
-  assert.match(html, /value="update" selected=""/);
+  assert.doesNotMatch(html, /<select name="type"/);
   assert.match(html, /href="\/community\/sign-in\?returnTo=%2Fcommunity"/);
   assert.doesNotMatch(html, /href="\/tutorial|An Operating System/);
   const header = html.match(/<header\b[^>]*>[\s\S]*?<\/header>/)?.[0];
@@ -398,13 +412,13 @@ test("legacy catalogs retain untyped tools while excluding workflows", async () 
 });
 
 
-test("Original/Update filtering works before backend rollout and groups legacy updates", async () => {
+test("home lists only Original tools even with old Update-filter bookmarks", async () => {
   for (const type of ["original", "update"]) {
     const response = await fetch(base + "/?q=transitional&type=" + type, { headers: { cookie: "community_session=transitional" } });
     const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
     assert.doesNotMatch(html, /Old backend needs origin|temporarily unavailable/);
-    if (type === "original") { assert.match(html, /Example tool/); assert.doesNotMatch(html, /Legacy improved tool|Legacy fix tool/); }
-    else { assert.match(html, /Legacy improved tool/); assert.match(html, /Legacy fix tool/); assert.doesNotMatch(html, />Example tool</); }
+    assert.match(html, /Search Tools/); assert.match(html, /Example tool/);
+    assert.doesNotMatch(html, /Legacy improved tool|Legacy fix tool|<select name="type"/);
   }
 });
 
@@ -449,4 +463,46 @@ test("record mode preserves sign-in destination and existing Tool selection", as
   assert.match(html, /id="contribution-type"/);
   assert.match(html, /value="cp_example" selected=""/);
   assert.match(html, /value="Example tool"/);
+});
+
+
+test("tool details show global maintainers once and recommendations before other versions", async () => {
+  const response = await fetch(base + "/community/catalog/cp_managed",{headers:{cookie:"community_session=maintainer"}});
+  const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+  assert.match(html, /Tool maintainer/); assert.doesNotMatch(html, /Version-only maintainer/);
+  assert.ok(html.indexOf("Recommended update") < html.indexOf(">v1</h3>"));
+  assert.match(html, /href="\/community\/catalog\/cp_managed\/manage"/);
+  assert.match(html, /href="\/community\/registry\/submit\?pipelineId=cp_managed"/);
+  assert.match(html, /href="\/community\/submit\?mode=record&amp;catalogId=cp_managed"/);
+  assert.doesNotMatch(html, /href="\/community\/submit\?catalogId=cp_managed"/);
+});
+
+test("My Contributions has correctly paginated groups and assigned-tool management", async () => {
+  for (const [section,label] of [["tools","My Tools"],["updates","My Updates"],["maintained","My Maintained Tools"]]) {
+    const response = await fetch(base+"/community/mine?section="+section,{headers:{cookie:"community_session=maintainer"}});
+    const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+    assert.match(html, /My Contributions/); assert.match(html,new RegExp(label));
+    if(section === "maintained") assert.match(html,/Manage this tool/); else { assert.match(html,/My submitted tool/); assert.match(html,/page=2/); }
+  }
+});
+
+test("Tool management keeps sign-in destinations and hides administrator assignment from maintainers", async () => {
+  const anon = await fetch(base+"/community/catalog/cp_managed/manage",{redirect:"manual"});
+  assert.equal(anon.status,307);assert.equal(anon.headers.get("location"),"/community/sign-in?returnTo=%2Fcommunity%2Fcatalog%2Fcp_managed%2Fmanage");
+  for(const mode of ["ready","maintainer","admin"]) {
+    const response=await fetch(base+"/community/catalog/cp_managed/manage",{headers:{cookie:"community_session="+mode}});
+    const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+    if(mode === "ready") assert.doesNotMatch(html,/Save recommendations|Save maintainers/);
+    else {assert.match(html,/Save recommendations/);assert.equal(html.includes("Save maintainers"),mode === "admin");}
+  }
+});
+
+
+test("private Tool routes reject bearer credentials even with a web cookie", async () => {
+  for(const path of ["catalog/cp_managed/management","catalog/cp_managed/recommendations","catalog/cp_managed/maintainers","catalog/cp_managed/metadata","me/contributions"]) {
+    const response=await fetch(base+"/api/community/v2/"+path,{headers:{cookie:"community_session=maintainer",authorization:"Bearer desktop-fixture"}});
+    assert.equal(response.status,403,path);
+  }
+  const unknown=await fetch(base+"/api/community/v2/catalog/cp_managed/management/extra");
+  assert.equal(unknown.status,404);
 });
