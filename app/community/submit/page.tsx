@@ -25,7 +25,7 @@ export default async function SubmitPage({ searchParams: query }: { searchParams
     <>
       <header className="community-heading">
         <h1>Log a contribution</h1>
-        <p>Give your work a public record, from a new pipeline to a bug fix in an existing tool.</p>
+        <p>Give your work a public record, from an original tool to an update such as a performance improvement or bug fix.</p>
       </header>
       <ContributionForm catalog={catalog} selected={catalog.find((item) => item.id === selected?.id)} />
     </>

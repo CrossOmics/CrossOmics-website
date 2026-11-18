@@ -1,23 +1,23 @@
 "use client";
 
 import Link from "next/link";
+import { contributionRequestType } from "@/lib/community/tool-types";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import type { Contribution } from "@/lib/community/types";
-import { contributionTypes, subjectKinds } from "@/lib/community/types";
-import { contributionSummary, contributionDescriptions, subjectDescriptions } from "@/lib/community/form-copy";
+import { contributionTypes } from "@/lib/community/types";
+import { contributionSummary, contributionDescriptions } from "@/lib/community/form-copy";
 import TypeHelp from "./TypeHelp";
 import { communityRequest } from "../client";
 
-type CatalogOption = { id: string; name: string; kind?: "workflow" | "tool"; projectUrl: string };
+type CatalogOption = { id: string; name: string; projectUrl: string };
 
 export default function ContributionForm({ catalog, selected }: { catalog: CatalogOption[]; selected?: CatalogOption }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<{ item: Contribution; reused: boolean } | null>(null);
   const [name, setName] = useState(selected?.name ?? "");
-  const [kind, setKind] = useState<keyof typeof subjectKinds>(selected?.kind === "tool" ? "tool" : "pipeline");
-  const [type, setType] = useState<keyof typeof contributionTypes>("new_pipeline");
+  const [type, setType] = useState<keyof typeof contributionTypes>("original");
   const summaryCopy = contributionSummary(type);
   const [projectUrl, setProjectUrl] = useState(selected?.projectUrl ?? "");
 
@@ -25,7 +25,7 @@ export default function ContributionForm({ catalog, selected }: { catalog: Catal
     event.preventDefault();
     setError("");
     setPending(true);
-    const data = Object.fromEntries(new FormData(event.currentTarget));
+    const data = { ...Object.fromEntries(new FormData(event.currentTarget)), type: contributionRequestType(type) };
     try {
       setResult(await communityRequest("contributions", "POST", data));
     } catch (error) {
@@ -53,7 +53,7 @@ export default function ContributionForm({ catalog, selected }: { catalog: Catal
         <div className="community-form-grid">
           <div className="community-item-type-field">
             <div className="community-item-type-label">
-              <label htmlFor="contribution-type">Contribution type</label>
+              <label htmlFor="contribution-type">Type</label>
               <TypeHelp label="About contribution types" entries={(Object.keys(contributionTypes) as Array<keyof typeof contributionTypes>).map((value) => ({ name: contributionTypes[value], description: contributionDescriptions[value] }))} />
             </div>
             <select id="contribution-type" required name="type" value={type} onChange={(event) => setType(event.target.value as keyof typeof contributionTypes)}>
@@ -67,7 +67,6 @@ export default function ContributionForm({ catalog, selected }: { catalog: Catal
                 const entry = catalog.find((item) => item.id === event.target.value);
                 if (entry) {
                   setName(entry.name);
-                  setKind(entry.kind === "tool" ? "tool" : "pipeline");
                   setProjectUrl(entry.projectUrl);
                 }
               }}>
@@ -76,16 +75,8 @@ export default function ContributionForm({ catalog, selected }: { catalog: Catal
               </select>
             </label>
           )}
-          <div className="community-item-type-field">
-            <div className="community-item-type-label">
-              <label htmlFor="subject-kind">Item type</label>
-              <TypeHelp label="About item types" entries={(Object.keys(subjectKinds) as Array<keyof typeof subjectKinds>).map((value) => ({ name: subjectKinds[value], description: subjectDescriptions[value] }))} />
-            </div>
-            <select id="subject-kind" name="subjectKind" value={kind} onChange={(event) => setKind(event.target.value as keyof typeof subjectKinds)} required>
-              {Object.entries(subjectKinds).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
-            </select>
-          </div>
-          <label>Item name<input name="subjectName" value={name} onChange={(event) => setName(event.target.value)} maxLength={120} required /></label>
+          <input type="hidden" name="subjectKind" value="tool" />
+          <label>Tool name<input name="subjectName" value={name} onChange={(event) => setName(event.target.value)} maxLength={120} required /></label>
           <label className="community-field-wide">{summaryCopy.label}
             <textarea name="summary" rows={4} maxLength={2000} required placeholder={summaryCopy.placeholder} />
           </label>
@@ -94,10 +85,10 @@ export default function ContributionForm({ catalog, selected }: { catalog: Catal
       <fieldset disabled={pending}>
         <legend>Link to your work</legend>
         <div className="community-form-grid">
-          <label>Project URL<input name="projectUrl" type="url" value={projectUrl} onChange={(event) => setProjectUrl(event.target.value)} maxLength={2048} placeholder="https://github.com/org/project" required /></label>
+          <label>Tool URL<input name="projectUrl" type="url" value={projectUrl} onChange={(event) => setProjectUrl(event.target.value)} maxLength={2048} placeholder="https://github.com/org/project" required /></label>
           <label>Evidence URL<input name="evidenceUrl" type="url" maxLength={2048} placeholder="https://github.com/org/project/pull/123" required /></label>
         </div>
-        <p>Link to a public pull request, commit, release, or paper. BioCode Commons and external projects follow the same rules.</p>
+        <p>Link to a public pull request, commit, release, or paper. BioCode Commons and external tools follow the same rules.</p>
       </fieldset>
       <div className="community-form-footer">
         <p>Your Community username, description, and links will be visible in the public contribution feed.</p>

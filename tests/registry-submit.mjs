@@ -11,8 +11,8 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const gardenerTarget = process.env.GARDENER_TEST_TARGET ?? "https://gardener.example.test";
 let service, web, workspace, base, output = "", catalogUnavailable = false, detailMetadata = false;
 const pipeline = {
-  id: "cp_example", name: "Example pipeline", description: "Example analysis", domain: "genomics",
-  status: "active", modalities: [], algorithms: [], keywords: [], inputs: [], outputs: [],
+  id: "cp_example", name: "Example tool", description: "Example analysis", domain: "genomics",
+  kind: "tool", status: "active", modalities: [], algorithms: [], keywords: [], inputs: [], outputs: [],
   repositories: [], papers: [], metrics: null,
   versions: [{ id: "cv_example", type: "origin", label: "v1", parent: null,
     repo: "https://github.com/example/pipeline", commit: "a".repeat(40), released_at: null,
@@ -38,16 +38,28 @@ before(async () => {
         registryV2Available: !["legacy", "unavailable"].includes(mode),
         canManageRegistry: mode === "admin", desktopAuthAvailable: true, canPostBounties: false, canManageBounties: false
       }));
+    } else if (request.url?.startsWith("/api/community/v1/catalog")) {
+      response.end(JSON.stringify({ items: [pipeline, { ...pipeline, id: "cp_unknown", name: "Untyped tool fixture", kind: undefined }, { ...pipeline, id: "cp_workflow", name: "Workflow fixture", kind: "workflow" }], generatedAt: "2026-11-13T00:00:00Z" }));
+    } else if (request.url?.startsWith("/api/community/v1/contributions")) {
+      response.end(JSON.stringify({ items: [{ id: "00000000-0000-4000-8000-000000000002", type: "algorithm_update", subjectKind: "tool", subjectName: "Example tool", catalogId: "cp_example", summary: "A legacy update", occurredOn: "2026-11-01", projectUrl: "https://github.com/example/tool", evidenceUrl: "https://github.com/example/tool/pull/1", projectScope: "external", channel: "web", contributor: { id: "123456", login: "test-user" }, impact: [] }], page: 1, hasMore: false }));
     } else if (request.url?.startsWith("/api/community/v1/bounties")) {
       response.end(JSON.stringify({ items: [], page: 1, hasMore: false }));
     } else if (request.url?.startsWith("/api/community/v2/registry/submissions")) {
       response.end(JSON.stringify({ submissions: [] }));
+    } else if (request.url === "/api/community/v2/catalog/cp_workflow") {
+      response.end(JSON.stringify({ item: { ...pipeline, id: "cp_workflow", name: "Workflow fixture", kind: "workflow" } }));
     } else if (request.url?.match(/^\/api\/community\/v2\/catalog\/cp_example$/)) {
       response.end(JSON.stringify({ item: detailMetadata ? { ...pipeline, modalities: ["RNA-seq"], inputs: ["FASTQ"] } : pipeline }));
     } else if (request.url?.endsWith("/metadata")) {
       response.end(JSON.stringify({ updated: true }));
     } else if (request.url?.startsWith("/api/community/v2/catalog")) {
-      response.writeHead(catalogUnavailable ? 503 : 200).end(JSON.stringify({ items: [pipeline], generatedAt: "2026-11-13T00:00:00Z" }));
+      if (new URL(request.url, "http://fixture").searchParams.get("q") === "transitional") {
+        const requested = new URL(request.url, "http://fixture").searchParams.get("type");
+        if (requested === "original") { response.writeHead(422).end(JSON.stringify({ message: "Old backend needs origin." })); return; }
+        const items = [pipeline, ...["improved", "fix"].map(type => ({ ...pipeline, id: "cp_" + type, name: "Legacy " + type + " tool", versions: pipeline.versions.map(v => ({ ...v, type })) }))];
+        response.end(JSON.stringify({ items: requested ? items.filter(item => item.versions.some(v => v.type === requested)) : items, generatedAt: "2026-11-13T00:00:00Z" })); return;
+      }
+      response.writeHead(catalogUnavailable ? 503 : 200).end(JSON.stringify({ items: [pipeline, { ...pipeline, id: "cp_workflow", name: "Workflow fixture", kind: "workflow" }], generatedAt: "2026-11-13T00:00:00Z" }));
     } else if (request.url?.startsWith("/api/community/auth/callback")) {
       response.setHeader("set-cookie", "community_session=fixture; Path=/; HttpOnly; Secure; SameSite=Lax");
       response.writeHead(307, { location: "https://www.cross-omics.com/community/mine" }).end();
@@ -92,13 +104,13 @@ async function page(mode, query = "") {
 }
 
 function entryTypes(html) {
-  const select = html.match(/<label>Registration type<select[^>]*>(.*?)<\/select>/s)?.[1];
-  assert.ok(select, "The submission form must explain the registration type");
+  const select = html.match(/<label>Type<select[^>]*>(.*?)<\/select>/s)?.[1];
+  assert.ok(select, "The submission form must explain the tool type");
   assert.deepEqual([...select.matchAll(/<option value="([^"]+)"[^>]*>([^<]+)<\/option>/g)].map((match) => [match[1], match[2]]),
-    [["origin", "New project (first version)"], ["improved", "Performance improvement"], ["update", "Feature or compatibility update"], ["fix", "Bug fix"]]);
+    [["original", "Original"], ["update", "Update"]]);
 }
 
-test("legacy service shows four types with submission controls disabled", async () => {
+test("legacy service shows two types with submission controls disabled", async () => {
   const html = await page("legacy");
   entryTypes(html);
   assert.match(html, /<fieldset disabled="">/);
@@ -106,7 +118,7 @@ test("legacy service shows four types with submission controls disabled", async 
   assert.doesNotMatch(html, /Authorize and open PR|Preview registration/);
 });
 
-test("ready service shows four entry types and keeps pipeline lineage", async () => {
+test("ready service shows two entry types and keeps pipeline lineage", async () => {
   const html = await page("ready", "?pipelineId=cp_example");
   entryTypes(html);
   assert.match(html, /value="update" selected=""/);
@@ -117,9 +129,9 @@ test("ready service shows four entry types and keeps pipeline lineage", async ()
   assert.match(html, /<button[^>]*type="submit">Submit registration<\/button>/);
 });
 
-test("new project asks for actual authors and citation without requiring a change summary", async () => {
+test("original tool asks for actual authors and citation without requiring a change summary", async () => {
   const html = await page("ready");
-  assert.match(html, /value="origin" selected=""/);
+  assert.match(html, /value="original" selected=""/);
   assert.match(html, /Author names/);
   assert.match(html, /Separate names with a semicolon/);
   assert.match(html, /Citation information \(optional\)/);
@@ -129,7 +141,7 @@ test("new project asks for actual authors and citation without requiring a chang
   assert.match(html, /<button[^>]*type="submit">Submit registration<\/button>/);
 });
 
-test("unavailable service retains the four-type form with submission disabled", async () => {
+test("unavailable service retains the two-type form with submission disabled", async () => {
   const html = await page("unavailable");
   entryTypes(html);
   assert.match(html, /<fieldset disabled="">/);
@@ -158,7 +170,7 @@ test("Google and Apple can submit projects and read history without switching ac
   }
 });
 
-test("anonymous registration uses the dedicated sign-in page and keeps the target project", async () => {
+test("anonymous registration uses the dedicated sign-in page and keeps the target tool", async () => {
   const response = await fetch(base + "/community/registry/submit?pipelineId=cp_example", { redirect: "manual" });
   assert.equal(response.status, 307);
   assert.equal(response.headers.get("location"), "/community/sign-in?returnTo=%2Fcommunity%2Fregistry%2Fsubmit%3FpipelineId%3Dcp_example");
@@ -225,10 +237,11 @@ test("Community root is the registry and keeps query filters", async () => {
   assert.equal(response.status, 200);
   const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
   assert.match(html, /Community Tracking/);
-  assert.match(html, /Example pipeline/);
+  assert.doesNotMatch(html, />Example tool</);
+  assert.match(html, /No tools match these filters/);
   assert.match(html, /action="\/#registry"/);
   assert.match(html, /name="q"[^>]*value="example"/);
-  assert.match(html, /value="fix" selected=""/);
+  assert.match(html, /value="update" selected=""/);
   assert.match(html, /href="\/community\/sign-in\?returnTo=%2Fcommunity"/);
   assert.doesNotMatch(html, /href="\/tutorial|An Operating System/);
   const header = html.match(/<header\b[^>]*>[\s\S]*?<\/header>/)?.[0];
@@ -304,7 +317,7 @@ test("all authenticated accounts see the bounty form without contributions or ed
 });
 
 
-test("project registration offers optional metadata with examples", async () => {
+test("tool registration offers optional metadata with examples", async () => {
   const html = await page("ready");
   for (const field of ["modalities", "algorithms", "inputs", "outputs"]) {
     assert.match(html, new RegExp('name="' + field + '"'));
@@ -323,7 +336,7 @@ test("project details hide empty metadata and show only populated fields", async
     assert.equal(html.includes("<dt>Modalities</dt>"), mode === "metadata");
     assert.equal(html.includes("<dt>Inputs</dt>"), mode === "metadata");
     assert.doesNotMatch(html, /<dt>Algorithms<\/dt>|<dt>Outputs<\/dt>/);
-    assert.equal(html.includes("Edit project metadata"), mode === "admin");
+    assert.equal(html.includes("Edit tool metadata"), mode === "admin");
   }
 });
 
@@ -334,4 +347,63 @@ test("project metadata correction is forwarded by the authenticated proxy", asyn
   });
   assert.equal(response.status, 200);
   assert.equal((await response.json()).updated, true);
+});
+
+
+test("registry and contribution forms share Original/Update and offer only tools", async () => {
+  const registry = await page("ready");
+  entryTypes(registry);
+  assert.match(registry, /Tool name/);
+  assert.doesNotMatch(registry, /Project name|>Workflow<|>Performance improvement<|>Bug fix</);
+  const contributionResponse = await fetch(base + "/community/submit", { headers: { cookie: "community_session=ready" } });
+  assert.equal(contributionResponse.status, 200);
+  const contribution = (await contributionResponse.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+  const menu = contribution.match(/<select id="contribution-type"[^>]*>(.*?)<\/select>/s)?.[1];
+  assert.ok(menu);
+  assert.deepEqual([...menu.matchAll(/<option value="([^"]+)"[^>]*>([^<]+)<\/option>/g)].map(m => [m[1],m[2]]), [["original","Original"],["update","Update"]]);
+  assert.match(contribution, /name="subjectKind"[^>]*value="tool"/);
+  assert.match(contribution, /Tool name/);
+  assert.doesNotMatch(contribution, /Item type|Workflow fixture/);
+  const detail = await fetch(base + "/community/catalog/cp_example", { headers: { cookie: "community_session=ready" } });
+  const detailHtml = (await detail.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+  assert.match(detailHtml, />Tool<\/span>/);
+  assert.match(detailHtml, />Original<\/span>/);
+});
+
+test("tool catalog excludes workflow entries and uses Tool registration vocabulary", async () => {
+  const response = await fetch(base + "/", { headers: { cookie: "community_session=ready" } });
+  const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+  assert.match(html, /Register a tool/);
+  assert.doesNotMatch(html, /Workflow fixture|Register a project|>Workflows<|>Project<\/span>/);
+});
+
+
+test("legacy contribution types display the same Update label and workflows have no Tool detail page", async () => {
+  const feed = await fetch(base + "/community/activity");
+  assert.equal(feed.status, 200);
+  const html = (await feed.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+  assert.match(html, />Update<\/span>/);
+  assert.doesNotMatch(html, />Algorithm update<|>Optimization<|>Bug fix</);
+  const workflow = await fetch(base + "/community/catalog/cp_workflow");
+  assert.equal(workflow.status, 404);
+});
+
+
+test("legacy catalogs retain untyped tools while excluding workflows", async () => {
+  const response = await fetch(base + "/", { headers: { cookie: "community_session=legacy" } });
+  assert.equal(response.status, 200);
+  const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+  assert.match(html, /Untyped tool fixture/);
+  assert.doesNotMatch(html, /Workflow fixture/);
+});
+
+
+test("Original/Update filtering works before backend rollout and groups legacy updates", async () => {
+  for (const type of ["original", "update"]) {
+    const response = await fetch(base + "/?q=transitional&type=" + type, { headers: { cookie: "community_session=transitional" } });
+    const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+    assert.doesNotMatch(html, /Old backend needs origin|temporarily unavailable/);
+    if (type === "original") { assert.match(html, /Example tool/); assert.doesNotMatch(html, /Legacy improved tool|Legacy fix tool/); }
+    else { assert.match(html, /Legacy improved tool/); assert.match(html, /Legacy fix tool/); assert.doesNotMatch(html, />Example tool</); }
+  }
 });

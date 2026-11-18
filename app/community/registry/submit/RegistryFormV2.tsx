@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { registryRequestType } from "@/lib/community/tool-types";
 import { useRef, useState, type FormEvent } from "react";
 import { registryTypes, registryTypeDescriptions, type RegistryDraftV2, type RegistryItemV2, type RegistrySubmissionV2, type RegistryType } from "@/lib/community/registry-v2";
 import type { Contributor } from "@/lib/community/types";
@@ -13,18 +14,18 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
   items: RegistryItemV2[]; submitter: Contributor; initialId?: string; unavailableMessage?: string;
 }) {
   const initial = items.find((item) => item.id === initialId);
-  const [type, setType] = useState<RegistryType>(initial ? "update" : "origin");
+  const [type, setType] = useState<RegistryType>(initial ? "update" : "original");
   const [pipelineId, setPipelineId] = useState(initial?.id ?? "");
   const [authors, setAuthors] = useState<CreditInput[]>(() => seedCredits(initial, "authors"));
   const [authorNames, setAuthorNames] = useState(() => seedCredits(initial, "authors").map((credit) => credit.name).filter(Boolean).join("; "));
-  const [citation, setCitation] = useState(() => initial?.versions.find((version) => version.type === "origin")?.citation ?? "");
+  const [citation, setCitation] = useState(() => initial?.versions.find((version) => version.type === "original")?.citation ?? "");
   const [maintainers, setMaintainers] = useState<CreditInput[]>(() => seedCredits(initial, "maintainers"));
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<RegistrySubmissionV2 | null>(null);
   const inFlight = useRef(false);
   const requestId = useRef<string | null>(null);
-  const origin = type === "origin";
+  const origin = type === "original";
   const selected = origin ? undefined : items.find((item) => item.id === pipelineId);
   const parents = selected?.versions.filter((version) => !version.withdrawn) ?? [];
 
@@ -33,7 +34,7 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
     setPipelineId(id);
     setAuthors(seedCredits(item, "authors"));
     setAuthorNames(seedCredits(item, "authors").map((credit) => credit.name).filter(Boolean).join("; "));
-    setCitation(item?.versions.find((version) => version.type === "origin")?.citation ?? "");
+    setCitation(item?.versions.find((version) => version.type === "original")?.citation ?? "");
     setMaintainers(seedCredits(item, "maintainers"));
   }
 
@@ -62,7 +63,7 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
     setError("");
     try {
       const response = await communityRequest<{ submission: RegistrySubmissionV2 }>(
-        "registry/submissions", "POST", body, "v2");
+        "registry/submissions", "POST", { ...body, type: registryRequestType(body.type) }, "v2");
       setResult(response.submission);
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : "Could not submit your registration.");
@@ -90,24 +91,24 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
       <fieldset disabled={pending || Boolean(unavailableMessage)}>
         <legend>Registry details</legend>
         <div className="community-form-grid">
-          <label>Registration type<select name="type" value={type} aria-describedby="registration-type-help" onChange={(event) => {
+          <label>Type<select name="type" value={type} aria-describedby="registration-type-help" onChange={(event) => {
             const next = event.target.value as RegistryType;
-            if ((next === "origin") !== origin) select(next === "origin" ? "" : initial?.id ?? "");
+            if ((next === "original") !== origin) select(next === "original" ? "" : initial?.id ?? "");
             setType(next);
           }}>
             {Object.entries(registryTypes).map(([key, label]) => <option value={key} key={key}>{label}</option>)}
           </select></label>
           <p id="registration-type-help" className="community-field-wide">{registryTypeDescriptions[type]}</p>
           {origin ? <>
-            <label>Project name<input name="name" required maxLength={120} /></label>
+            <label>Tool name<input name="name" required maxLength={120} /></label>
             <label>Domain<select name="domain" required defaultValue="">
               <option value="">Choose a domain</option>
               {domains.map((domain) => <option value={domain} key={domain}>{domain}</option>)}
             </select></label>
             <label className="community-field-wide">Description<textarea name="description" required maxLength={2000} rows={4} /></label>
           </> : <>
-            <label>Existing project<select required value={pipelineId} onChange={(event) => select(event.target.value)}>
-              <option value="">Choose a project</option>
+            <label>Existing tool<select required value={pipelineId} onChange={(event) => select(event.target.value)}>
+              <option value="">Choose a tool</option>
               {items.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
             </select></label>
             <label>Based on version<select name="parentVersionId" key={pipelineId} required defaultValue="" onChange={(event) => {
@@ -124,7 +125,7 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
           <label>Version label<input name="label" required maxLength={120} placeholder="v1.0.0" /></label>
           <label>Full commit SHA<input name="commit" required maxLength={40} pattern="[0-9a-fA-F]{40}" spellCheck={false} /></label>
         </div>
-        <RegistryMetadataFields key={origin ? "origin" : pipelineId} metadata={selected} />
+        <RegistryMetadataFields key={origin ? "original" : pipelineId} metadata={selected} />
         <label>Author names<input name="authorNames" required value={authorNames} maxLength={2600}
           placeholder="Jane Smith; John Doe" aria-describedby="author-names-help" onChange={(event) => setAuthorNames(event.target.value)} /></label>
         <p id="author-names-help">Separate names with a semicolon (;). List the original authors, who may be different from the person submitting this form.</p>
@@ -143,7 +144,7 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
 }
 
 function seedCredits(item: RegistryItemV2 | undefined, field: "authors" | "maintainers") {
-  const origin = item?.versions.find((version) => version.type === "origin");
+  const origin = item?.versions.find((version) => version.type === "original");
   const values = origin?.[field] ?? [];
   return values.length ? values.map(withEmptyCreditFields) : [emptyCredit];
 }

@@ -1,11 +1,10 @@
 import type { Contributor, RegistryItem } from "./types";
+import { toolTypes, normalizeToolType } from "./tool-types";
 
-export const registryTypes = { origin: "New project (first version)", improved: "Performance improvement", update: "Feature or compatibility update", fix: "Bug fix" } as const;
+export const registryTypes = toolTypes;
 export const registryTypeDescriptions = {
-  origin: "Register a project that is not in the catalog yet. Describe what it does; no earlier version is needed.",
-  improved: "Make an existing project faster or reduce its memory use. Choose the version you improved.",
-  update: "Add a feature or support for a new dependency, format, or platform. Choose the earlier version you updated.",
-  fix: "Correct a problem in an existing project. Choose the version with the problem and describe the fix."
+  original: "Register a tool that is not in the catalog yet. Describe what it does; no earlier version is needed.",
+  update: "Update an existing tool with performance improvements, bug fixes, features, compatibility or maintenance changes. Choose the earlier version you updated."
 } as const;
 export type RegistryType = keyof typeof registryTypes;
 export type RegistryCredit = { name: string; github?: string; orcid?: string; url?: string };
@@ -47,3 +46,18 @@ export type RegistrySubmissionV2 = Omit<RegistryDraftV2, "requestId"> & {
   reason?: string | null;
   versionId?: string | null;
 };
+
+
+export function normalizeRegistryItem(item: RegistryItemV2): RegistryItemV2 {
+  return { ...item, kind: "tool", versions: item.versions.map(version => {
+    const type = normalizeToolType(version.type);
+    if (!type) throw new Error("Unsupported tool version type.");
+    return { ...version, type };
+  }) };
+}
+
+export function normalizeRegistrySubmission(item: RegistrySubmissionV2): RegistrySubmissionV2 {
+  const type = normalizeToolType(item.type);
+  if (!type) throw new Error("Unsupported tool submission type.");
+  return { ...item, type };
+}

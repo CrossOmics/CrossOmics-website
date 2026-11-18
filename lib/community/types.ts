@@ -1,10 +1,6 @@
-export const contributionTypes = {
-  new_pipeline: "New project",
-  algorithm_update: "Algorithm update",
-  bug_fix: "Bug fix",
-  optimization: "Optimization",
-  maintenance: "Maintenance"
-} as const;
+import { toolTypes } from "./tool-types";
+
+export const contributionTypes = toolTypes;
 
 export const subjectKinds = {
   pipeline: "Pipeline",

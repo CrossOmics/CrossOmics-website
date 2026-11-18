@@ -19,21 +19,21 @@ export default function EditProjectMetadata({ pipelineId, metadata }: { pipeline
     try {
       await communityRequest("catalog/" + encodeURIComponent(pipelineId) + "/metadata", "POST",
         { ...readRegistryMetadata(form), reason: String(form.get("reason") ?? "") }, "v2");
-      setMessage({ text: "Project metadata saved.", error: false });
+      setMessage({ text: "Tool metadata saved.", error: false });
       router.refresh();
     } catch (error) {
-      setMessage({ text: error instanceof Error ? error.message : "Could not save project metadata.", error: true });
+      setMessage({ text: error instanceof Error ? error.message : "Could not save tool metadata.", error: true });
     } finally { setPending(false); }
   }
   return <details className="community-app-access">
-    <summary>Edit project metadata</summary>
+    <summary>Edit tool metadata</summary>
     <form className="community-form" onSubmit={save} aria-busy={pending}>
       <fieldset disabled={pending}>
         <RegistryMetadataFields metadata={metadata} />
-        <p>Saving replaces these four project fields. Clear a field to hide it on the public page. Versions and credits stay unchanged.</p>
+        <p>Saving replaces these four tool fields. Clear a field to hide it on the public page. Versions and credits stay unchanged.</p>
         <label>Source and reason for correction<textarea name="reason" required maxLength={1000} rows={3} /></label>
       </fieldset>
-      <button type="submit" className="community-primary" disabled={pending}>Save project metadata</button>
+      <button type="submit" className="community-primary" disabled={pending}>Save tool metadata</button>
       {message && <p role={message.error ? "alert" : "status"} className={message.error ? "community-error" : undefined}>{message.text}</p>}
     </form>
   </details>;

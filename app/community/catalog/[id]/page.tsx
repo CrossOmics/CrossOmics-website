@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { registryTypes } from "@/lib/community/registry-v2";
+import { toolTypeLabel } from "@/lib/community/tool-types";
 import RegistryCredits from "../../RegistryCredits";
 import { communityCatalogItem, communitySession, registryV2Item } from "@/lib/community/service";
 import EditProjectMetadata from "./EditProjectMetadata";
@@ -22,7 +22,7 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
     <>
       <header className="community-heading">
         <Link href="/#registry" className="community-link">← Back to registry</Link>
-        <span className="community-tag">{v2 ? "Project" : item.kind === "workflow" ? "Workflow" : "Tool"}</span>
+        <span className="community-tag">Tool</span>
         <h1>{item.name}</h1>
         <p>{item.description}</p>
         <div className="community-actions">
@@ -55,7 +55,7 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
               <li key={version.id} className="community-record">
                 <div className="community-actions">
                   <h3>{version.label}</h3>
-                  <span className="community-tag">{"type" in version ? registryTypes[version.type] : version.kind === "optimization" ? "Optimization" : "Original"}</span>
+                  <span className="community-tag">{toolTypeLabel("type" in version ? version.type : version.kind)}</span>
                   {version.withdrawn && <span className="community-tag">Withdrawn</span>}
                 </div>
                 <p>{[version.released_at, parent && `Based on ${parent.label}`].filter(Boolean).join(" · ")}</p>
