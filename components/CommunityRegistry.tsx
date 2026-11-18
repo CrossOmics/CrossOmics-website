@@ -84,10 +84,9 @@ export default async function CommunityRegistry({ searchParams: query }: { searc
                   <li key={item.id}>
                     <Link href={`/community/catalog/${item.id}`} className="community-catalog-card">
                       <div className="community-card-top">
-                        <span className="community-tag">Tool</span>
+                        <h3>{item.name}</h3>
                         <span aria-hidden>↗</span>
                       </div>
-                      <h3>{item.name}</h3>
                       <p>{item.description}</p>
                       {item.algorithms.length > 0 && <small>{item.algorithms.slice(0, 3).join(" · ")}</small>}
                     </Link>

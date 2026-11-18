@@ -366,7 +366,7 @@ test("registry and contribution forms share Original/Update and offer only tools
   assert.doesNotMatch(contribution, /Item type|Workflow fixture/);
   const detail = await fetch(base + "/community/catalog/cp_example", { headers: { cookie: "community_session=ready" } });
   const detailHtml = (await detail.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
-  assert.match(detailHtml, />Tool<\/span>/);
+  assert.doesNotMatch(detailHtml, />Tool<\/span>/);
   assert.match(detailHtml, />Original<\/span>/);
 });
 
@@ -374,7 +374,7 @@ test("tool catalog excludes workflow entries and uses Tool registration vocabula
   const response = await fetch(base + "/", { headers: { cookie: "community_session=ready" } });
   const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
   assert.match(html, /Register a tool/);
-  assert.doesNotMatch(html, /Workflow fixture|Register a project|>Workflows<|>Project<\/span>/);
+  assert.doesNotMatch(html, /Workflow fixture|Register a project|>Workflows<|>Project<\/span>|>Tool<\/span>/);
 });
 
 
