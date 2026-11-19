@@ -40,11 +40,11 @@ export default async function RegistrySubmitPage({ searchParams }: {
   return (
     <>
       <header className="community-heading">
-        <Link href="/#registry" className="community-link">← Back to the registry</Link>
-        <h1>Register a tool</h1>
+        <Link href="/community/submit" className="community-link">← All contribution options</Link>
+        <h1>Submit a Tool or Update</h1>
         <p>Register an original tool, or submit an update to an existing tool. CrossOmics administrators review submissions before publication.</p>
         {v2 && signedIn && <div className="community-actions">
-          <Link className="community-link" href="/community/registry/submissions">My registry submissions</Link>
+          <Link className="community-link" href="/community/registry/submissions">My Tool Submissions</Link>
         </div>}
       </header>
       {legacyResult && <p className="community-notice" role="alert">{legacyResult}{" "}

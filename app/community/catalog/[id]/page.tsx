@@ -27,8 +27,7 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
         <div className="community-actions">
           {project && <a className="community-secondary" href={project}>Source repository <span aria-hidden>↗</span></a>}
           <Link className="community-secondary" href={`/community/activity?catalogId=${item.id}`}>View contributions</Link>
-          {v2 && <Link className="community-secondary" href={"/community/registry/submit?pipelineId=" + item.id}>Submit a version</Link>}
-          <Link className="community-primary" href={`/community/submit?catalogId=${item.id}`}>Log a contribution</Link>
+          <Link className="community-primary" href={`/community/submit?catalogId=${item.id}`}>Submit a Contribution</Link>
         </div>
       </header>
       <dl className="community-detail-grid">

@@ -15,7 +15,7 @@ export default async function DesktopSignIn({ searchParams }: { searchParams: Pr
     <>
       <header className="community-heading">
         <h1>Sign in to Gardener</h1>
-        <p>Use your CrossOmics Community account to access shared contributions and the registry in Gardener.</p>
+        <p>Use your Community account to access shared contributions and the registry in Gardener.</p>
       </header>
       {request && (error === "failed" || error === "expired") && <p role="alert" className="community-error">
         GitHub sign-in did not complete. You can try again from this page.

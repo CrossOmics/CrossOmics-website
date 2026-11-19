@@ -20,7 +20,7 @@ export default async function LegacyGardenerPage({ params, searchParams }: {
     <main className="community-main container">
       <h1>Gardener website is temporarily unavailable</h1>
       <p>The Gardener product website has moved. Please try this link again later.</p>
-      <Link className="community-link" href="/">Browse CrossOmics Community</Link>
+      <Link className="community-link" href="/">Browse Community</Link>
     </main>
     <SiteFooter />
   </div>;

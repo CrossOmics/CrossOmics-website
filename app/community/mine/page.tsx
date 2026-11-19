@@ -23,7 +23,7 @@ export default async function MyHistory({ searchParams: query }: { searchParams:
         <div className="community-actions">
           <span className="community-tag">@{contributor.login}</span>
           {session?.registryV2Available && /^[1-9]\d{0,19}$/.test(contributor.id) &&
-            <Link className="community-secondary" href="/community/registry/submissions">My registry submissions</Link>}
+            <Link className="community-secondary" href="/community/registry/submissions">My Tool Submissions</Link>}
           <form method="post" action="/api/community/auth/logout"><button className="community-secondary">Sign out</button></form>
         </div>
         <ContributorId id={contributor.id} />

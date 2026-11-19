@@ -2,7 +2,6 @@ import Link from "next/link";
 import { normalizeToolType, isToolKind } from "@/lib/community/tool-types";
 import { registryTypes } from "@/lib/community/registry-v2";
 import { communityCatalog, communitySession, registryV2Catalog } from "@/lib/community/service";
-const rankingUrl = "https://crossomics.github.io/pipeline-registry/ranking/";
 
 function RegistryDiagram() {
   return (
@@ -53,12 +52,8 @@ export default async function CommunityRegistry({ searchParams: query }: { searc
       <section className="community-section" id="registry" aria-labelledby="registry-title">
         <div className="community-section-heading">
           <div>
-            <h2 id="registry-title">Explore the registry</h2>
+            <h2 id="registry-title">Explore Existing Tools</h2>
             <p>Browse registered tools and their versions.</p>
-          </div>
-          <div className="community-actions">
-            <a href={rankingUrl} className="community-link">Maintenance ranking <span aria-hidden>↗</span></a>
-            <Link href="/community/registry/submit" className="community-primary">Register a tool</Link>
           </div>
         </div>
         <form className="community-search" action="/#registry">

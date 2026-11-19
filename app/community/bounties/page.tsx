@@ -11,8 +11,8 @@ export default async function BountiesPage({ searchParams }: { searchParams: Pro
   return (
     <>
       <header className="community-heading">
-        <h1>Community bounties</h1>
-        <p>Find work the CrossOmics community would like help with, from maintaining a tool to building a workflow or running a benchmark.</p>
+        <h1>Tools Wanted</h1>
+        <p>Find requests from the community for new tools, improvements, maintenance, and benchmarks. Offer help or post a bounty for work you need.</p>
         <div className="community-actions">
           <Link href="/community/bounties/new" className="community-primary">Post a bounty</Link>
         </div>
