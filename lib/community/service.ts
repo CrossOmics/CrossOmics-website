@@ -155,3 +155,26 @@ export async function desktopAuthAttempt(id: string) {
     return null;
   }
 }
+
+export async function toolManagement(id: string) {
+  try {
+    const data = await communityData<import("./tool-maintenance").ToolManagement>("catalog/" + encodeURIComponent(id) + "/management", true, "v2");
+    return { data: { ...data, item: normalizeRegistryItem(data.item) }, status: 200 };
+  } catch (error) {
+    return { data: null, status: error instanceof ServiceError ? error.status : 503 };
+  }
+}
+
+export async function personalContributions(section: import("./tool-maintenance").PersonalSection, page?: string) {
+  const query = new URLSearchParams({ section, ...(page ? { page } : {}) });
+  try {
+    const data = await communityData<import("./tool-maintenance").PersonalContributions>("me/contributions?" + query, true, "v2");
+    return { ...data, entries: data.entries.map(entry => {
+      if (entry.kind === "submission") return { ...entry, submission: normalizeRegistrySubmission(entry.submission) };
+      if (entry.kind === "maintained") return { ...entry, tool: normalizeRegistryItem(entry.tool) };
+      const type = normalizeToolType(entry.contribution.type);
+      if (!type) throw new Error("Unsupported contribution type.");
+      return { ...entry, contribution: { ...entry.contribution, type } };
+    }) };
+  } catch { return null; }
+}

@@ -42,3 +42,18 @@ test("the Tool UI can write through the existing backend during a frontend-first
   for (const value of ["tool", "", null, undefined]) assert.equal(isToolKind(value), true);
   for (const value of ["workflow", "algorithm", "unknown"]) assert.equal(isToolKind(value), false);
 });
+
+
+const { toolMaintainers, orderedToolVersions } = require("../lib/community/tool-maintenance.ts");
+test("explicitly empty Tool maintainer credits never fall back to per-version credits", () => {
+  const item={versions:[{id:"cv_original",type:"original",maintainers:[{name:"Old maintainer"}]}]};
+  assert.deepEqual(toolMaintainers(item),[{name:"Old maintainer"}]);
+  assert.deepEqual(toolMaintainers({...item,maintainers:[]}),[]);
+});
+
+test("recommendations preserve complete history while ignoring missing or withdrawn pins", () => {
+  const versions=[{id:"cv_original"},{id:"cv_update"},{id:"cv_withdrawn",withdrawn:true}];
+  const result=orderedToolVersions({versions,recommendedVersionIds:["cv_missing","cv_withdrawn","cv_update"]});
+  assert.deepEqual(result.map(v=>v.id),["cv_update","cv_original","cv_withdrawn"]);
+  assert.deepEqual(versions.map(v=>v.id),["cv_original","cv_update","cv_withdrawn"]);
+});

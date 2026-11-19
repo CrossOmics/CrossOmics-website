@@ -21,7 +21,7 @@ export default function CommunityNav({ signedIn }: { signedIn: boolean }) {
       </div>
       <div className="community-nav-actions">
         {signedIn ? (
-          <Link href="/community/mine" className="community-secondary" aria-current={path === "/community/mine" ? "page" : undefined}>My history</Link>
+          <Link href="/community/mine" className="community-secondary" aria-current={path === "/community/mine" ? "page" : undefined}>My Contributions</Link>
         ) : (
           <Link href={signInHref} className="community-secondary">Sign in</Link>
         )}
