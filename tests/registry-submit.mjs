@@ -50,6 +50,11 @@ before(async () => {
     } else if (request.url === "/api/community/v2/catalog/cp_managed/management") {
       if (!["admin","maintainer"].includes(mode)) {response.writeHead(403).end("{}");return;}
       response.end(JSON.stringify({item:managed,canAssignMaintainers:mode === "admin",maintainers:[{name:"Tool maintainer",...(mode === "admin" ? {contributorId:"123456"} : {})}]}));
+    } else if (request.url === "/api/community/v2/catalog/cp_invalid") {
+      response.end(JSON.stringify({item:{...pipeline,id:"cp_invalid",versions:[
+        {...pipeline.versions[0],id:"cv_self",type:"update",label:"Cyclic version",parent:"cv_self"},
+        {...pipeline.versions[0],id:"cv_orphan",type:"update",label:"Orphan version",parent:"not-found"}
+      ]}}));
     } else if (request.url === "/api/community/v2/catalog/cp_managed") {
       response.end(JSON.stringify({item:managed}));
     } else if (request.url?.startsWith("/api/community/v1/catalog")) {
@@ -558,4 +563,15 @@ test('Tool versions retain full detail cards and expose a lineage view without b
   assert.match(html, /Recommended update/);
   assert.match(html, /NuSTAR Developer/);
   assert.match(html, /Withdraw this version/);
+});
+
+
+test('invalid ancestry never claims a self-parent or turns orphan Update credits into Original authors', async () => {
+  const response=await fetch(base+'/community/catalog/cp_invalid');
+  assert.equal(response.status,200);
+  const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,'');
+  assert.doesNotMatch(html,/Based on Cyclic version|<dt>Original authors<\/dt>/);
+  assert.match(html,/Invalid parent relationship/);
+  assert.match(html,/Parent not available/);
+  assert.equal((html.match(/<dt>Recorded authors<\/dt>/g)??[]).length,2);
 });

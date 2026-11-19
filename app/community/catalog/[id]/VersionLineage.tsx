@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState, type PointerEvent, type ReactNode } from "react";
-import { buildLineage, fitLineage, lineageNodeSize, zoomLineage, moveLineageGesture, type LineageGesture, type LineageView } from "@/lib/community/lineage";
+import { buildLineage, fitLineage, lineageNodeSize, lineageIssueLabels, zoomLineage, moveLineageGesture, type LineageGesture, type LineageView } from "@/lib/community/lineage";
 import styles from "./VersionLineage.module.css";
 
 type Version = { id: string; label: string; parent: string | null; type: string; repo: string; withdrawn: boolean; authors: string };
 type Point = { x: number; y: number };
-const issueLabels = { "missing-parent": "Parent not available", cycle: "Invalid parent relationship" };
 
 export default function VersionLineage({ versions, recommendedIds = [], details }: {
   versions: Version[]; recommendedIds?: string[]; details: ReactNode[];
@@ -22,6 +21,7 @@ export default function VersionLineage({ versions, recommendedIds = [], details 
   const graphId = useId(), markerId = useId();
   const layout = useMemo(() => buildLineage(versions), [versions]);
   const positions = useMemo(() => new Map(layout.nodes.map(node => [node.id, node])), [layout]);
+  const validParents = useMemo(() => new Map(layout.edges.map(edge => [edge.child,edge.parent])), [layout]);
   const byId = useMemo(() => new Map(versions.map(version => [version.id, version])), [versions]);
   const currentIndex = Math.max(0, versions.findIndex(version => version.id === selected));
   const updateView = (next: LineageView) => { viewRef.current = next; setView(next); };
@@ -63,6 +63,10 @@ export default function VersionLineage({ versions, recommendedIds = [], details 
     const points = [...pointers.current.values()], start = gesture.current;
     const next = moveLineageGesture(start, points);
     if (!next) return;
+    if (points.length === 1) {
+      start.pan = true;
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
     if (points.length > 1 || Math.hypot(points[0].x-start.point.x,points[0].y-start.point.y)>4) suppressClick.current = true;
     updateView(next);
   };
@@ -117,18 +121,20 @@ export default function VersionLineage({ versions, recommendedIds = [], details 
           </svg>
           {layout.nodes.map(node => {
             const version=byId.get(node.id)!;
+            const parent = byId.get(validParents.get(node.id) ?? "");
+            const recommended = !version.withdrawn && recommendedIds.includes(version.id);
             let repository="";
             try { repository = new URL(version.repo).pathname.replace(/^\//, "").replace(/\/$/, ""); } catch { /* No usable repository label. */ }
             return <button type="button" key={node.id} className={styles.node} aria-pressed={selected===node.id}
               style={{ left:node.x,top:node.y,width:lineageNodeSize.width,height:lineageNodeSize.height }}
-              onFocus={() => reveal(node.id)} onClick={() => setSelected(node.id)} aria-controls={`${graphId}-details`}
-              aria-label={`${version.label}, ${version.type}${version.parent ? `, based on ${byId.get(version.parent)?.label ?? "unavailable parent"}` : ""}${version.withdrawn ? ", withdrawn" : ""}`}>
+              onFocus={event => { if (event.currentTarget.matches(":focus-visible")) reveal(node.id); }} onClick={() => setSelected(node.id)} aria-controls={`${graphId}-details`}
+              aria-label={`${version.label}, ${version.type}${parent ? `, based on ${parent.label}` : ""}${node.issue ? `, ${lineageIssueLabels[node.issue]}` : ""}${recommended ? ", recommended" : ""}${version.withdrawn ? ", withdrawn" : ""}`}>
               <span className={styles.badges}><span className="community-tag">{version.type}</span>
-                {!version.withdrawn && recommendedIds.includes(version.id) && <span className="community-tag community-recommended">Recommended</span>}
+                {recommended && <span className="community-tag community-recommended">Recommended</span>}
                 {version.withdrawn && <span className="community-tag community-tag-neutral">Withdrawn</span>}</span>
               <strong>{version.label}</strong><span className={styles.repository}>{repository}</span>
               <span className={styles.authors}>{version.authors || "Authors not recorded"}</span>
-              {node.issue && <span className={styles.issue}>{issueLabels[node.issue]}</span>}
+              {node.issue && <span className={styles.issue}>{lineageIssueLabels[node.issue]}</span>}
             </button>;
           })}
         </div>

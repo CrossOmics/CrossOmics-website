@@ -67,11 +67,17 @@ test('zoom preserves the chosen screen anchor and clamps at 10% and 200%', () =>
   assert.equal(api.zoomLineage(view,0,{x:0,y:0}).scale,.1);
 });
 
-test('pinch zoom follows the finger midpoint and a pan cannot move a pressed node', () => {
+test('pinch zoom follows the finger midpoint and tap jitter does not pan', () => {
   assert.equal(typeof api.moveLineageGesture,'function');
   const start={view:{scale:1,x:0,y:0},point:{x:100,y:100},distance:100,pan:false};
   assert.deepEqual(api.moveLineageGesture(start,[{x:50,y:100},{x:250,y:100}]),{scale:2,x:-50,y:-100});
-  assert.equal(api.moveLineageGesture(start,[{x:150,y:150}]),null);
+  assert.equal(api.moveLineageGesture(start,[{x:103,y:100}]),null);
   assert.equal(api.moveLineageGesture(start,[]),null);
   assert.deepEqual(api.moveLineageGesture({...start,view:{scale:1,x:10,y:20},point:{x:30,y:40},distance:0,pan:true},[{x:55,y:65}]),{scale:1,x:35,y:45});
+});
+
+test('a node press becomes a pan beyond the click threshold', () => {
+  const start={view:{scale:1,x:0,y:0},point:{x:100,y:100},distance:0,pan:false};
+  assert.equal(api.moveLineageGesture(start,[{x:103,y:100}]),null);
+  assert.deepEqual(api.moveLineageGesture(start,[{x:115,y:100}]),{scale:1,x:15,y:0});
 });

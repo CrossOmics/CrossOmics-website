@@ -2,6 +2,7 @@ export type LineageVersion = { id: string; parent: string | null };
 export type LineageNode = { id: string; x: number; y: number; issue: "missing-parent" | "cycle" | null };
 export type LineageLayout = { nodes: LineageNode[]; edges: { parent: string; child: string }[]; width: number; height: number };
 export type LineageView = { scale: number; x: number; y: number };
+export const lineageIssueLabels = { "missing-parent": "Parent not available", cycle: "Invalid parent relationship" };
 export const lineageNodeSize = { width: 244, height: 152 };
 
 /** Build a forest from identity links, never API/recommendation ordering. Iterative for deep chains. */
@@ -81,5 +82,6 @@ export function moveLineageGesture(start: LineageGesture, points: { x: number; y
     const next = zoomLineage(start.view, start.view.scale * Math.hypot(a.x-b.x,a.y-b.y) / start.distance, start.point);
     return { ...next, x:next.x+(a.x+b.x)/2-start.point.x, y:next.y+(a.y+b.y)/2-start.point.y };
   }
-  return start.pan ? { ...start.view, x:start.view.x+a.x-start.point.x, y:start.view.y+a.y-start.point.y } : null;
+  const moved = Math.hypot(a.x-start.point.x, a.y-start.point.y) > 4;
+  return start.pan || moved ? { ...start.view, x:start.view.x+a.x-start.point.x, y:start.view.y+a.y-start.point.y } : null;
 }

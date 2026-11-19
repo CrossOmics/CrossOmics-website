@@ -24,9 +24,9 @@
 **Files:** Create lib/community/lineage.ts, app/community/catalog/[id]/VersionLineage.tsx and its CSS module; modify detail page, package.json and registry rendering tests; create tests/lineage.mjs.
 **Interfaces:** buildLineage(versions) returns nodes (id,x,y,issue), edges and bounds; fitLineage(bounds, viewport) returns scale/x/y; zoomLineage(view, scale, anchor) preserves anchor. Client receives versions/recommended IDs and server version-detail slots.
 
-- [ ] Write failing behavior tests for branched/out-of-order parents, cycles/orphans, a long chain, anchored zoom and bounded fit; add a real Next detail assertion for the lineage entry.
-- [ ] Run node --test tests/lineage.mjs and npm run test:registry-submit; expect failures because lineage is absent.
-- [ ] Implement iterative layout, accessible node selection and zoom/pan controls; integrate existing cards as server slots.
-- [ ] Run npm run test:registry-submit and npm run build; expect all relevant tests and build to pass. Run legacy test:community and report environmental failures if prerequisites are unavailable.
-- [ ] Use the built-in browser against local real frontend/controlled API data to exercise actual, branched and narrow-screen cases; save screenshots.
-- [ ] Review complete change, fix material findings, record verification and create a reviewable frontend PR.
+- [x] Write failing behavior tests for branched/out-of-order parents, cycles/orphans, a long chain, anchored zoom and bounded fit; add a real Next detail assertion for the lineage entry.
+- [x] Run node --test tests/lineage.mjs and npm run test:registry-submit; expect failures because lineage is absent.
+- [x] Implement iterative layout, accessible node selection and zoom/pan controls; integrate existing cards as server slots.
+- [x] Run npm run test:registry-submit and npm run build; expect all relevant tests and build to pass. Run legacy test:community and report environmental failures if prerequisites are unavailable.
+- [x] Use the built-in browser against local real frontend/controlled API data to exercise actual, branched and narrow-screen cases; save screenshots.
+- [x] Review complete change, fix material findings, record verification and create a reviewable frontend PR.
