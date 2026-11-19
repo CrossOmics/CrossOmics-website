@@ -549,3 +549,13 @@ test("legacy Update history retains neutral attribution and recorded maintainer 
   assert.match(html, /Recorded authors/);
   assert.doesNotMatch(html, /<h3>Update citation<\/h3>|<dt>Update authors<\/dt>/);
 });
+
+test('Tool versions retain full detail cards and expose a lineage view without backend changes', async () => {
+  const response = await fetch(base + '/community/catalog/cp_managed', {headers:{cookie:'community_session=admin'}});
+  assert.equal(response.status,200);
+  const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,'');
+  assert.match(html, /aria-expanded="false"[^>]*>View lineage/);
+  assert.match(html, /Recommended update/);
+  assert.match(html, /NuSTAR Developer/);
+  assert.match(html, /Withdraw this version/);
+});

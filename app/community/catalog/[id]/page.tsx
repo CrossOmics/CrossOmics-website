@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { toolTypeLabel } from "@/lib/community/tool-types";
 import RegistryCredits from "../../RegistryCredits";
+import VersionLineage from "./VersionLineage";
 import { communityCatalogItem, communitySession, registryV2Item, toolManagement } from "@/lib/community/service";
 import { orderedToolVersions, toolMaintainers } from "@/lib/community/tool-maintenance";
 import type { RegistryItemV2 } from "@/lib/community/registry-v2";
@@ -51,10 +52,14 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
           <RegistryMetadata metadata={{ algorithms: item.algorithms, inputs: item.inputs, outputs: item.outputs }} />
         </section>}
       {v2 && session?.canManageRegistry && !managed?.data && <EditProjectMetadata pipelineId={item.id} metadata={item} />}
-      <section className="community-section">
-        <h2>Versions</h2>
-        <ul className="community-record-list">
-          {versions.map((version) => {
+      <VersionLineage
+        versions={versions.map(version => ({
+          id:version.id, label:version.label, parent:version.parent, repo:version.repo, withdrawn:version.withdrawn,
+          type:toolTypeLabel("type" in version ? version.type : version.kind),
+          authors:("updateAuthors" in version && version.updateAuthors ? version.updateAuthors : "authors" in version ? version.authors : []).map(credit => credit.name).join("; ")
+        }))}
+        recommendedIds={v2Item?.recommendedVersionIds}
+        details={versions.map((version) => {
             const repo = httpsUrl(version.repo);
             const evidence = "evidence_url" in version ? httpsUrl(version.evidence_url) : null;
             const parent = item.versions.find((candidate) => candidate.id === version.parent);
@@ -86,8 +91,7 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
               </li>
             );
           })}
-        </ul>
-      </section>
+      />
       {item.papers.length > 0 && (
         <section className="community-section">
           <h2>Related papers</h2>
