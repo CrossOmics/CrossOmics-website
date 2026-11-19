@@ -16,11 +16,11 @@ const pipeline = {
   repositories: [], papers: [], metrics: null,
   versions: [{ id: "cv_example", type: "origin", label: "v1", parent: null,
     repo: "https://github.com/example/pipeline", commit: "a".repeat(40), released_at: null,
-    improvement: null, withdrawn: false, authors: [{ name: "Original author" }], maintainers: [{ name: "Maintainer" }] }]
+    improvement: null, withdrawn: false, authors: [{ name: "Original author" }], citation: "Upstream paper citation", maintainers: [{ name: "Maintainer" }] }]
 };
 
 const managed = { ...pipeline, id: "cp_managed", name: "Managed tool", maintainers: [{ name: "Tool maintainer" }], recommendedVersionIds: ["cv_recommended"],
-  versions: [...pipeline.versions, { ...pipeline.versions[0], id: "cv_recommended", type: "update", label: "Recommended update", parent: "cv_example", maintainers: [{ name: "Version-only maintainer" }] }] };
+  versions: [...pipeline.versions, { ...pipeline.versions[0], id: "cv_recommended", type: "update", label: "Recommended update", parent: "cv_example", updateAuthors: [{ name: "NuSTAR Developer" }], upstreamCitation: "Upstream paper citation", citation: "NuSTAR software citation", maintainers: [{ name: "Version-only maintainer" }] }] };
 
 async function listen(server) {
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -39,7 +39,7 @@ before(async () => {
         signInAvailable: mode !== "login-none", signInProviders: mode === "login-none" ? [] : ["github", "google", "apple"],
         registrySubmissionAvailable: true, registryV2Enabled: mode !== "legacy",
         registryV2Available: !["legacy", "unavailable"].includes(mode),
-        canManageRegistry: mode === "admin", desktopAuthAvailable: true, canPostBounties: false, canManageBounties: false
+        registryUpdateAuthorsAvailable: mode !== "old-authors", canManageRegistry: mode === "admin", desktopAuthAvailable: true, canPostBounties: false, canManageBounties: false
       }));
     } else if (request.url?.startsWith("/api/community/v2/me/contributions")) {
       const params = new URL(request.url,"http://fixture").searchParams;
@@ -59,7 +59,7 @@ before(async () => {
     } else if (request.url?.startsWith("/api/community/v1/bounties")) {
       response.end(JSON.stringify({ items: [], page: 1, hasMore: false }));
     } else if (request.url?.startsWith("/api/community/v2/registry/submissions")) {
-      response.end(JSON.stringify({ submissions: [] }));
+      response.end(JSON.stringify({ submissions: ["credits", "legacy-credits"].includes(mode) ? [{ id: "00000000-0000-4000-8000-000000000004", type: "update", name: "Example tool", label: "NuSTAR-dev", repository: "https://github.com/example/nustar", pipelineId: "cp_example", parentVersionId: "cv_example", commit: "b".repeat(40), status: "submitted", createdAt: "2026-11-18T00:00:00Z", contributor: { id: "123456", login: "test-user" }, authors: [{ name: "Original author" }], updateAuthors: mode === "legacy-credits" ? undefined : [{ name: "NuSTAR Developer" }], maintainers: mode === "legacy-credits" ? [{ name: "Historic version maintainer" }] : [], upstreamCitation: "Upstream paper citation", citation: "NuSTAR software citation" }] : [] }));
     } else if (request.url === "/api/community/v2/catalog/cp_workflow") {
       response.end(JSON.stringify({ item: { ...pipeline, id: "cp_workflow", name: "Workflow fixture", kind: "workflow" } }));
     } else if (request.url?.match(/^\/api\/community\/v2\/catalog\/cp_example$/)) {
@@ -139,8 +139,13 @@ test("ready service shows two entry types and keeps pipeline lineage", async () 
   assert.match(html, /value="cp_example" selected=""/);
   assert.match(html, /value="cv_example"/);
   assert.doesNotMatch(html, /<legend>Maintainers<\/legend>/);
-  assert.match(html, /Author names/);
-  assert.match(html, /name="authorNames"[^>]*value="Original author"/);
+  assert.match(html, /Update author names/);
+  const authorsInput = html.match(/<input[^>]*name="updateAuthorNames"[^>]*>/)?.[0];
+  assert.ok(authorsInput);
+  assert.match(authorsInput, /required=""/);
+  assert.match(authorsInput, /value=""/);
+  assert.doesNotMatch(html, /name="authorNames"/);
+  assert.match(html, /Choose a based-on version to see upstream attribution/);
   assert.match(html, /<button[^>]*type="submit">Submit registration<\/button>/);
 });
 
@@ -505,4 +510,42 @@ test("private Tool routes reject bearer credentials even with a web cookie", asy
   }
   const unknown=await fetch(base+"/api/community/v2/catalog/cp_managed/management/extra");
   assert.equal(unknown.status,404);
+});
+
+
+test("Update form does not substitute upstream citation or authors for this version", async () => {
+  const html = await page("ready", "?pipelineId=cp_example");
+  assert.match(html, /Update author names/);
+  assert.match(html, /Update citation \(optional\)/);
+  assert.doesNotMatch(html, /<h4>Upstream citation<\/h4>/);
+  assert.doesNotMatch(html, /Upstream paper citation/);
+  assert.match(html, /name="citation"[^>]*><\/textarea>/);
+  assert.doesNotMatch(html, /name="authorNames"/);
+  const old = await page("old-authors", "?pipelineId=cp_example");
+  assert.match(old, /<button[^>]*disabled=""[^>]*>Submit registration<\/button>/);
+});
+
+
+test("published detail and submission history keep Update developers distinct from upstream authors", async () => {
+  for (const [path, mode] of [["/community/catalog/cp_managed", "ready"], ["/community/registry/submissions", "credits"]]) {
+    const response = await fetch(base + path, { headers: { cookie: "community_session=" + mode } });
+    assert.equal(response.status, 200);
+    const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+    assert.match(html, /<dt>Upstream authors<\/dt>/);
+    assert.match(html, /<dt>Update authors<\/dt>/);
+    assert.match(html, /NuSTAR Developer/);
+    assert.match(html, /Upstream paper citation/);
+    assert.match(html, /NuSTAR software citation/);
+    assert.equal([...html.matchAll(/<dt>Update authors<\/dt>/g)].length, 1);
+  }
+});
+
+
+test("legacy Update history retains neutral attribution and recorded maintainer credits", async () => {
+  const response = await fetch(base + "/community/registry/submissions", { headers: { cookie: "community_session=legacy-credits" } });
+  const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+  assert.match(html, /Historic version maintainer/);
+  assert.match(html, /Recorded citation/);
+  assert.match(html, /Recorded authors/);
+  assert.doesNotMatch(html, /<h3>Update citation<\/h3>|<dt>Update authors<\/dt>/);
 });

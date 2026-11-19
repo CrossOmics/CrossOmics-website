@@ -386,3 +386,7 @@
 .community-recommended { background: #e0f3e9; color: #166447; }
 .community-version-choices label { flex-direction: row; justify-content: flex-start; }
 .community-version-choices input[type="checkbox"] { flex: none; }
+
+.community-upstream-credits { margin: 16px 0; }
+.community-upstream-credits h3 { font-size: 17px; }
+.community-upstream-credits h4 { margin-top: 14px; }

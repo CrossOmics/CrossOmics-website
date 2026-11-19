@@ -55,7 +55,7 @@ export default async function RegistrySubmitPage({ searchParams }: {
       ) : !session ? (
         <p className="community-notice">Website submissions are temporarily unavailable. Try again shortly.</p>
       ) : (
-        <RegistryFormV2 items={catalog?.data?.items ?? []} submitter={session.contributor!} initialId={pipelineId} unavailableMessage={unavailableMessage} />
+        <RegistryFormV2 items={catalog?.data?.items ?? []} submitter={session.contributor!} initialId={pipelineId} unavailableMessage={unavailableMessage} updateAuthorsAvailable={session.registryUpdateAuthorsAvailable} />
       )}
     </>
   );

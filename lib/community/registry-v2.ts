@@ -23,6 +23,8 @@ export type RegistryDraftV2 = Partial<RegistryMetadata> & {
   changeSummary?: string;
   evidenceUrl?: string;
   authors: RegistryCredit[];
+  updateAuthors?: RegistryCredit[];
+  upstreamCitation?: string;
   maintainers: RegistryCredit[];
   citation?: string;
 };
@@ -31,6 +33,8 @@ export type RegistryVersionV2 = Omit<RegistryItem["versions"][number], "kind"> &
   evidence_url?: string;
   legacyKind?: "original" | "optimization";
   authors: RegistryCredit[];
+  updateAuthors?: RegistryCredit[];
+  upstreamCitation?: string;
   maintainers: RegistryCredit[];
   citation?: string;
 };

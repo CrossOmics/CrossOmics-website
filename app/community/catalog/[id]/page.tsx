@@ -68,10 +68,13 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
                 </div>
                 <p>{[version.released_at, parent && `Based on ${parent.label}`].filter(Boolean).join(" · ")}</p>
                 {"authors" in version && <dl className="community-detail-grid">
-                  <div><dt>Original authors</dt><dd><RegistryCredits credits={version.authors} /></dd></div>
+                  {version.authors.length > 0 && <div><dt>{parent ? ("updateAuthors" in version && version.updateAuthors ? "Upstream authors" : "Recorded authors") : "Original authors"}</dt><dd><RegistryCredits credits={version.authors} /></dd></div>}
+                  {"updateAuthors" in version && version.updateAuthors && version.updateAuthors.length > 0 &&
+                    <div><dt>Update authors</dt><dd><RegistryCredits credits={version.updateAuthors} /></dd></div>}
                 </dl>}
                 {version.improvement && <p>{version.improvement}</p>}
-                {"citation" in version && version.citation && <div><h4>How to cite this version</h4><p className="community-citation">{version.citation}</p></div>}
+                {"upstreamCitation" in version && version.upstreamCitation && <div><h4>Upstream citation</h4><p className="community-citation">{version.upstreamCitation}</p></div>}
+                {"citation" in version && version.citation && <div><h4>{parent && !("updateAuthors" in version && version.updateAuthors) ? "Recorded citation" : "How to cite this version"}</h4><p className="community-citation">{version.citation}</p></div>}
                 {repo && <a href={repo} className="community-link">Version repository <span aria-hidden>↗</span></a>}
                 {evidence && <a href={evidence} className="community-link">Evidence <span aria-hidden>↗</span></a>}
                 <code>{version.commit}</code>
