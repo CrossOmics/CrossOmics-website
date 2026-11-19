@@ -47,7 +47,8 @@ export default async function RegistrySubmissions({ searchParams }: { searchPara
                       </div>
                       <p>Submitted by @{item.contributor.login} · {item.createdAt.slice(0, 10)}</p>
                       <p>{item.changeSummary || item.description}</p>
-                      {item.citation && <div><h3>Citation information</h3><p className="community-citation">{item.citation}</p></div>}
+                      {item.upstreamCitation && <div><h3>Upstream citation</h3><p className="community-citation">{item.upstreamCitation}</p></div>}
+                      {item.citation && <div><h3>{item.type === "original" ? "Citation information" : item.updateAuthors ? "Update citation" : "Recorded citation"}</h3><p className="community-citation">{item.citation}</p></div>}
                       {repo && <a className="community-link" href={repo}>Source repository ↗</a>}
                       {evidence && <a className="community-link" href={evidence}>Evidence ↗</a>}
                       <dl className="community-detail-grid">
@@ -56,8 +57,9 @@ export default async function RegistrySubmissions({ searchParams }: { searchPara
                           <dd><Link className="community-link" href={"/community/catalog/" + item.pipelineId}>{item.pipelineId}</Link></dd>
                         </div>}
                         {item.parentVersionId && <div><dt>Parent version</dt><dd>{item.parentVersionId}</dd></div>}
-                        <div><dt>Original authors</dt><dd><RegistryCredits credits={item.authors} /></dd></div>
-                        <div><dt>Maintainers</dt><dd><RegistryCredits credits={item.maintainers} /></dd></div>
+                        {item.authors.length > 0 && <div><dt>{item.type === "original" ? "Original authors" : item.updateAuthors ? "Upstream authors" : "Recorded authors"}</dt><dd><RegistryCredits credits={item.authors} /></dd></div>}
+                        {item.updateAuthors?.length ? <div><dt>Update authors</dt><dd><RegistryCredits credits={item.updateAuthors} /></dd></div> : null}
+                        {item.maintainers.length > 0 && <div><dt>{item.type === "original" ? "Maintainers" : "Recorded version maintainer credits"}</dt><dd><RegistryCredits credits={item.maintainers} /></dd></div>}
                       </dl>
                       <RegistryMetadata metadata={item} />
                       {item.reason && <p>Review reason · {item.reason}</p>}

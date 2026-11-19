@@ -37,6 +37,7 @@ export const communitySession = cache(async function () {
     registrySubmissionAvailable?: boolean;
     registryV2Enabled?: boolean;
     registryV2Available?: boolean;
+    registryUpdateAuthorsAvailable?: boolean;
     canManageRegistry?: boolean;
     desktopAuthAvailable?: boolean;
     canPostBounties?: boolean;
@@ -52,6 +53,7 @@ export const communitySession = cache(async function () {
     registrySubmissionAvailable: session.registrySubmissionAvailable === true,
     registryV2Enabled: (session.registryV2Enabled ?? session.registryV2Available) === true,
     registryV2Available: session.registryV2Available === true,
+    registryUpdateAuthorsAvailable: session.registryUpdateAuthorsAvailable === true,
     canManageRegistry: session.canManageRegistry === true,
     desktopAuthAvailable: session.desktopAuthAvailable === true,
     canPostBounties: (session.canPostBounties ?? session.canManageBounties) === true,

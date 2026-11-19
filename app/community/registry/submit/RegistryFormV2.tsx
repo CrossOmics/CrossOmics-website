@@ -8,18 +8,21 @@ import { registryTypes, registryTypeDescriptions, type RegistryDraftV2, type Reg
 import type { Contributor } from "@/lib/community/types";
 import { communityRequest } from "../../client";
 import RegistryMetadataFields, { readRegistryMetadata, changedRegistryMetadata } from "../RegistryMetadataFields";
+import RegistryCredits from "../../RegistryCredits";
 import CreditFields, { emptyCredit, parseCredit, withEmptyCreditFields, type CreditInput } from "../CreditFields";
 
 const domains = ["transcriptomics", "epigenomics", "genomics", "proteomics", "metagenomics", "multi-omics", "imaging"];
-export default function RegistryFormV2({ items, submitter, initialId, unavailableMessage }: {
-  items: RegistryItemV2[]; submitter: Contributor; initialId?: string; unavailableMessage?: string;
+export default function RegistryFormV2({ items, submitter, initialId, unavailableMessage, updateAuthorsAvailable }: {
+  items: RegistryItemV2[]; submitter: Contributor; initialId?: string; unavailableMessage?: string; updateAuthorsAvailable: boolean;
 }) {
   const initial = items.find((item) => item.id === initialId);
   const [type, setType] = useState<RegistryType>(initial ? "update" : "original");
   const [pipelineId, setPipelineId] = useState(initial?.id ?? "");
-  const [authors, setAuthors] = useState<CreditInput[]>(() => seedCredits(initial, "authors"));
-  const [authorNames, setAuthorNames] = useState(() => seedCredits(initial, "authors").map((credit) => credit.name).filter(Boolean).join("; "));
-  const [citation, setCitation] = useState(() => initial?.versions.find((version) => version.type === "original")?.citation ?? "");
+  const [authorNames, setAuthorNames] = useState("");
+  const [updateAuthorNames, setUpdateAuthorNames] = useState("");
+  const [citation, setCitation] = useState("");
+  const [updateCitation, setUpdateCitation] = useState("");
+  const [parentVersionId, setParentVersionId] = useState("");
   const [maintainers, setMaintainers] = useState<CreditInput[]>(() => seedCredits(initial, "maintainers"));
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
@@ -29,19 +32,21 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
   const origin = type === "original";
   const selected = origin ? undefined : items.find((item) => item.id === pipelineId);
   const parents = selected?.versions.filter((version) => !version.withdrawn) ?? [];
+  const upstream = parents.find((version) => version.id === parentVersionId);
+  const blockedMessage = unavailableMessage || (!origin && !updateAuthorsAvailable
+    ? "Update submissions are temporarily unavailable. Please try again later." : undefined);
+  const names = (value: string) => value.split(/[;；]/).map(name => name.trim()).filter(Boolean).map(name => ({ name }));
 
   function select(id: string) {
     const item = items.find((candidate) => candidate.id === id);
     setPipelineId(id);
-    setAuthors(seedCredits(item, "authors"));
-    setAuthorNames(seedCredits(item, "authors").map((credit) => credit.name).filter(Boolean).join("; "));
-    setCitation(item?.versions.find((version) => version.type === "original")?.citation ?? "");
+    setParentVersionId("");
     setMaintainers(seedCredits(item, "maintainers"));
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (inFlight.current || unavailableMessage) return;
+    if (inFlight.current || blockedMessage) return;
     const form = new FormData(event.currentTarget);
     const value = (key: string) => String(form.get(key) ?? "");
     const body: RegistryDraftV2 = {
@@ -50,12 +55,10 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
       domain: selected?.domain ?? value("domain"), repository: value("repository"), label: value("label"),
       commit: value("commit"),
       ...(selected ? changedRegistryMetadata(readRegistryMetadata(form), selected) : readRegistryMetadata(form)),
-      authors: authorNames.split(/[;；]/).map((name) => name.trim()).filter(Boolean).map((name) => {
-        const existing = authors.find((credit) => credit.name.trim() === name);
-        return existing ? parseCredit(existing) : { name };
-      }),
+      authors: origin ? names(authorNames) : [],
+      ...(origin ? {} : { updateAuthors: names(updateAuthorNames) }),
       maintainers: origin ? maintainers.map(parseCredit) : [],
-      ...(citation.trim() ? { citation: citation.trim() } : {}),
+      ...((origin ? citation : updateCitation).trim() ? { citation: (origin ? citation : updateCitation).trim() } : {}),
       ...(origin ? {} : { pipelineId, parentVersionId: value("parentVersionId"), changeSummary: value("changeSummary"),
         ...(value("evidenceUrl").trim() ? { evidenceUrl: value("evidenceUrl").trim() } : {}) })
     };
@@ -88,7 +91,7 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
 
   return (
     <form className="community-form" onSubmit={submit} onChange={() => { requestId.current = null; }} aria-busy={pending}>
-      {unavailableMessage && <p className="community-notice" role="status">{unavailableMessage}</p>}
+      {blockedMessage && <p className="community-notice" role="status">{blockedMessage}</p>}
       <fieldset disabled={pending || Boolean(unavailableMessage)}>
         <legend>Registry details</legend>
         <div className="community-form-grid">
@@ -112,7 +115,8 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
               <option value="">Choose a tool</option>
               {items.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
             </select></label>
-            <label>Based on version<select name="parentVersionId" key={pipelineId} required defaultValue="" onChange={(event) => {
+            <label>Based on version<select name="parentVersionId" key={pipelineId} required value={parentVersionId} onChange={(event) => {
+              setParentVersionId(event.target.value);
               const parent = parents.find((version) => version.id === event.target.value);
               if (parent && selected) setMaintainers(toolMaintainers(selected).map(withEmptyCreditFields));
             }}>
@@ -127,17 +131,32 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
           <label>Full commit SHA<input name="commit" required maxLength={40} pattern="[0-9a-fA-F]{40}" spellCheck={false} /></label>
         </div>
         <RegistryMetadataFields key={origin ? "original" : pipelineId} metadata={selected} />
-        <label>Author names<input name="authorNames" required value={authorNames} maxLength={2600}
-          placeholder="Jane Smith; John Doe" aria-describedby="author-names-help" onChange={(event) => setAuthorNames(event.target.value)} /></label>
-        <p id="author-names-help">Separate names with a semicolon (;). List the original authors, who may be different from the person submitting this form.</p>
-        <label>Citation information (optional)<textarea name="citation" value={citation} maxLength={4000} rows={3}
-          placeholder="Paper or software citation, DOI, URL, or BibTeX" onChange={(event) => setCitation(event.target.value)} /></label>
+        {!origin && selected && !upstream && <p className="community-notice">Choose a based-on version to see upstream attribution.</p>}
+        {!origin && upstream && <section className="community-notice community-upstream-credits" aria-label="Upstream attribution">
+          <h3>Upstream attribution</h3>
+          <p>Credits from the based-on version are preserved separately from this update's authors.</p>
+          <dl className="community-detail-grid"><div><dt>Upstream authors</dt><dd>
+            {(upstream.updateAuthors?.length || upstream.authors.length) ? <RegistryCredits credits={upstream.updateAuthors?.length ? upstream.updateAuthors : upstream.authors} /> : "Not recorded"}
+          </dd></div></dl>
+          {upstream?.citation && <div><h4>Upstream citation</h4><p className="community-citation">{upstream.citation}</p></div>}
+        </section>}
+        <label>{origin ? "Author names" : "Update author names"}<input name={origin ? "authorNames" : "updateAuthorNames"}
+          required value={origin ? authorNames : updateAuthorNames} maxLength={2600}
+          placeholder="Jane Smith; John Doe" aria-describedby="author-names-help"
+          onChange={(event) => origin ? setAuthorNames(event.target.value) : setUpdateAuthorNames(event.target.value)} /></label>
+        <p id="author-names-help">{origin
+          ? "Separate names with a semicolon (;). List the original authors, who may be different from the person submitting this form."
+          : "Separate names with a semicolon (;). List the people who developed this update. Submitting it does not make you an author."}</p>
+        <label>{origin ? "Citation information (optional)" : "Update citation (optional)"}<textarea name="citation"
+          value={origin ? citation : updateCitation} maxLength={4000} rows={3}
+          placeholder={origin ? "Paper or software citation, DOI, URL, or BibTeX" : "Citation for this update, if one exists; otherwise leave blank"}
+          onChange={(event) => origin ? setCitation(event.target.value) : setUpdateCitation(event.target.value)} /></label>
         <p>Submitting as @{submitter.login}. Authors and maintainers are recorded separately.</p>
         {origin && <p>These maintainer credits belong to the whole Tool. Management access is assigned separately by an administrator.</p>}
         {origin ? <CreditFields label="Maintainers" credits={maintainers} onChange={(value) => { requestId.current = null; setMaintainers(value); }} /> : <p>Maintainers belong to the Tool. Submitting an update does not change its maintainers or grant management access.</p>}
       </fieldset>
       <div className="community-form-footer">
-        <button className="community-primary" type="submit" disabled={pending || Boolean(unavailableMessage)}>Submit registration</button>
+        <button className="community-primary" type="submit" disabled={pending || Boolean(blockedMessage)}>Submit registration</button>
         {error && <p className="community-error" role="alert">{error}</p>}
         {pending && <p role="status">Submitting your registration…</p>}
       </div>
