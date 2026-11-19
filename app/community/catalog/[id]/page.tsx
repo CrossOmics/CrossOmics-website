@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { toolTypeLabel } from "@/lib/community/tool-types";
 import RegistryCredits from "../../RegistryCredits";
+import VersionLineage from "./VersionLineage";
+import { buildLineage, lineageIssueLabels } from "@/lib/community/lineage";
 import { communityCatalogItem, communitySession, registryV2Item, toolManagement } from "@/lib/community/service";
 import { orderedToolVersions, toolMaintainers } from "@/lib/community/tool-maintenance";
 import type { RegistryItemV2 } from "@/lib/community/registry-v2";
@@ -23,6 +25,9 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
   const managed = v2 && session?.contributor ? await toolManagement(item.id) : null;
   const v2Item = v2 ? item as RegistryItemV2 : null;
   const versions = v2Item ? orderedToolVersions(v2Item) : item.versions;
+  const lineage = buildLineage(item.versions);
+  const parentIds = new Map(lineage.edges.map(edge => [edge.child,edge.parent]));
+  const issues = new Map(lineage.nodes.map(node => [node.id,node.issue]));
   const maintainers = v2Item ? toolMaintainers(v2Item) : [];
   return (
     <>
@@ -51,13 +56,19 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
           <RegistryMetadata metadata={{ algorithms: item.algorithms, inputs: item.inputs, outputs: item.outputs }} />
         </section>}
       {v2 && session?.canManageRegistry && !managed?.data && <EditProjectMetadata pipelineId={item.id} metadata={item} />}
-      <section className="community-section">
-        <h2>Versions</h2>
-        <ul className="community-record-list">
-          {versions.map((version) => {
+      <VersionLineage
+        versions={versions.map(version => ({
+          id:version.id, label:version.label, parent:version.parent, repo:version.repo, withdrawn:version.withdrawn,
+          type:toolTypeLabel("type" in version ? version.type : version.kind),
+          authors:("updateAuthors" in version && version.updateAuthors ? version.updateAuthors : "authors" in version ? version.authors : []).map(credit => credit.name).join("; ")
+        }))}
+        recommendedIds={v2Item?.recommendedVersionIds}
+        details={versions.map((version) => {
             const repo = httpsUrl(version.repo);
             const evidence = "evidence_url" in version ? httpsUrl(version.evidence_url) : null;
-            const parent = item.versions.find((candidate) => candidate.id === version.parent);
+            const parent = item.versions.find((candidate) => candidate.id === parentIds.get(version.id));
+            const issue = issues.get(version.id);
+            const isUpdate = toolTypeLabel("type" in version ? version.type : version.kind) === "Update";
             return (
               <li key={version.id} className="community-record">
                 <div className="community-actions">
@@ -67,14 +78,15 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
                   {version.withdrawn && <span className="community-tag">Withdrawn</span>}
                 </div>
                 <p>{[version.released_at, parent && `Based on ${parent.label}`].filter(Boolean).join(" · ")}</p>
+                {issue && <p>{lineageIssueLabels[issue]}</p>}
                 {"authors" in version && <dl className="community-detail-grid">
-                  {version.authors.length > 0 && <div><dt>{parent ? ("updateAuthors" in version && version.updateAuthors ? "Upstream authors" : "Recorded authors") : "Original authors"}</dt><dd><RegistryCredits credits={version.authors} /></dd></div>}
+                  {version.authors.length > 0 && <div><dt>{parent ? ("updateAuthors" in version && version.updateAuthors ? "Upstream authors" : "Recorded authors") : (isUpdate || version.parent ? "Recorded authors" : "Original authors")}</dt><dd><RegistryCredits credits={version.authors} /></dd></div>}
                   {"updateAuthors" in version && version.updateAuthors && version.updateAuthors.length > 0 &&
                     <div><dt>Update authors</dt><dd><RegistryCredits credits={version.updateAuthors} /></dd></div>}
                 </dl>}
                 {version.improvement && <p>{version.improvement}</p>}
                 {"upstreamCitation" in version && version.upstreamCitation && <div><h4>Upstream citation</h4><p className="community-citation">{version.upstreamCitation}</p></div>}
-                {"citation" in version && version.citation && <div><h4>{parent && !("updateAuthors" in version && version.updateAuthors) ? "Recorded citation" : "How to cite this version"}</h4><p className="community-citation">{version.citation}</p></div>}
+                {"citation" in version && version.citation && <div><h4>{isUpdate && !("updateAuthors" in version && version.updateAuthors) ? "Recorded citation" : "How to cite this version"}</h4><p className="community-citation">{version.citation}</p></div>}
                 {repo && <a href={repo} className="community-link">Version repository <span aria-hidden>↗</span></a>}
                 {evidence && <a href={evidence} className="community-link">Evidence <span aria-hidden>↗</span></a>}
                 <code>{version.commit}</code>
@@ -86,8 +98,7 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
               </li>
             );
           })}
-        </ul>
-      </section>
+      />
       {item.papers.length > 0 && (
         <section className="community-section">
           <h2>Related papers</h2>
