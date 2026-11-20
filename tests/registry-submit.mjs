@@ -142,7 +142,7 @@ test("ready service shows two entry types and keeps pipeline lineage", async () 
   entryTypes(html);
   assert.match(html, /value="update" selected=""/);
   assert.match(html, /value="cp_example" selected=""/);
-  assert.match(html, /value="cv_example"/);
+  assert.match(html, /value="cv_example" selected=""/);
   assert.doesNotMatch(html, /<legend>Maintainers<\/legend>/);
   assert.match(html, /Update author names/);
   const authorsInput = html.match(/<input[^>]*name="updateAuthorNames"[^>]*>/)?.[0];
@@ -150,7 +150,7 @@ test("ready service shows two entry types and keeps pipeline lineage", async () 
   assert.match(authorsInput, /required=""/);
   assert.match(authorsInput, /value=""/);
   assert.doesNotMatch(html, /name="authorNames"/);
-  assert.match(html, /Choose a based-on version to see upstream attribution/);
+  assert.match(html, /aria-label="Upstream attribution"/);
   assert.match(html, /<button[^>]*type="submit">Submit registration<\/button>/);
 });
 
@@ -166,11 +166,11 @@ test("original tool asks for actual authors and citation without requiring a cha
   assert.match(html, /<button[^>]*type="submit">Submit registration<\/button>/);
 });
 
-test("Update offers a new repository or an original-repository PR with benchmark verification", async () => {
+test("Update offers a new repository or a based-on repository PR with benchmark verification", async () => {
   const html = await page("ready", "?pipelineId=cp_example");
   assert.match(html, /name="updateSource"/);
   assert.match(html, /New repository/);
-  assert.match(html, /PR to the original repository/);
+  assert.match(html, /PR to the based-on repository/);
   assert.match(html, /name="verificationKind"/);
   assert.match(html, /Benchmark \(Markdown file\)/);
   assert.match(html, /Verification URL/);
@@ -544,8 +544,7 @@ test("Update form does not substitute upstream citation or authors for this vers
   const html = await page("ready", "?pipelineId=cp_example");
   assert.match(html, /Update author names/);
   assert.match(html, /Update citation \(optional\)/);
-  assert.doesNotMatch(html, /<h4>Upstream citation<\/h4>/);
-  assert.doesNotMatch(html, /Upstream paper citation/);
+  assert.match(html, /<h4>Upstream citation<\/h4><p[^>]*>Upstream paper citation<\/p>/);
   assert.match(html, /name="citation"[^>]*><\/textarea>/);
   assert.doesNotMatch(html, /name="authorNames"/);
   const old = await page("old-authors", "?pipelineId=cp_example");
