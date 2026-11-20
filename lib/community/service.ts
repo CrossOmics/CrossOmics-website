@@ -1,6 +1,8 @@
 import { cookies } from "next/headers";
 import { cache } from "react";
-import type { Bounty, BountyReply, Contribution, Contributor, RegistryItem, SignInProvider } from "@/community-server/lib/community/types";
+import type { Bounty, BountyReply, Contribution, Contributor, RegistryCatalog, RegistryItem, SignInProvider } from "@/community-server/lib/community/types";
+import { curatedRepositories } from "./repositories";
+import { refreshRepositoryUpdates } from "./repository-updates";
 
 export function communityServiceFetch(path: string, init: RequestInit = {}) {
   const origin = process.env.COMMUNITY_SERVICE_URL;
@@ -47,7 +49,7 @@ export async function communityCatalog(filters: { q?: string; kind?: string } = 
   if (filters.q) query.set("q", filters.q);
   if (filters.kind) query.set("kind", filters.kind);
   try {
-    return { data: await communityData<{ items: RegistryItem[]; generatedAt: string }>(`catalog?${query}`), error: "" };
+    return { data: await communityData<RegistryCatalog>(`catalog?${query}`), error: "" };
   } catch (error) {
     return { data: null, error: error instanceof ServiceError && error.status === 400
       ? error.message : "The registry is temporarily unavailable. Try refreshing this page." };
@@ -57,7 +59,9 @@ export async function communityCatalog(filters: { q?: string; kind?: string } = 
 export async function communityCatalogItem(id: string) {
   const query = new URLSearchParams({ id });
   try {
-    return await communityData<{ item: RegistryItem }>(`catalog?${query}`);
+    const result = await communityData<{ item: RegistryItem }>(`catalog?${query}`);
+    const curated = curatedRepositories[result.item.id];
+    return { item: curated ? await refreshRepositoryUpdates(result.item, curated) : result.item };
   } catch (error) {
     if (error instanceof ServiceError && error.status === 404) return { item: null };
     return null;

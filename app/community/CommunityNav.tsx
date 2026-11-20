@@ -6,6 +6,7 @@ import { communitySignInPath } from "@/community-server/lib/community/return-pat
 
 const links = [
   { href: "/community", label: "Registry" },
+  { href: "/community/ranking", label: "Maintenance ranking" },
   { href: "/community/bounties", label: "Bounties" },
   { href: "/community/activity", label: "Contributions" }
 ];

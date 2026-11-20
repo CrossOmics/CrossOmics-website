@@ -321,6 +321,60 @@
 .community-bounty-form > fieldset, .community-bounty-form > label { width: 100%; }
 #discussion > .community-notice, #discussion > .community-bounty-form, .community-bounty-empty { margin-top: 12px; }
 
+.community-repositories { display: grid; gap: 18px; margin-top: 20px; }
+.community-repository { min-width: 0; padding: clamp(18px, 3vw, 28px); border: 1px solid var(--community-border); border-radius: var(--community-radius); }
+.community-repository.is-pinned { border-color: var(--accent); box-shadow: inset 4px 0 var(--accent); }
+.community-repository-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.community-repository-heading > div { min-width: 0; }
+.community-repository-heading h3 { font-size: 24px; }
+.community-repository-path { margin-top: 7px; font-size: 14px; }
+.community-repository > p { margin-top: 14px; font-size: 16px; }
+.community-pinned-tag { background: var(--accent-soft); color: var(--accent); font-size: 14px; }
+.community-repository-latest { padding: 16px 18px; margin-top: 18px; background: var(--community-paper); border-radius: 8px; }
+.community-repository-label { color: var(--community-quiet); font-size: 14px; }
+.community-repository-latest > * + * { margin-top: 7px; }
+.community-repository-latest p { font-size: 16px; }
+.community-repository code { display: block; overflow-wrap: anywhere; color: var(--community-quiet); font-size: 13px; }
+.community-lineage { margin-top: 18px; border-top: 1px solid var(--community-border); }
+.community-lineage summary { min-height: 44px; padding: 14px 0; cursor: pointer; color: var(--accent); font-size: 16px; font-weight: 600; }
+.community-lineage summary span { color: var(--community-quiet); font-weight: 400; }
+.community-lineage > p { font-size: 14px; margin-bottom: 16px; max-width: 75ch; }
+.community-lineage ol { list-style: none; display: grid; gap: 12px; padding: 0; }
+.community-lineage-record { min-width: 0; border-left: 2px solid var(--community-border); padding: 4px 0 4px 16px; }
+.community-lineage-record.has-parent { border-left-color: var(--accent); }
+.community-lineage-record h4 { font-size: 16px; }
+.community-lineage-record > * + * { margin-top: 7px; }
+.community-lineage-record p { font-size: 14px; }
+#versions { scroll-margin-top: 100px; }
+
+.community-ranking-dates p { font-size: 13px; }
+.community-ranking-help { margin: 12px 0 18px; font-size: 14px; }
+.community-ranking-scroll { max-width: 100%; overflow-x: auto; border: 1px solid var(--community-border); border-radius: var(--community-radius); margin-top: 18px; isolation: isolate; }
+.community-ranking-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; font-variant-numeric: tabular-nums; }
+.community-ranking-table th, .community-ranking-table td { text-align: left; white-space: nowrap; padding: 16px; border-bottom: 1px solid var(--community-border); color: var(--community-ink); background: var(--bg); }
+.community-ranking-table thead th { background: var(--community-paper); color: var(--community-quiet); font-weight: 600; }
+.community-ranking-table tbody th { position: sticky; left: 0; z-index: 1; min-width: 170px; max-width: 240px; white-space: normal; box-shadow: 1px 0 var(--community-border); }
+.community-ranking-table tbody th a, .community-ranking-table td a { color: var(--accent); }
+.community-ranking-table a:hover { text-decoration: underline; }
+.community-ranking-table tbody tr:last-child > * { border-bottom: 0; }
+.community-ranking-table tbody tr:hover > * { background: #f8fbff; }
+.community-ranking-table .community-ranking-number, .community-ranking-table .community-ranking-score { text-align: right; }
+.community-ranking-score { font-weight: 600; }
+.community-score-track { display: block; height: 4px; width: 64px; margin: 6px 0 0 auto; background: var(--community-border); border-radius: 4px; overflow: hidden; }
+.community-score-track > span { display: block; height: 100%; background: var(--accent); }
+.community-ranking-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.community-ranking-badges:empty { display: none; }
+.community-ranking-table .community-maintenance-available { background: #e5f5ec; color: #145b38; }
+.community-maintenance-planned { background: #fff2d8; color: #69420a; }
+.community-ranking-excluded li { padding: 14px 0; border-bottom: 1px solid var(--community-border); display: flex; gap: 8px 20px; justify-content: space-between; flex-wrap: wrap; }
+.community-ranking-excluded li span { color: var(--community-quiet); font-size: 14px; }
+.community-ranking-method { border: 1px solid var(--community-border); border-radius: var(--community-radius); }
+.community-ranking-method summary { padding: 20px; min-height: 44px; font-weight: 600; color: var(--community-ink); cursor: pointer; }
+.community-ranking-method > div { padding: 0 24px 24px; color: var(--community-quiet); font-size: 16px; max-width: 85ch; }
+.community-ranking-method ul { list-style: disc; padding-left: 20px; }
+.community-ranking-method li { margin-top: 12px; }
+.community-section > .community-notice { margin-top: 16px; }
+
 @media (max-width: 820px) {
   .community-catalog { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

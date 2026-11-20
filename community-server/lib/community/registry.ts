@@ -6,6 +6,8 @@ export const registryUrl = "https://crossomics.github.io/pipeline-registry/index
 type Registry = {
   schema_version: number;
   generated_at: string;
+  metrics_collected_at?: string | null;
+  config?: { citation_years: number[]; activity_window_days: number };
   moved: Record<string, string>;
   pipelines: RegistryItem[];
 };

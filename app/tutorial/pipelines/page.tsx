@@ -210,7 +210,7 @@ export default function PipelinesGuide() {
             <li>In Community pipelines, select <strong>Risk ranking</strong>.</li>
             <li>Compare the risk score with <strong>Original GitHub update</strong>, the activity details and the three annual citation columns. On a narrow window, scroll the table horizontally to see every column.</li>
             <li>Read <strong>BioCode maintenance</strong> separately to see whether replacement maintenance is registered or planned. Follow the <a className="cta-link" href="https://github.com/BioCode-Commons" target="_blank" rel="noopener noreferrer">BioCode Commons</a> link for community maintenance projects.</li>
-            <li>Use <strong>Open public page</strong> to view or share the <a className="cta-link" href="https://crossomics.github.io/pipeline-registry/ranking/" target="_blank" rel="noopener noreferrer">ranking without installing Gardener</a>. Enable <strong>Include mature (stable) pipelines</strong> if you also want those entries.</li>
+            <li>Use <strong>Open public page</strong> to view or share the <Link className="cta-link" href="/community/ranking">community maintenance ranking without installing Gardener</Link>. The website also lists mature (stable) pipelines separately.</li>
           </ol>
           <Screenshot file="risk-ranking" alt="Risk ranking with risk scores, original GitHub update dates, BioCode maintenance statuses, and citation columns" caption="Rankings use the original author’s repository. BioCode maintenance is recorded separately; values reflect the collection date shown in the app." />
           <Note>

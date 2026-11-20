@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { communityCatalogItem } from "@/lib/community/service";
 import { httpsUrl } from "@/community-server/lib/community/validation";
+import RepositoryVersions from "./RepositoryVersions";
 
 export default async function RegistryDetail({ params }: { params: Promise<{ id: string }> }) {
   const result = await communityCatalogItem((await params).id);
@@ -37,28 +38,7 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
           <div><dt>Outputs</dt><dd>{item.outputs.join(", ") || "Unspecified"}</dd></div>
         </dl>
       </section>
-      <section className="community-section">
-        <h2>Versions</h2>
-        <ul className="community-record-list">
-          {item.versions.map((version) => {
-            const repo = httpsUrl(version.repo);
-            const parent = item.versions.find((candidate) => candidate.id === version.parent);
-            return (
-              <li key={version.id} className="community-record">
-                <div className="community-actions">
-                  <h3>{version.label}</h3>
-                  <span className="community-tag">{version.kind === "optimization" ? "Optimization" : "Original"}</span>
-                  {version.withdrawn && <span className="community-tag">Withdrawn</span>}
-                </div>
-                <p>{[version.released_at, parent && `Based on ${parent.label}`].filter(Boolean).join(" · ")}</p>
-                {version.improvement && <p>{version.improvement}</p>}
-                {repo && <a href={repo} className="community-link">Version repository <span aria-hidden>↗</span></a>}
-                <code>{version.commit}</code>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+      <RepositoryVersions item={item} />
       {item.papers.length > 0 && (
         <section className="community-section">
           <h2>Related papers</h2>

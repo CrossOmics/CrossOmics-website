@@ -14,6 +14,7 @@ export function GET(request: NextRequest) {
     }
     const { q, kind } = registryFilters({ q: params.get("q"), kind: params.get("kind") });
     const registry = await loadRegistry();
-    return json({ items: searchRegistry(registry, q, kind), generatedAt: registry.generated_at });
+    return json({ items: searchRegistry(registry, q, kind), generatedAt: registry.generated_at,
+      metricsCollectedAt: registry.metrics_collected_at, config: registry.config });
   });
 }

@@ -116,7 +116,11 @@ The website runs on its existing Next.js host with Node.js 22. It calls a separa
 
 ## Community Tracking
 
-Open `/community` to search the Gardener registry, explore algorithms and versions, or open its maintenance ranking. The Community navigation also links to the bounty board and sign-in page. Web and Gardener use the same shared contribution history and account. Contributions accept public HTTPS evidence from BioCode Commons and external projects. Each distinct record counts once. A recorded Impact value of zero means someone checked and observed no activity.
+Open `/community` to search the Gardener registry and explore algorithms and repositories. Maintenance ranking is a native Community page at `/community/ranking`, with internal links to tool details, ranked/stable/excluded entries, citation and activity metrics, collection dates and scoring methodology. The Community navigation also links to the bounty board and sign-in page. Web and Gardener use the same shared contribution history and account. Contributions accept public HTTPS evidence from BioCode Commons and external projects. Each distinct record counts once. A recorded Impact value of zero means someone checked and observed no activity.
+
+The **Versions** section on each catalog detail page shows one card per repository, its latest known active update, and expandable lineage confined to that repository. Withdrawn records remain in history; if all records are withdrawn the latest is visibly marked. Repository URLs are normalized so GitHub case differences and `.git`/trailing slash aliases do not duplicate cards.
+
+Administrator-selected repositories are configured in `lib/community/repositories.ts` under `curatedRepositories`, keyed by registry item ID. `cp_star` currently pins `BioCode-Commons/NuSTAR` above the original `alexdobin/STAR` repository. Until the upstream registry includes NuSTAR, this configuration supplies its verified commit snapshot. Tool details refresh the latest NuSTAR commit from GitHub with a 15-minute cache and a four-second timeout, falling back to the snapshot when unavailable. These observed snapshots do not invent parent relationships or alter the original repository's maintenance score. Once matching records reach the upstream registry, duplicate commits are suppressed. The other repositories display their latest registered version.
 
 Deploy the API and PostgreSQL to a separate machine using the [Community server instructions](community-server/README.md). Set `COMMUNITY_SERVICE_URL` on the website host and optionally set `COMMUNITY_PUBLIC_SERVICE_URL` to show the public API address in My history. Set the optional contact values to approved public links and email.
 
@@ -155,6 +159,8 @@ Contribution types are `new_pipeline`, `algorithm_update`, `bug_fix`, `optimizat
 After you connect Gardener, new CrossOmics registry pull requests also sync to shared history. In **Register → My submissions**, use **Sync** on older PRs or retry an interrupted sync. Open each workspace that holds submissions you want to sync. The local registry cache, pipeline links and PR status stay with the Gardener workspace.
 
 ### Verify locally
+
+Run `npm run test:registry` for isolated repository grouping, pinning, lineage, latest-commit fallback and ranking tests (no servers or database needed).
 
 Run `npm run test:community` with the website at `http://localhost:3017` and the Community service at `http://localhost:4100`. Override those origins with `COMMUNITY_TEST_URL` and `COMMUNITY_TEST_SERVICE_URL`. For the authenticated test, configure an isolated test database and set `COMMUNITY_TEST_DATABASE_URL` and `COMMUNITY_TEST_SESSION_SECRET` to the values used by the service. The test creates and removes its own rows. Set `COMMUNITY_TEST_OAUTH=1` to check redirect and cookie forwarding with OAuth configuration present.
 
