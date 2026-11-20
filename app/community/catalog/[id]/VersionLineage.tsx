@@ -1,17 +1,17 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState, type PointerEvent, type ReactNode } from "react";
-import { buildLineage, fitLineage, lineageNodeSize, lineageIssueLabels, zoomLineage, moveLineageGesture, type LineageGesture, type LineageView } from "@/lib/community/lineage";
+import { buildLineage, fitLineage, lineageNodeSize, lineageIssueLabels, zoomLineage, moveLineageGesture, type LineageGesture, type LineageView, type LineageNode } from "@/lib/community/lineage";
 import styles from "./VersionLineage.module.css";
 
-type Version = { id: string; label: string; parent: string | null; type: string; repo: string; withdrawn: boolean; authors: string };
+type Version = { id: string; label: string; parent: string | null; type: string; repo: string; withdrawn: boolean; authors: string; issue?: LineageNode["issue"] };
 type Point = { x: number; y: number };
 
-export default function VersionLineage({ versions, recommendedIds = [], details }: {
-  versions: Version[]; recommendedIds?: string[]; details: ReactNode[];
+export default function VersionLineage({ versions, recommendedIds = [], details, latestId, repositoryName }: {
+  versions: Version[]; recommendedIds?: string[]; details: ReactNode[]; latestId?: string; repositoryName?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState(versions[0]?.id ?? "");
+  const [selected, setSelected] = useState(latestId ?? versions[0]?.id ?? "");
   const [view, setView] = useState<LineageView>({ scale: 1, x: 24, y: 24 });
   const viewport = useRef<HTMLDivElement>(null);
   const viewRef = useRef(view);
@@ -19,7 +19,11 @@ export default function VersionLineage({ versions, recommendedIds = [], details 
   const gesture = useRef<LineageGesture | null>(null);
   const suppressClick = useRef(false);
   const graphId = useId(), markerId = useId();
-  const layout = useMemo(() => buildLineage(versions), [versions]);
+  const layout = useMemo(() => {
+    const graph = buildLineage(versions);
+    const issues = new Map(versions.map(version => [version.id, version.issue]));
+    return { ...graph, nodes: graph.nodes.map(node => ({ ...node, issue: node.issue ?? issues.get(node.id) ?? null })) };
+  }, [versions]);
   const positions = useMemo(() => new Map(layout.nodes.map(node => [node.id, node])), [layout]);
   const validParents = useMemo(() => new Map(layout.edges.map(edge => [edge.child,edge.parent])), [layout]);
   const byId = useMemo(() => new Map(versions.map(version => [version.id, version])), [versions]);
@@ -84,11 +88,11 @@ export default function VersionLineage({ versions, recommendedIds = [], details 
         y:element.clientHeight/2-(node.y+lineageNodeSize.height/2)*v.scale });
   };
 
-  return <section className="community-section" aria-label="Tool versions">
+  return <section className={repositoryName ? "community-repository-versions" : "community-section"} aria-label={repositoryName ? `${repositoryName} versions` : "Tool versions"}>
     <div className={styles.heading}>
-      <h2>Versions</h2>
+      {repositoryName ? <h4>{open ? `${repositoryName} lineage` : "Latest known update"}</h4> : <h2>Versions</h2>}
       {versions.length > 0 && <button className="community-primary" type="button" aria-expanded={open} aria-controls={graphId}
-        onClick={() => setOpen(!open)}>{open ? "View version list" : "View lineage"}</button>}
+        onClick={() => setOpen(!open)}>{open ? (repositoryName ? "View latest update" : "View version list") : "View lineage"}</button>}
     </div>
     {open && <div id={graphId} className={styles.graph}>
       <div className={styles.caption}><span>Version lineage</span><span>Select a version to view details</span></div>
@@ -144,7 +148,7 @@ export default function VersionLineage({ versions, recommendedIds = [], details 
       <p className={styles.selection} role="status">Selected version: {versions[currentIndex]?.label}</p>
     </div>}
     <ul id={open ? `${graphId}-details` : undefined} className={`community-record-list ${styles.details}`}>
-      {open ? details[currentIndex] : details}
+      {open ? details[currentIndex] : latestId ? details[Math.max(0, versions.findIndex(version => version.id === latestId))] : details}
     </ul>
   </section>;
 }

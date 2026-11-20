@@ -468,7 +468,7 @@ test("Community navigation uses task labels with a single submission entry", asy
   assert.ok(nav);
   for (const label of ["Submit a Contribution", "Explore Existing Tools", "Maintenance Needed", "Tools Wanted"]) assert.match(nav, new RegExp(label));
   assert.equal([...nav.matchAll(/href="\/community\/submit"/g)].length, 1);
-  assert.match(nav, /href="https:\/\/crossomics.github.io\/pipeline-registry\/ranking\/"/);
+  assert.match(nav, /href="\/community\/ranking"/);
   assert.doesNotMatch(nav, />Registry<|>Bounties<|>Contributions<|Log a contribution/);
   const registry = html.match(/<section[^>]*id="registry"[\s\S]*?<\/section>/)?.[0];
   assert.ok(registry);
@@ -504,11 +504,13 @@ test("record mode preserves sign-in destination and existing Tool selection", as
 });
 
 
-test("tool details show global maintainers once and recommendations before other versions", async () => {
+test("tool details show global maintainers once and the latest repository update with its recommendation", async () => {
   const response = await fetch(base + "/community/catalog/cp_managed",{headers:{cookie:"community_session=maintainer"}});
   const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
   assert.match(html, /Tool maintainer/); assert.doesNotMatch(html, /Version-only maintainer/);
-  assert.ok(html.indexOf("Recommended update") < html.indexOf(">v1</h3>"));
+  assert.match(html, /Recommended update/);
+  assert.match(html, /Pinned · Recommended/);
+  assert.equal((html.match(/data-version-id=/g) ?? []).length, 1);
   assert.match(html, /href="\/community\/catalog\/cp_managed\/manage"/);
   assert.match(html, /href="\/community\/registry\/submit\?pipelineId=cp_managed"/);
   assert.match(html, /href="\/community\/submit\?mode=record&amp;catalogId=cp_managed"/);
@@ -599,6 +601,19 @@ test('invalid ancestry never claims a self-parent or turns orphan Update credits
   const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,'');
   assert.doesNotMatch(html,/Based on Cyclic version|<dt>Original authors<\/dt>/);
   assert.match(html,/Invalid parent relationship/);
-  assert.match(html,/Parent not available/);
-  assert.equal((html.match(/<dt>Recorded authors<\/dt>/g)??[]).length,2);
+  assert.equal((html.match(/<dt>Recorded authors<\/dt>/g)??[]).length,1);
+  assert.equal((html.match(/data-version-id=/g) ?? []).length, 1);
+});
+
+test("maintenance ranking is a native Community route with current home navigation", async () => {
+  const response = await fetch(base + "/community/ranking");
+  assert.equal(response.status, 200);
+  const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+  assert.match(html, /<h1>Maintenance ranking<\/h1>/);
+  assert.match(html, /aria-current="page" href="\/community\/ranking"/);
+  assert.match(html, /href="\/#registry"/);
+  assert.match(html, /href="\/community\/sign-in\?returnTo=%2Fcommunity"/);
+  assert.match(html, /Not ranked/);
+  assert.match(html, /How the score is computed/);
+  assert.doesNotMatch(html, /href="https:\/\/crossomics.github.io\/pipeline-registry\/ranking/);
 });

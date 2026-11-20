@@ -45,7 +45,7 @@ export type Contribution = ContributionInput & {
   impact: Impact[];
 };
 
-type RegistryVersion = {
+export type RegistryVersion = {
   id: string;
   kind: "original" | "optimization";
   label: string;
@@ -55,6 +55,27 @@ type RegistryVersion = {
   released_at: string | null;
   improvement: string | null;
   withdrawn: boolean;
+  source?: "repository";
+};
+
+export type RegistryRepository = { url: string; primary: boolean; name?: string; pinned?: boolean; description?: string };
+
+export type RegistryMetrics = {
+  recent_citations: number | null;
+  priority?: number | null;
+  priority_reason?: string | null;
+  citations_by_year?: Record<string, number>;
+  collected_at?: string | null;
+  stale_since?: string | null;
+  activity?: {
+    archived?: boolean;
+    moved_to_url?: string | null;
+    last_commit_at?: string | null;
+    commits?: number | null;
+    releases?: number | null;
+    merged_prs?: number | null;
+    closed_issues?: number | null;
+  } | null;
 };
 
 export type RegistryItem = {
@@ -69,10 +90,18 @@ export type RegistryItem = {
   keywords: string[];
   inputs: string[];
   outputs: string[];
-  repositories: { url: string; primary: boolean }[];
+  repositories: RegistryRepository[];
   papers: { title: string | null; doi: string | null; url: string | null }[];
   versions: RegistryVersion[];
-  metrics: { recent_citations: number | null } | null;
+  metrics: RegistryMetrics | null;
+  biocode_maintenance?: { status: "planned" | "available"; repository?: string };
+};
+
+export type RegistryCatalog = {
+  items: RegistryItem[];
+  generatedAt: string;
+  metricsCollectedAt?: string | null;
+  config?: { citation_years: number[]; activity_window_days: number };
 };
 
 export const bountyCategories = {

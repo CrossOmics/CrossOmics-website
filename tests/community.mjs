@@ -42,6 +42,38 @@ test("community tracker is reachable from the existing site", async () => {
   assert.equal(personal.headers.get("location"), "/community/sign-in?returnTo=%2Fcommunity%2Fmine");
 });
 
+test("maintenance ranking stays in Community and links to native tool details", async () => {
+  const response = await fetch(`${base}/community/ranking`, { redirect: "manual" });
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /<h1>Maintenance ranking<\/h1>/);
+  const rankingLink = html.match(/<a\b[^>]*href="\/community\/ranking"[^>]*>/)?.[0];
+  assert.match(rankingLink ?? "", /aria-current="page"/);
+  assert.match(html, /href="\/community\/sign-in\?returnTo=%2Fcommunity"/);
+  assert.match(html, /href="\/community\/catalog\/cp_star"/);
+  assert.match(html, /Mature \(stable\) pipelines/);
+  assert.match(html, /How the score is computed/);
+  assert.doesNotMatch(html, /href="https:\/\/crossomics.github.io\/pipeline-registry\/ranking/);
+});
+
+test("STAR presents NuSTAR pinned before the original with separate lineage controls", async () => {
+  const response = await fetch(`${base}/community/catalog/cp_star`);
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  const cards = html.match(/<li class="community-repository(?: is-pinned)?"[^>]*>[\s\S]*?<\/section><\/li>/g) ?? [];
+  assert.ok(cards.length >= 2);
+  assert.match(cards[0], /<h3>NuSTAR<\/h3>/);
+  assert.match(cards[0], /Pinned · Admin selected/);
+  assert.match(cards[0], /github.com\/BioCode-Commons\/NuSTAR/);
+  const original = cards.find((card) => card.includes("<h3>STAR</h3>"));
+  assert.ok(original);
+  assert.match(original, /Original repository/);
+  assert.equal((original.match(/data-version-id=/g) ?? []).length, 1);
+  assert.match(original, /Based on 2.7.11a/);
+  assert.doesNotMatch(original, /NuSTAR/);
+  assert.equal((cards.join("").match(/aria-expanded="false"/g) ?? []).length, cards.length);
+});
+
 test("the website proxies OAuth and keeps callback cookies on the website origin", {
   skip: !process.env.COMMUNITY_TEST_OAUTH
 }, async () => {

@@ -44,6 +44,7 @@ Unknown paths return 404. Missing, invalid, or self-referencing `GARDENER_WEBSIT
 ## Verification
 
 ```bash
+npm run test:registry
 npm run test:registry-submit
 GARDENER_TEST_TARGET= npm run test:registry-submit  # missing-destination fallback
 npm run build
@@ -68,3 +69,13 @@ Deploy the paired backend change and run its `db/002-registry-community-identity
 ## Bounty publishing
 
 Every signed-in Community account can post a bounty, without a prior contribution or editor membership. The board always shows **Post a bounty**; anonymous visitors sign in before reaching the form. Status management remains editor-only. Deploy the paired backend update before this frontend. No database migration or environment changes are needed.
+
+## Repository versions and maintenance ranking
+
+`/community/ranking` renders maintenance scores, citation/activity metrics, collection dates, stable entries and exclusions inside Community. It uses the existing v1 metrics endpoint and infers citation years when optional metadata is absent. Tool links use the current Registry v2 detail route; the homepage remains `/` and `/community` keeps its compatibility redirect.
+
+Each Tool's Versions section has one card per repository, showing its latest known active update. **View lineage** opens the existing pan/zoom graph for that repository only, and selecting a node shows its full attribution, citations, verification and permitted administrator actions. Registry v2 recommendations pin their repository cards without overriding which update is latest. Withdrawn records remain selectable in history. Cycles and unavailable parents use the existing lineage diagnostics.
+
+`lib/community/repositories.ts` holds administrator-curated repositories. STAR currently pins `BioCode-Commons/NuSTAR`, with a verified commit snapshot until the registry includes it. Tool details refresh its latest GitHub commit with a 15-minute cache and four-second timeout. Observed commit snapshots retain a fallback during outages and do not expose registry mutation controls or invent authors/parents. Original repository maintenance metrics stay unchanged.
+
+`npm run test:registry` covers grouping, latest selection, pinning, shared lineage validation, GitHub fallback, ranking, and interactive per-repository history. `npm run test:registry-submit` covers the existing Registry v2 workflows and native ranking route using an isolated API fixture.

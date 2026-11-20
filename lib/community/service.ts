@@ -2,7 +2,9 @@ import { cookies } from "next/headers";
 import { cache } from "react";
 import { normalizeRegistryItem, normalizeRegistrySubmission, type RegistryItemV2, type RegistrySubmissionV2 } from "./registry-v2";
 import { normalizeToolType, isToolKind } from "./tool-types";
-import type { Bounty, BountyReply, Contribution, Contributor, RegistryItem, SignInProvider } from "@/lib/community/types";
+import type { Bounty, BountyReply, Contribution, Contributor, RegistryCatalog, RegistryItem, SignInProvider } from "@/lib/community/types";
+import { curatedRepositories } from "./repositories";
+import { refreshRepositoryUpdates } from "./repository-updates";
 
 export function communityServiceFetch(path: string, init: RequestInit = {}) {
   const origin = process.env.COMMUNITY_SERVICE_URL;
@@ -66,7 +68,7 @@ export async function communityCatalog(filters: { q?: string; kind?: string } = 
   if (filters.q) query.set("q", filters.q);
   if (filters.kind) query.set("kind", filters.kind);
   try {
-    const data = await communityData<{ items: RegistryItem[]; generatedAt: string }>(`catalog?${query}`);
+    const data = await communityData<RegistryCatalog>(`catalog?${query}`);
     return { data: { ...data, items: data.items.filter(item => isToolKind(item.kind)) }, error: "" };
   } catch (error) {
     return { data: null, error: error instanceof ServiceError && (error.status === 400 || error.status === 422)
@@ -78,7 +80,8 @@ export async function communityCatalogItem(id: string) {
   const query = new URLSearchParams({ id });
   try {
     const data = await communityData<{ item: RegistryItem }>(`catalog?${query}`);
-    return { item: data.item && isToolKind(data.item.kind) ? data.item : null };
+    const item = data.item && isToolKind(data.item.kind) ? data.item : null;
+    return { item: item && curatedRepositories[item.id] ? await refreshRepositoryUpdates(item, curatedRepositories[item.id]) : item };
   } catch (error) {
     if (error instanceof ServiceError && error.status === 404) return { item: null };
     return null;
@@ -138,7 +141,8 @@ export async function registryV2Catalog(filters: { q?: string; type?: string } =
 export async function registryV2Item(id: string) {
   try {
     const data = await communityData<{ item: RegistryItemV2 | null }>("catalog/" + encodeURIComponent(id), false, "v2");
-    return { item: data.item && isToolKind(data.item.kind) ? normalizeRegistryItem(data.item) : null };
+    const item = data.item && isToolKind(data.item.kind) ? normalizeRegistryItem(data.item) : null;
+    return { item: item && curatedRepositories[item.id] ? await refreshRepositoryUpdates(item, curatedRepositories[item.id]) : item };
   } catch (error) {
     return error instanceof ServiceError && error.status === 404 ? { item: null } : null;
   }

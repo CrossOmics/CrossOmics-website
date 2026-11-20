@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "test:community": "node --test tests/community.mjs",
-    "test:registry-submit": "node --test tests/registry-submit.mjs tests/form-copy.mjs tests/site-links.mjs tests/registry-metadata.mjs tests/lineage.mjs tests/update-verification.mjs"
+    "test:registry-submit": "node --test tests/registry-submit.mjs tests/form-copy.mjs tests/site-links.mjs tests/registry-metadata.mjs tests/lineage.mjs tests/update-verification.mjs",
+    "test:registry": "node --test tests/community-registry.mjs tests/repository-lineage.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

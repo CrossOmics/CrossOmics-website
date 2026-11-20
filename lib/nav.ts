@@ -3,7 +3,7 @@ export type NavEntry = { href: string; label: string; external?: boolean };
 export const NAV: NavEntry[] = [
   { href: "/community/submit", label: "Submit a Contribution" },
   { href: "/", label: "Explore Existing Tools" },
-  { href: "https://crossomics.github.io/pipeline-registry/ranking/", label: "Maintenance Needed", external: true },
+  { href: "/community/ranking", label: "Maintenance Needed" },
   { href: "/community/bounties", label: "Tools Wanted" }
 ];
 
