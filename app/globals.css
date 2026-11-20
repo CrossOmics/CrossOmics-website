@@ -204,16 +204,7 @@ img { max-width: 100%; display: block; }
    two stack into a 240px void above the footer. */
 .page-main > :last-child,
 .page-main-home > :last-child { margin-bottom: 0; }
-.site-footer-inner {
-  display: flex; align-items: center; gap: 32px; flex-wrap: wrap;
-}
-.site-footer-nav {
-  display: flex; gap: 24px; flex-wrap: wrap;
-  margin-right: auto;
-  font-size: 14px; color: var(--muted);
-}
-.site-footer-nav a:hover { color: var(--fg); }
-.site-footer-copy { font-size: 13px; color: var(--muted); }
+.site-footer-copy { text-align: right; font-size: 13px; color: var(--muted); }
 
 @media (max-width: 900px) {
   .site-header-inner { gap: 16px; }
@@ -224,10 +215,7 @@ img { max-width: 100%; display: block; }
     -webkit-overflow-scrolling: touch;
   }
   .site-nav::-webkit-scrollbar { display: none; }
-  /* Hidden rather than wrapped — the footer still carries the GitHub link. */
   .site-header-cta { display: none; }
-  .site-footer-inner { flex-direction: column; align-items: flex-start; gap: 20px; }
-  .site-footer-nav { margin-right: 0; }
 }
 
 .page {

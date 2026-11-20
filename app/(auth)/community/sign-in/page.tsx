@@ -37,7 +37,7 @@ export default async function CommunitySignInPage({ searchParams }: { searchPara
           <p className="account-authorization-note">Use any account to register a tool. We ask for GitHub permission separately when an action needs it.</p>
         </div>
       </main>
-      <footer className="account-footer container"><span>© {new Date().getFullYear()} CrossOmics, Inc.</span><Link href="/">Return to Community</Link></footer>
+      <footer className="account-footer container">© {new Date().getFullYear()} CrossOmics, Inc.</footer>
     </div>
   );
 }
