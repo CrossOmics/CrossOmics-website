@@ -26,10 +26,10 @@ export default function ImpactForm({ contributionId }: { contributionId: string 
         evidenceUrl: data.get("evidenceUrl")
       });
       form.reset();
-      setStatus("Impact evidence saved.");
+      setStatus("Impact verification saved.");
       router.refresh();
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Could not save impact evidence.");
+      setError(error instanceof Error ? error.message : "Could not save impact verification.");
     } finally {
       setPending(false);
     }
@@ -37,19 +37,19 @@ export default function ImpactForm({ contributionId }: { contributionId: string 
 
   return (
     <details className="community-impact-form">
-      <summary>Add or update impact evidence</summary>
+      <summary>Add or update impact verification</summary>
       <form method="post" onSubmit={submit}>
         <fieldset disabled={pending}>
-          <legend className="community-visually-hidden">Impact evidence</legend>
+          <legend className="community-visually-hidden">Impact verification</legend>
           <p>Enter 0 for a metric you checked and found no activity. Leave metrics you cannot check unrecorded.</p>
           <div className="community-form-grid">
             <label>Metric<select name="metric" required>{Object.entries(impactMetrics).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
             <label>Count<input name="value" type="number" step="1" min="0" max="2147483647" required /></label>
-            <label className="community-field-wide">Evidence URL<input name="evidenceUrl" type="url" maxLength={2048} required /></label>
+            <label className="community-field-wide">Verification URL<input name="evidenceUrl" type="url" maxLength={2048} required /></label>
           </div>
           {error && <p role="alert" className="community-error">{error}</p>}
           {status && <p role="status">{status}</p>}
-          <button className="community-secondary" type="submit">{pending ? "Saving…" : "Save impact evidence"}</button>
+          <button className="community-secondary" type="submit">{pending ? "Saving…" : "Save impact verification"}</button>
         </fieldset>
       </form>
     </details>

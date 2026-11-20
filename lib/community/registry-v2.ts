@@ -22,6 +22,8 @@ export type RegistryDraftV2 = Partial<RegistryMetadata> & {
   parentVersionId?: string;
   changeSummary?: string;
   evidenceUrl?: string;
+  updateSource?: "new_repository" | "upstream_pr";
+  verificationKind?: "benchmark" | "pull_request";
   authors: RegistryCredit[];
   updateAuthors?: RegistryCredit[];
   upstreamCitation?: string;
@@ -31,6 +33,8 @@ export type RegistryDraftV2 = Partial<RegistryMetadata> & {
 export type RegistryVersionV2 = Omit<RegistryItem["versions"][number], "kind"> & {
   type: RegistryType;
   evidence_url?: string;
+  updateSource?: "new_repository" | "upstream_pr";
+  verificationKind?: "benchmark" | "pull_request";
   legacyKind?: "original" | "optimization";
   authors: RegistryCredit[];
   updateAuthors?: RegistryCredit[];

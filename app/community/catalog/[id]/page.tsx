@@ -88,7 +88,7 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
                 {"upstreamCitation" in version && version.upstreamCitation && <div><h4>Upstream citation</h4><p className="community-citation">{version.upstreamCitation}</p></div>}
                 {"citation" in version && version.citation && <div><h4>{isUpdate && !("updateAuthors" in version && version.updateAuthors) ? "Recorded citation" : "How to cite this version"}</h4><p className="community-citation">{version.citation}</p></div>}
                 {repo && <a href={repo} className="community-link">Version repository <span aria-hidden>↗</span></a>}
-                {evidence && <a href={evidence} className="community-link">Evidence <span aria-hidden>↗</span></a>}
+                {evidence && <a href={evidence} className="community-link">Verification <span aria-hidden>↗</span></a>}
                 <code>{version.commit}</code>
                 {session?.canManageRegistry && "legacyKind" in version &&
                   <CorrectVersionCredits pipelineId={item.id} versionId={version.id}

@@ -16,7 +16,7 @@ const pipeline = {
   repositories: [], papers: [], metrics: null,
   versions: [{ id: "cv_example", type: "origin", label: "v1", parent: null,
     repo: "https://github.com/example/pipeline", commit: "a".repeat(40), released_at: null,
-    improvement: null, withdrawn: false, authors: [{ name: "Original author" }], citation: "Upstream paper citation", maintainers: [{ name: "Maintainer" }] }]
+    improvement: null, evidence_url: "https://github.com/example/pipeline/blob/main/benchmark.md", withdrawn: false, authors: [{ name: "Original author" }], citation: "Upstream paper citation", maintainers: [{ name: "Maintainer" }] }]
 };
 
 const managed = { ...pipeline, id: "cp_managed", name: "Managed tool", maintainers: [{ name: "Tool maintainer" }], recommendedVersionIds: ["cv_recommended"],
@@ -164,6 +164,28 @@ test("original tool asks for actual authors and citation without requiring a cha
   assert.match(html, /no earlier version is needed/);
   assert.match(html, /<legend>Maintainers<\/legend>/);
   assert.match(html, /<button[^>]*type="submit">Submit registration<\/button>/);
+});
+
+test("Update offers a new repository or an original-repository PR with benchmark verification", async () => {
+  const html = await page("ready", "?pipelineId=cp_example");
+  assert.match(html, /name="updateSource"/);
+  assert.match(html, /New repository/);
+  assert.match(html, /PR to the original repository/);
+  assert.match(html, /name="verificationKind"/);
+  assert.match(html, /Benchmark \(Markdown file\)/);
+  assert.match(html, /Verification URL/);
+  assert.doesNotMatch(html, /Evidence URL/);
+  const original = await page("ready");
+  assert.doesNotMatch(original, /name="updateSource"/);
+  const response = await fetch(base + "/community/catalog/cp_example");
+  const detail = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+  assert.match(detail, /Verification/);
+  assert.doesNotMatch(detail, />Evidence/);
+  const history = await fetch(base + "/community/mine", { headers: { cookie: "community_session=legacy" } });
+  const historyHtml = (await history.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+  assert.match(historyHtml, /Add or update impact verification/);
+  assert.match(historyHtml, /Save impact verification/);
+  assert.doesNotMatch(historyHtml, /impact evidence|Submitted evidence|Evidence URL/i);
 });
 
 test("unavailable service retains the two-type form with submission disabled", async () => {

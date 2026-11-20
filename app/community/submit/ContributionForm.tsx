@@ -86,9 +86,9 @@ export default function ContributionForm({ catalog, selected }: { catalog: Catal
         <legend>Link to your work</legend>
         <div className="community-form-grid">
           <label>Tool URL<input name="projectUrl" type="url" value={projectUrl} onChange={(event) => setProjectUrl(event.target.value)} maxLength={2048} placeholder="https://github.com/org/project" required /></label>
-          <label>Evidence URL<input name="evidenceUrl" type="url" maxLength={2048} placeholder="https://github.com/org/project/pull/123" required /></label>
+          <label>Verification URL<input name="evidenceUrl" type="url" maxLength={2048} placeholder="https://github.com/org/project/pull/123" required /></label>
         </div>
-        <p>Link to a public pull request, commit, release, or paper. BioCode Commons and external tools follow the same rules.</p>
+        <p>Link to a public pull request, benchmark Markdown file, commit, release, or paper. BioCode Commons and external tools follow the same rules.</p>
       </fieldset>
       <div className="community-form-footer">
         <p>Your Community username, description, and links will be visible in the public contribution feed.</p>

@@ -50,7 +50,7 @@ export default async function RegistrySubmissions({ searchParams }: { searchPara
                       {item.upstreamCitation && <div><h3>Upstream citation</h3><p className="community-citation">{item.upstreamCitation}</p></div>}
                       {item.citation && <div><h3>{item.type === "original" ? "Citation information" : item.updateAuthors ? "Update citation" : "Recorded citation"}</h3><p className="community-citation">{item.citation}</p></div>}
                       {repo && <a className="community-link" href={repo}>Source repository ↗</a>}
-                      {evidence && <a className="community-link" href={evidence}>Evidence ↗</a>}
+                      {evidence && <a className="community-link" href={evidence}>Verification ↗</a>}
                       <dl className="community-detail-grid">
                         <div><dt>Commit</dt><dd><code>{item.commit}</code></dd></div>
                         {item.type !== "original" && item.pipelineId && <div><dt>Target tool</dt>
