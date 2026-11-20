@@ -97,9 +97,12 @@ test("choosing a tool in PR mode shows its recorded repository before a version 
   }
   await selectTool(tool.id);
   assert.equal(values().updateSource, "upstream_pr");
-  const repositoryField = () => [...document.querySelectorAll("input")].find(input => input.labels[0]?.textContent.includes("repository"));
+  const repositoryField = () => [...document.querySelectorAll("input")].find(input => input.labels?.[0]?.textContent.includes("repository"));
   assert.equal(repositoryField().value, "https://github.com/example/upstream");
   assert.equal(repositoryField().readOnly, true);
+  const link = document.querySelector('[name="evidenceUrl"]');
+  assert.equal(link.labels[0].textContent.trim(), "Pull Request Link");
+  assert.ok(link.compareDocumentPosition(repositoryField()) & dom.window.Node.DOCUMENT_POSITION_FOLLOWING);
   assert.equal(values().repository, undefined);
   assert.equal(values().parentVersionId, "");
   await choose("parentVersionId", fork.id);
