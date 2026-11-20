@@ -1,26 +1,21 @@
 import Link from "next/link";
-import { bountyStatuses } from "@/community-server/lib/community/types";
-import { communityBounties, communitySession } from "@/lib/community/service";
+import { bountyStatuses } from "@/lib/community/types";
+import { communityBounties } from "@/lib/community/service";
 import { BountyPager, BountyTags } from "./BountyMeta";
 
 export default async function BountiesPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; page?: string }> }) {
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q : "";
   const status = typeof params.status === "string" ? params.status : "";
-  const [{ data, error }, session] = await Promise.all([
-    communityBounties({ q, status, page: params.page }),
-    communitySession()
-  ]);
+  const { data, error } = await communityBounties({ q, status, page: params.page });
   return (
     <>
       <header className="community-heading">
-        <h1>Community bounties</h1>
-        <p>Find work CrossOmics would like help with, from maintaining a tool to building a workflow or running a benchmark.</p>
-        {session?.canManageBounties && (
-          <div className="community-actions">
-            <Link href="/community/bounties/new" className="community-primary">Post a bounty</Link>
-          </div>
-        )}
+        <h1>Tools Wanted</h1>
+        <p>Find requests from the community for new tools, improvements, maintenance, and benchmarks. Offer help or post a bounty for work you need.</p>
+        <div className="community-actions">
+          <Link href="/community/bounties/new" className="community-primary">Post a bounty</Link>
+        </div>
       </header>
       <form className="community-search" action="/community/bounties">
         <label>Search bounties<input type="search" name="q" maxLength={120} defaultValue={q} placeholder="Try a tool, workflow, or benchmark" /></label>
@@ -34,7 +29,7 @@ export default async function BountiesPage({ searchParams }: { searchParams: Pro
         {(q || status) && <Link className="community-link" href="/community/bounties">Clear filters</Link>}
       </form>
       {!data ? <p className="community-notice" role="status">{error}</p> : data.items.length === 0 ? (
-        <p className="community-notice">{q || status ? "No bounties match these filters." : "CrossOmics hasn’t posted any bounties yet."}</p>
+        <p className="community-notice">{q || status ? "No bounties match these filters." : "No one has posted a bounty yet."}</p>
       ) : (
         <>
           <ul className="community-bounty-list">

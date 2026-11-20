@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { communitySignInPath } from "@/community-server/lib/community/return-path";
-import { httpsUrl } from "@/community-server/lib/community/validation";
+import { communitySignInPath } from "@/lib/community/return-path";
+import { httpsUrl } from "@/lib/community/https-url";
 import { communityBounty, communitySession } from "@/lib/community/service";
 import { BountyReplyForm, BountyStatusForm } from "../BountyForms";
 import { BountyPager, BountyTags } from "../BountyMeta";

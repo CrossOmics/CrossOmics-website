@@ -1,15 +1,16 @@
 import Link from "next/link";
-import type { Contribution } from "@/community-server/lib/community/types";
-import { contributionTypes, impactMetrics, subjectKinds } from "@/community-server/lib/community/types";
-import { httpsUrl } from "@/community-server/lib/community/validation";
+import type { Contribution } from "@/lib/community/types";
+import { impactMetrics, subjectKinds } from "@/lib/community/types";
+import { httpsUrl } from "@/lib/community/https-url";
+import { toolTypeLabel } from "@/lib/community/tool-types";
 import ImpactForm from "./mine/ImpactForm";
 
 export default function ContributionList({ items, mine = false }: { items: Contribution[]; mine?: boolean }) {
   if (!items.length) return (
     <div className="community-notice">
       <h2>{mine ? "Your history is empty" : "No contributions to show"}</h2>
-      <p>{mine ? "Log a contribution to start your history." : "A contribution appears here when someone publishes it."}</p>
-      <Link href="/community/submit" className="community-link">Log a contribution</Link>
+      <p>{mine ? "Submit a contribution to start your history." : "A contribution appears here when someone publishes it."}</p>
+      <Link href="/community/submit" className="community-link">Submit a Contribution</Link>
     </div>
   );
   return (
@@ -20,8 +21,8 @@ export default function ContributionList({ items, mine = false }: { items: Contr
         return (
           <li key={item.id} className="community-record" id={`contribution-${item.id}`}>
             <div className="community-actions">
-              <span className="community-tag">{contributionTypes[item.type]}</span>
-              <span className="community-tag community-tag-neutral">{item.projectScope === "commons" ? "BioCode Commons" : "External project"}</span>
+              <span className="community-tag">{toolTypeLabel(item.type)}</span>
+              <span className="community-tag community-tag-neutral">{item.projectScope === "commons" ? "BioCode Commons" : "External"}</span>
             </div>
             <h3>{item.catalogId ? <Link href={`/community/catalog/${item.catalogId}`}>{item.subjectName}</Link> : item.subjectName}</h3>
             <p className="community-record-meta">
@@ -29,8 +30,8 @@ export default function ContributionList({ items, mine = false }: { items: Contr
             </p>
             <p className="community-record-copy">{item.summary}</p>
             <div className="community-actions">
-              {evidence && <a className="community-link" href={evidence}>Submitted evidence <span aria-hidden>↗</span></a>}
-              {project && <a className="community-link" href={project}>Project <span aria-hidden>↗</span></a>}
+              {evidence && <a className="community-link" href={evidence}>Verification <span aria-hidden>↗</span></a>}
+              {project && <a className="community-link" href={project}>Source repository <span aria-hidden>↗</span></a>}
             </div>
             <div className="community-impact">
               <h4>Reported impact</h4>

@@ -1,11 +1,9 @@
 import assert from "node:assert/strict";
-import { createRequire } from "node:module";
 import { test } from "node:test";
 
 const base = process.env.COMMUNITY_TEST_URL || "http://localhost:3017";
 const webOrigin = process.env.COMMUNITY_TEST_WEB_ORIGIN || new URL(base).origin;
 const service = process.env.COMMUNITY_TEST_SERVICE_URL || "http://localhost:4100";
-const requireFromService = createRequire(new URL("../community-server/package.json", import.meta.url));
 
 test("registry discovery returns real catalog records without signing in", async () => {
   const response = await fetch(`${base}/api/community/v1/catalog?q=suffix&kind=tool`);
@@ -32,7 +30,7 @@ test("publishing and personal history require authentication", async () => {
 test("community tracker is reachable from the existing site", async () => {
   const home = await fetch(base);
   assert.equal(home.status, 200);
-  assert.match(await home.text(), /href="\/community"[^>]*>Explore the community/);
+  assert.match(await home.text(), /Community Tracking/);
   const response = await fetch(`${base}/community`);
   assert.equal(response.status, 200);
   const html = await response.text();
@@ -51,18 +49,18 @@ test("maintenance ranking stays in Community and links to native tool details", 
   assert.match(html, /<h1>Maintenance ranking<\/h1>/);
   const rankingLink = html.match(/<a\b[^>]*href="\/community\/ranking"[^>]*>/)?.[0];
   assert.match(rankingLink ?? "", /aria-current="page"/);
-  assert.match(html, /href="\/community\/sign-in\?returnTo=%2Fcommunity%2Franking"/);
+  assert.match(html, /href="\/community\/sign-in\?returnTo=%2Fcommunity"/);
   assert.match(html, /href="\/community\/catalog\/cp_star"/);
   assert.match(html, /Mature \(stable\) pipelines/);
   assert.match(html, /How the score is computed/);
   assert.doesNotMatch(html, /href="https:\/\/crossomics.github.io\/pipeline-registry\/ranking/);
 });
 
-test("STAR presents NuSTAR pinned before the original with separate collapsed lineage", async () => {
+test("STAR presents NuSTAR pinned before the original with separate lineage controls", async () => {
   const response = await fetch(`${base}/community/catalog/cp_star`);
   assert.equal(response.status, 200);
   const html = await response.text();
-  const cards = html.match(/<li class="community-repository(?: is-pinned)?">[\s\S]*?<\/details><\/li>/g) ?? [];
+  const cards = html.match(/<li class="community-repository(?: is-pinned)?"[^>]*>[\s\S]*?<\/section><\/li>/g) ?? [];
   assert.ok(cards.length >= 2);
   assert.match(cards[0], /<h3>NuSTAR<\/h3>/);
   assert.match(cards[0], /Pinned · Admin selected/);
@@ -70,10 +68,10 @@ test("STAR presents NuSTAR pinned before the original with separate collapsed li
   const original = cards.find((card) => card.includes("<h3>STAR</h3>"));
   assert.ok(original);
   assert.match(original, /Original repository/);
-  assert.equal((original.match(/class="community-repository-latest"/g) ?? []).length, 1);
+  assert.equal((original.match(/data-version-id=/g) ?? []).length, 1);
   assert.match(original, /Based on 2.7.11a/);
   assert.doesNotMatch(original, /NuSTAR/);
-  assert.doesNotMatch(cards.join(""), /<details[^>]*\sopen(?:\s|>)/);
+  assert.equal((cards.join("").match(/aria-expanded="false"/g) ?? []).length, cards.length);
 });
 
 test("the website proxies OAuth and keeps callback cookies on the website origin", {
@@ -125,7 +123,7 @@ test("Web and Gardener share records, deduplicate evidence and preserve impact z
   skip: !process.env.COMMUNITY_TEST_DATABASE_URL || !process.env.COMMUNITY_TEST_SESSION_SECRET
 }, async () => {
   const { createHmac, randomInt, randomUUID } = await import("node:crypto");
-  const { Pool } = requireFromService("pg");
+  const { Pool } = await import("pg");
   const db = new Pool({ connectionString: process.env.COMMUNITY_TEST_DATABASE_URL });
   const contributor = { id: String(randomInt(1000000000, 9999999999)), login: "community-test" };
   const other = { id: String(Number(contributor.id) + 1), login: "community-other" };
@@ -158,6 +156,13 @@ test("Web and Gardener share records, deduplicate evidence and preserve impact z
   };
 
   try {
+    const historyPage = await fetch(`${base}/community/mine`, { headers: browser });
+    assert.equal(historyPage.status, 200);
+    const historyHtml = await historyPage.text();
+    assert.match(historyHtml, /Your history is empty/);
+    assert.match(historyHtml, /Contributor ID/);
+    assert.ok(historyHtml.includes(`<code>${contributor.id}</code>`));
+
     const blocked = await api("app-token", { method: "POST", headers: { ...browser, origin: "https://example.org" } });
     assert.equal(blocked.status, 403);
     const issued = await api("app-token", { method: "POST", headers: browser });
@@ -219,15 +224,16 @@ test("Web and Gardener share records, deduplicate evidence and preserve impact z
   }
 });
 
-test("bounty publishing is restricted to editors and closing stops new replies", {
+test("all signed-in users can publish bounties, and editors control status", {
   skip: !process.env.COMMUNITY_TEST_DATABASE_URL || !process.env.COMMUNITY_TEST_SESSION_SECRET || !process.env.COMMUNITY_TEST_BOARD_EDITOR_ID
 }, async () => {
   const { createHmac, randomInt, randomUUID } = await import("node:crypto");
-  const { Pool } = requireFromService("pg");
+  const { Pool } = await import("pg");
   const db = new Pool({ connectionString: process.env.COMMUNITY_TEST_DATABASE_URL });
   const editor = { id: process.env.COMMUNITY_TEST_BOARD_EDITOR_ID, login: "bounty-editor" };
   const member = { id: String(randomInt(1000000000, 9999999999)), login: "bounty-member" };
   let id;
+  let memberBountyId;
 
   function headers(identity) {
     const payload = Buffer.from(JSON.stringify({ ...identity, exp: Date.now() + 60000 })).toString("base64url");
@@ -252,7 +258,9 @@ test("bounty publishing is restricted to editors and closing stops new replies",
 
   try {
     assert.equal((await request("", "POST", undefined, draft)).status, 401);
-    assert.equal((await request("", "POST", member, draft)).status, 403);
+    const firstMemberPost = await request("", "POST", member, { ...draft, title: `New member bounty ${randomUUID()}` });
+    assert.equal(firstMemberPost.status, 201);
+    ({ id: memberBountyId } = await firstMemberPost.json());
     const created = await request("", "POST", editor, draft);
     assert.equal(created.status, 201);
     ({ id } = await created.json());
@@ -272,11 +280,91 @@ test("bounty publishing is restricted to editors and closing stops new replies",
     assert.equal((await request(`/${id}`, "PATCH", member, { status: "closed" })).status, 403);
     assert.equal((await request(`/${id}`, "PATCH", editor, { status: "closed" })).status, 200);
     assert.equal((await request(`/${id}/replies`, "POST", member, reply)).status, 409);
+
+    assert.equal((await request(`/${memberBountyId}`, "PATCH", member, { status: "closed" })).status, 403);
+
+    const session = await fetch(`${base}/api/community/v1/session`, { headers: headers(member) });
+    const permissions = await session.json();
+    assert.equal(permissions.canPostBounties, true);
+    assert.equal(permissions.canManageBounties, false);
+    const listing = await fetch(`${base}/community/bounties`, { headers: headers(member) });
+    assert.match(await listing.text(), /href="\/community\/bounties\/new"[^>]*>Post a bounty/);
+    const form = await fetch(`${base}/community/bounties/new`, { headers: headers(member) });
+    assert.match(await form.text(), /Reward or recognition/);
   } finally {
     if (id) {
       await db.query("DELETE FROM community_bounty_replies WHERE bounty_id = $1", [id]);
       await db.query("DELETE FROM community_bounties WHERE id = $1", [id]);
     }
+    if (memberBountyId) await db.query("DELETE FROM community_bounties WHERE id = $1", [memberBountyId]);
+    await db.query("DELETE FROM community_contributions WHERE github_id = $1", [member.id]);
+    await db.end();
+  }
+});
+
+test("bounty administrators can grant and revoke editor access without granting admin access", {
+  skip: !process.env.COMMUNITY_TEST_DATABASE_URL || !process.env.COMMUNITY_TEST_SESSION_SECRET ||
+    !process.env.COMMUNITY_TEST_BOARD_EDITOR_ID || !process.env.COMMUNITY_TEST_BOUNTY_ADMIN_ID
+}, async () => {
+  const { createHmac, randomBytes, randomUUID } = await import("node:crypto");
+  const { Pool } = await import("pg");
+  const db = new Pool({ connectionString: process.env.COMMUNITY_TEST_DATABASE_URL });
+  const admin = { id: process.env.COMMUNITY_TEST_BOUNTY_ADMIN_ID, login: "bounty-admin" };
+  const editor = { id: process.env.COMMUNITY_TEST_BOARD_EDITOR_ID, login: "legacy-editor" };
+  const hash = randomBytes(32).toString("hex");
+  const member = { id: `google:${hash}`, login: `member-${hash.slice(0, 16)}` };
+  let bountyId;
+  let postRevocationId;
+
+  async function request(path, identity, { method = "GET", body, origin = webOrigin } = {}) {
+    const headers = { origin };
+    if (identity) {
+      const payload = Buffer.from(JSON.stringify({ ...identity, exp: Date.now() + 60000 })).toString("base64url");
+      const signature = createHmac("sha256", process.env.COMMUNITY_TEST_SESSION_SECRET).update(payload).digest("base64url");
+      headers.cookie = `community_session=${payload}.${signature}`;
+    }
+    if (body !== undefined) headers["content-type"] = "application/json";
+    const response = await fetch(`${base}/api/community/v1/${path}`, {
+      method, headers, body: body === undefined ? undefined : JSON.stringify(body)
+    });
+    return { status: response.status, body: await response.json() };
+  }
+
+  const grant = { method: "POST", body: { id: member.id } };
+  const revoke = { method: "DELETE", body: { id: member.id } };
+  const draft = { title: `Test editor grant ${randomUUID()}`, category: "documentation", description: "Verify delegated bounty access." };
+  try {
+    assert.equal((await request("bounty-editors", undefined)).status, 401);
+    assert.equal((await request("bounty-editors", editor, grant)).status, 403);
+    assert.equal((await request("bounty-editors", admin, { ...grant, origin: "https://example.org" })).status, 403);
+    assert.equal((await request("bounty-editors", admin, { method: "POST", body: { id: member.login } })).status, 422);
+    assert.equal((await request("session", member)).body.canManageBounties, false);
+
+    const attempts = await Promise.all([request("bounty-editors", admin, grant), request("bounty-editors", admin, grant)]);
+    assert.deepEqual(attempts.map(({ status }) => status), [200, 200]);
+    const list = await request("bounty-editors", admin);
+    assert.equal(list.status, 200);
+    assert.ok(list.body.configuredIds.includes(editor.id));
+    assert.deepEqual(list.body.managedIds.filter((id) => id === member.id), [member.id]);
+    assert.equal((await request("session", member)).body.canManageBounties, true);
+    assert.equal((await request("bounty-editors", member)).status, 403);
+    assert.equal((await request("bounty-editors", member, grant)).status, 403);
+
+    const published = await request("bounties", member, { method: "POST", body: draft });
+    assert.equal(published.status, 201);
+    bountyId = published.body.id;
+    assert.equal((await request("bounty-editors", admin, revoke)).status, 200);
+    assert.equal((await request("bounty-editors", admin, revoke)).status, 200);
+    assert.equal((await request("session", member)).body.canManageBounties, false);
+    const afterRevocation = await request("bounties", member, { method: "POST", body: draft });
+    assert.equal(afterRevocation.status, 201);
+    postRevocationId = afterRevocation.body.id;
+    assert.equal((await request("bounty-editors", admin, { method: "DELETE", body: { id: editor.id } })).status, 409);
+    assert.equal((await request("session", editor)).body.canManageBounties, true);
+  } finally {
+    if (bountyId) await db.query("DELETE FROM community_bounties WHERE id = $1", [bountyId]);
+    if (postRevocationId) await db.query("DELETE FROM community_bounties WHERE id = $1", [postRevocationId]);
+    await request("bounty-editors", admin, revoke).catch(() => {});
     await db.end();
   }
 });

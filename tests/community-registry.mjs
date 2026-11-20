@@ -1,14 +1,15 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { readFile } from "node:fs/promises";
 import ts from "typescript";
+import { createRequire } from "node:module";
+import { readFileSync } from "node:fs";
 
 // Compile the pure projections using the project's TypeScript; no test-only runtime dependency.
-async function loadProjection(name) {
-  const source = await readFile(new URL(`../lib/community/${name}.ts`, import.meta.url), "utf8");
-  const { outputText } = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } });
-  return import(`data:text/javascript;base64,${Buffer.from(outputText).toString("base64")}`);
-}
+const require = createRequire(import.meta.url);
+require.extensions[".ts"] = (module, filename) => module._compile(ts.transpileModule(readFileSync(filename, "utf8"), {
+  compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS }
+}).outputText, filename);
+async function loadProjection(name) { return require(`../lib/community/${name}.ts`); }
 const repositories = await loadProjection("repositories");
 const ranking = await loadProjection("ranking");
 const updates = await loadProjection("repository-updates");
@@ -89,6 +90,28 @@ test("HTTP GitHub aliases preserve registered history and merge with HTTPS repos
   assert.equal(groups.length, 1);
   assert.equal(groups[0].latest.id, "http-version");
   assert.equal(groups[0].url, original);
+});
+
+test("v2 recommendations pin repositories while retaining latest selection and author metadata", () => {
+  const originalV2 = { ...version("original", original, "2024-01-01"), type: "original", authors: [{ name: "Original author" }], maintainers: [] };
+  const updateV2 = { ...version("recommended", fork, "2025-01-01", "original"), type: "update", authors: [{ name: "Original author" }], updateAuthors: [{ name: "Update author" }], maintainers: [], citation: "Update citation" };
+  const latest = { ...updateV2, id: "latest", label: "Latest", released_at: "2026-01-01", parent: "recommended", commit: "b".repeat(40) };
+  const groups = repositories.repositoryGroups(item([originalV2, updateV2, latest], { recommendedVersionIds: ["recommended"] }));
+  assert.equal(groups[0].url, fork);
+  assert.equal(groups[0].pinned, true);
+  assert.equal(groups[0].latest.id, "latest");
+  assert.equal(groups[0].latest.updateAuthors[0].name, "Update author");
+  assert.equal(groups[0].latest.citation, "Update citation");
+  assert.equal(groups[0].lineage.find(entry => entry.version.id === "recommended").parent, null);
+  assert.equal(groups[0].lineage.find(entry => entry.version.id === "recommended").upstreamParent.id, "original");
+  assert.equal(groups[0].lineage.find(entry => entry.version.id === "recommended").issue, null);
+});
+
+test("repository lineage retains the shared v2 cycle diagnostics without fabricated edges", () => {
+  const group = repositories.repositoryGroups(item([
+    version("a", original, "2024-01-01", "b"), version("b", original, "2024-01-02", "a")
+  ]))[0];
+  assert.ok(group.lineage.every(entry => entry.parent === null && entry.issue === "cycle"));
 });
 
 test("empty repositories, withdrawn-only history and cycles remain readable", () => {

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import type { RegistryItem } from "@/community-server/lib/community/types";
-import { httpsUrl } from "@/community-server/lib/community/validation";
+import type { RegistryItem } from "@/lib/community/types";
+import { httpsUrl } from "@/lib/community/https-url";
 
 function count(value: number | null | undefined) {
   return value == null ? "—" : value.toLocaleString("en-US");

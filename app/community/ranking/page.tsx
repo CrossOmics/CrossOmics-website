@@ -15,7 +15,7 @@ export default async function MaintenanceRankingPage() {
   return (
     <>
       <header className="community-heading">
-        <Link href="/community#registry" className="community-link">Back to registry</Link>
+        <Link href="/#registry" className="community-link">Back to registry</Link>
         <span className="community-tag">Community registry</span>
         <h1>Maintenance ranking</h1>
         <p>Pipelines that may need community attention. Widely cited pipelines with little recent activity in their original repositories rank highest.</p>

@@ -1,8 +1,9 @@
-import type { RegistryItem, RegistryVersion } from "../../community-server/lib/community/types";
-import type { CuratedRepository } from "./repositories";
+import type { RegistryVersion } from "./types";
+import type { RegistryVersionV2 } from "./registry-v2";
+import type { CuratedRepository, RepositoryItem } from "./repositories";
 
-export async function refreshRepositoryUpdates(item: RegistryItem, curated: CuratedRepository[], fetcher: typeof fetch = fetch): Promise<RegistryItem> {
-  const updates = await Promise.all(curated.map(async (repo): Promise<RegistryVersion | null> => {
+export async function refreshRepositoryUpdates<T extends RepositoryItem>(item: T, curated: CuratedRepository[], fetcher: typeof fetch = fetch): Promise<T> {
+  const updates = await Promise.all(curated.map(async (repo): Promise<(RegistryVersion & RegistryVersionV2) | null> => {
     try {
       const url = new URL(repo.url);
       if (url.hostname !== "github.com" || !/^\/[\w.-]+\/[\w.-]+$/.test(url.pathname)) return null;
@@ -22,8 +23,8 @@ export async function refreshRepositoryUpdates(item: RegistryItem, curated: Cura
       return { id: `repository_${latest.sha}`, kind: "optimization", repo: repo.url, commit: latest.sha,
         label: `Latest commit · ${latest.sha.slice(0, 8)}`, parent: null, released_at: date,
         improvement: typeof latest.commit.message === "string" ? latest.commit.message.split("\n")[0].slice(0, 500) : null,
-        withdrawn: false, source: "repository" };
+        withdrawn: false, source: "repository", type: "update", authors: [], maintainers: [] };
     } catch { return null; }
   }));
-  return { ...item, versions: [...item.versions, ...updates.filter((version): version is RegistryVersion => version !== null)] };
+  return { ...item, versions: [...item.versions, ...updates.filter(version => version !== null)] } as T;
 }

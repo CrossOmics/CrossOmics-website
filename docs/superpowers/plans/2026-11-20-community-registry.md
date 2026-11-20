@@ -40,10 +40,19 @@
 - [x] Update Community navigation, Registry and tutorial links, CSS and README.
 - [x] Run behavior tests, builds and available integration/browser checks; review final diff.
 
-## Validation
+## Initial legacy-checkout validation
 
 - `npm run test:registry`: 10 passed, including review regressions for shared commits and HTTP GitHub aliases.
 - `npm run test:community`: 5 passed; 4 OAuth/database-dependent tests skipped because test credentials were not configured.
 - Website production build and Community server TypeScript check passed.
 - Browser verified NuSTAR pinning, original STAR lineage expansion, native ranking, and 390px responsive layouts without whole-page horizontal overflow.
 - Final review findings corrected; no dependencies added or deployment performed.
+
+## Registry v2 merge resolution
+
+- Merge current main (`0f275c8`) into the PR branch; retain `/` as home, `/community` as its compatibility redirect, current task navigation, and home-return sign-in behavior.
+- Keep the separately deployed API architecture. Do not restore the deleted bundled Community server or Gardener tutorial. Ranking reads existing v1 metrics; optional metadata remains backwards compatible.
+- Reuse Registry v2’s interactive lineage and full version details inside each repository card. Keep attribution, verification, citations, recommendations, withdrawal, credit correction and tool management. Observed commit snapshots cannot expose mutation controls.
+- Validate provenance globally and display valid cross-repository origins separately, while restricting graph edges to each repository. Preserve missing-parent/cycle diagnostics.
+- Distinguish configured administrator pins from maintainer recommendations in badge text.
+- Validation: `npm run test:registry` 15/15 passed; `npm run test:registry-submit` 68/68 passed; production build and TypeScript check passed. Live OAuth/database integration was not rerun during merge resolution. No deployment or main-branch merge is performed.

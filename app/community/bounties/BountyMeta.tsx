@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { bountyCategories, bountyStatuses, type Bounty } from "@/community-server/lib/community/types";
+import { bountyCategories, bountyStatuses, type Bounty } from "@/lib/community/types";
 
 export function BountyTags({ item }: { item: Bounty }) {
   return (

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { communitySignInPath } from "@/community-server/lib/community/return-path";
+import { communitySignInPath } from "@/lib/community/return-path";
 import { communitySession } from "@/lib/community/service";
 import { NewBountyForm } from "../BountyForms";
 
@@ -14,7 +14,7 @@ export default async function NewBountyPage() {
         <h1>Post a bounty</h1>
         <p>Describe a concrete task the community can help with.</p>
       </header>
-      {session.canManageBounties ? <NewBountyForm /> : <p className="community-notice">Only CrossOmics editors can post bounties.</p>}
+      <NewBountyForm />
     </>
   );
 }

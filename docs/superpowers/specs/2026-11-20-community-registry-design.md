@@ -9,3 +9,6 @@ Group repository URLs canonically, order updates by date rather than input order
 Store administrator choices in a small server-owned configuration. Bootstrap NuSTAR with a verified public commit because the published registry currently only contains original STAR. Refresh its latest commit through a cached, bounded GitHub request, retaining registered history and the verified snapshot if GitHub is unavailable. This does not change the original repository's maintenance metrics. No new account roles or management UI are required.
 
 Verify grouping and ranking with isolated Node tests, run type checks/builds, and inspect desktop/mobile pages when local browser preview is available. No dependency changes or deployment are needed for this repository task.
+
+
+Registry v2 integration: preserve the current dedicated Community site and separately deployed API. The existing interactive graph is scoped per repository and still exposes historical version details, attribution and authorized management controls. Global ancestry validation remains authoritative: cross-repository provenance is shown separately without drawing cross-repository edges. Native ranking uses existing v1 metrics, keeping optional metadata inference for the deployed API. Homepage and ordinary sign-in remain at the current Community home.

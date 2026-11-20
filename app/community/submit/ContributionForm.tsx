@@ -1,27 +1,31 @@
 "use client";
 
 import Link from "next/link";
+import { contributionRequestType } from "@/lib/community/tool-types";
 import { useState } from "react";
 import type { FormEvent } from "react";
-import type { Contribution } from "@/community-server/lib/community/types";
-import { contributionTypes, subjectKinds } from "@/community-server/lib/community/types";
+import type { Contribution } from "@/lib/community/types";
+import { contributionTypes } from "@/lib/community/types";
+import { contributionSummary, contributionDescriptions } from "@/lib/community/form-copy";
+import TypeHelp from "./TypeHelp";
 import { communityRequest } from "../client";
 
-type CatalogOption = { id: string; name: string; kind: "workflow" | "tool"; projectUrl: string };
+type CatalogOption = { id: string; name: string; projectUrl: string };
 
 export default function ContributionForm({ catalog, selected }: { catalog: CatalogOption[]; selected?: CatalogOption }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<{ item: Contribution; reused: boolean } | null>(null);
   const [name, setName] = useState(selected?.name ?? "");
-  const [kind, setKind] = useState(selected?.kind === "workflow" ? "pipeline" : "tool");
+  const [type, setType] = useState<keyof typeof contributionTypes>("original");
+  const summaryCopy = contributionSummary(type);
   const [projectUrl, setProjectUrl] = useState(selected?.projectUrl ?? "");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setPending(true);
-    const data = Object.fromEntries(new FormData(event.currentTarget));
+    const data = { ...Object.fromEntries(new FormData(event.currentTarget)), type: contributionRequestType(type) };
     try {
       setResult(await communityRequest("contributions", "POST", data));
     } catch (error) {
@@ -37,7 +41,7 @@ export default function ContributionForm({ catalog, selected }: { catalog: Catal
       <p>{result.item.subjectName} is in your history. You can add impact evidence there as it becomes available.</p>
       <div className="community-actions">
         <Link href="/community/mine" className="community-primary">View my history</Link>
-        <button type="button" className="community-secondary" onClick={() => setResult(null)}>Log another contribution</button>
+        <button type="button" className="community-secondary" onClick={() => setResult(null)}>Record another contribution</button>
       </div>
     </section>
   );
@@ -47,12 +51,15 @@ export default function ContributionForm({ catalog, selected }: { catalog: Catal
       <fieldset disabled={pending}>
         <legend>What did you contribute?</legend>
         <div className="community-form-grid">
-          <label>Contribution type
-            <select required name="type" defaultValue="">
-              <option value="" disabled>Choose a type</option>
+          <div className="community-item-type-field">
+            <div className="community-item-type-label">
+              <label htmlFor="contribution-type">Type</label>
+              <TypeHelp label="About contribution types" entries={(Object.keys(contributionTypes) as Array<keyof typeof contributionTypes>).map((value) => ({ name: contributionTypes[value], description: contributionDescriptions[value] }))} />
+            </div>
+            <select id="contribution-type" required name="type" value={type} onChange={(event) => setType(event.target.value as keyof typeof contributionTypes)}>
               {Object.entries(contributionTypes).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
             </select>
-          </label>
+          </div>
           <label>Date of contribution<input name="occurredOn" required type="date" /></label>
           {catalog.length > 0 && (
             <label className="community-field-wide">Related registry entry <span>(optional)</span>
@@ -60,7 +67,6 @@ export default function ContributionForm({ catalog, selected }: { catalog: Catal
                 const entry = catalog.find((item) => item.id === event.target.value);
                 if (entry) {
                   setName(entry.name);
-                  setKind(entry.kind === "workflow" ? "pipeline" : "tool");
                   setProjectUrl(entry.projectUrl);
                 }
               }}>
@@ -69,24 +75,20 @@ export default function ContributionForm({ catalog, selected }: { catalog: Catal
               </select>
             </label>
           )}
-          <label>Item type
-            <select name="subjectKind" value={kind} onChange={(event) => setKind(event.target.value)} required>
-              {Object.entries(subjectKinds).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
-            </select>
-          </label>
-          <label>Item name<input name="subjectName" value={name} onChange={(event) => setName(event.target.value)} maxLength={120} required /></label>
-          <label className="community-field-wide">What changed?
-            <textarea name="summary" rows={4} maxLength={2000} required placeholder="Describe the change and what it enables or fixes." />
+          <input type="hidden" name="subjectKind" value="tool" />
+          <label>Tool name<input name="subjectName" value={name} onChange={(event) => setName(event.target.value)} maxLength={120} required /></label>
+          <label className="community-field-wide">{summaryCopy.label}
+            <textarea name="summary" rows={4} maxLength={2000} required placeholder={summaryCopy.placeholder} />
           </label>
         </div>
       </fieldset>
       <fieldset disabled={pending}>
         <legend>Link to your work</legend>
         <div className="community-form-grid">
-          <label>Project URL<input name="projectUrl" type="url" value={projectUrl} onChange={(event) => setProjectUrl(event.target.value)} maxLength={2048} placeholder="https://github.com/org/project" required /></label>
-          <label>Evidence URL<input name="evidenceUrl" type="url" maxLength={2048} placeholder="https://github.com/org/project/pull/123" required /></label>
+          <label>Tool URL<input name="projectUrl" type="url" value={projectUrl} onChange={(event) => setProjectUrl(event.target.value)} maxLength={2048} placeholder="https://github.com/org/project" required /></label>
+          <label>Verification URL<input name="evidenceUrl" type="url" maxLength={2048} placeholder="https://github.com/org/project/pull/123" required /></label>
         </div>
-        <p>Link to a public pull request, commit, release, or paper. BioCode Commons and external projects follow the same rules.</p>
+        <p>Link to a public pull request, benchmark Markdown file, commit, release, or paper. BioCode Commons and external tools follow the same rules.</p>
       </fieldset>
       <div className="community-form-footer">
         <p>Your Community username, description, and links will be visible in the public contribution feed.</p>

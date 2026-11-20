@@ -1,4 +1,4 @@
-import type { RegistryCatalog, RegistryItem } from "../../community-server/lib/community/types";
+import type { RegistryCatalog, RegistryItem } from "./types";
 
 export const rankingReasons: Record<string, string> = {
   deprecated: "Deprecated", no_paper: "No paper registered", no_citation_data: "No citation data for its papers",
