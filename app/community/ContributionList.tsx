@@ -30,7 +30,7 @@ export default function ContributionList({ items, mine = false }: { items: Contr
             </p>
             <p className="community-record-copy">{item.summary}</p>
             <div className="community-actions">
-              {evidence && <a className="community-link" href={evidence}>Submitted evidence <span aria-hidden>↗</span></a>}
+              {evidence && <a className="community-link" href={evidence}>Verification <span aria-hidden>↗</span></a>}
               {project && <a className="community-link" href={project}>Source repository <span aria-hidden>↗</span></a>}
             </div>
             <div className="community-impact">

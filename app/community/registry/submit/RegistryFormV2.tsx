@@ -10,6 +10,7 @@ import { communityRequest } from "../../client";
 import RegistryMetadataFields, { readRegistryMetadata, changedRegistryMetadata } from "../RegistryMetadataFields";
 import RegistryCredits from "../../RegistryCredits";
 import CreditFields, { emptyCredit, parseCredit, withEmptyCreditFields, type CreditInput } from "../CreditFields";
+import UpdateVerificationFields from "./UpdateVerificationFields";
 
 const domains = ["transcriptomics", "epigenomics", "genomics", "proteomics", "metagenomics", "multi-omics", "imaging"];
 export default function RegistryFormV2({ items, submitter, initialId, unavailableMessage, updateAuthorsAvailable }: {
@@ -60,6 +61,8 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
       maintainers: origin ? maintainers.map(parseCredit) : [],
       ...((origin ? citation : updateCitation).trim() ? { citation: (origin ? citation : updateCitation).trim() } : {}),
       ...(origin ? {} : { pipelineId, parentVersionId: value("parentVersionId"), changeSummary: value("changeSummary"),
+        updateSource: value("updateSource") as RegistryDraftV2["updateSource"],
+        verificationKind: value("verificationKind") as RegistryDraftV2["verificationKind"],
         ...(value("evidenceUrl").trim() ? { evidenceUrl: value("evidenceUrl").trim() } : {}) })
     };
     inFlight.current = true;
@@ -124,9 +127,9 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
               {parents.map((version) => <option key={version.id} value={version.id}>{version.label}</option>)}
             </select></label>
             <label className="community-field-wide">Change summary<textarea name="changeSummary" required maxLength={2000} rows={4} /></label>
-            <label className="community-field-wide">Evidence URL (optional)<input name="evidenceUrl" type="url" pattern="https://.*" maxLength={2048} placeholder="https://example.org/benchmark-results" /></label>
+            <UpdateVerificationFields key={pipelineId + ":" + parentVersionId} upstreamRepository={upstream?.repo} />
           </>}
-          <label>Public GitHub repository<input name="repository" type="url" required maxLength={160} placeholder="https://github.com/owner/repository" /></label>
+          {origin && <label>Public GitHub repository<input key="original-repository" name="repository" type="url" required maxLength={160} placeholder="https://github.com/owner/repository" /></label>}
           <label>Version label<input name="label" required maxLength={120} placeholder="v1.0.0" /></label>
           <label>Full commit SHA<input name="commit" required maxLength={40} pattern="[0-9a-fA-F]{40}" spellCheck={false} /></label>
         </div>
