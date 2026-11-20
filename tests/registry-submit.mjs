@@ -238,6 +238,10 @@ test("dedicated login has three provider actions and duration without the Commun
   }
   assert.match(html, /returnTo=%2Fcommunity%2Fregistry%2Fsubmit%3FpipelineId%3Dcp_example/);
   assert.doesNotMatch(html, /aria-label="Community"|Log a contribution|Choose a sign-in method/);
+  const footer = html.match(/<footer\b[^>]*>[\s\S]*?<\/footer>/)?.[0];
+  assert.ok(footer);
+  assert.match(footer.replaceAll("<!-- -->", ""), /© \d{4} CrossOmics, Inc\./);
+  assert.doesNotMatch(footer, /<a\b/);
 });
 
 test("login handles old backend duration, unavailable providers and expired attempts", async () => {
@@ -294,7 +298,9 @@ test("Community root is the registry and keeps query filters", async () => {
   const footer = html.match(/<footer\b[^>]*>[\s\S]*?<\/footer>/)?.[0];
   assert.ok(header);
   assert.doesNotMatch(header, /Gardener/);
-  if (gardenerTarget) assert.match(footer, /href="https:\/\/gardener\.example\.test\/?"/);
+  assert.ok(footer);
+  assert.match(footer.replaceAll("<!-- -->", ""), /© \d{4} CrossOmics, Inc\./);
+  assert.doesNotMatch(footer, /<a\b/);
 });
 
 test("old Community index redirects to root preserving repeated query parameters", async () => {
