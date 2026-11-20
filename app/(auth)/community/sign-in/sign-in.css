@@ -28,7 +28,7 @@
 .account-retention svg { flex: 0 0 18px; width: 18px; height: 18px; margin-top: 2px; }
 .account-authorization-note { max-width: 45ch; margin: 18px auto 0; text-align: center; color: #61748c; font-size: 12px; line-height: 1.7; padding-inline: 12px; }
 .account-error { margin-top: 18px; padding: 12px 14px; background: #fff5ec; color: #874319; border: 1px solid #efd4bc; border-radius: 8px; font-size: 14px; }
-.account-footer { text-align: right; padding-block: 22px; color: #61748c; font-size: 12px; }
+.account-footer { text-align: center; padding-block: 22px; color: #61748c; font-size: 12px; }
 @media (max-width: 760px) {
   .account-header { min-height: 76px; }
   .account-brand { font-size: 21px; }

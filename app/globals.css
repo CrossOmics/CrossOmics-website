@@ -204,7 +204,7 @@ img { max-width: 100%; display: block; }
    two stack into a 240px void above the footer. */
 .page-main > :last-child,
 .page-main-home > :last-child { margin-bottom: 0; }
-.site-footer-copy { text-align: right; font-size: 13px; color: var(--muted); }
+.site-footer-copy { text-align: center; font-size: 13px; color: var(--muted); }
 
 @media (max-width: 900px) {
   .site-header-inner { gap: 16px; }
