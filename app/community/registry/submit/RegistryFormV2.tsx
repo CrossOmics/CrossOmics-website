@@ -23,7 +23,7 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
   const [updateAuthorNames, setUpdateAuthorNames] = useState("");
   const [citation, setCitation] = useState("");
   const [updateCitation, setUpdateCitation] = useState("");
-  const [parentVersionId, setParentVersionId] = useState("");
+  const [parentVersionId, setParentVersionId] = useState(() => defaultParentVersionId(initial));
   const [maintainers, setMaintainers] = useState<CreditInput[]>(() => seedCredits(initial, "maintainers"));
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
@@ -34,6 +34,8 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
   const selected = origin ? undefined : items.find((item) => item.id === pipelineId);
   const parents = selected?.versions.filter((version) => !version.withdrawn) ?? [];
   const upstream = parents.find((version) => version.id === parentVersionId);
+  const originalRepository = selected?.repositories?.find((repo) => repo.primary)?.url ||
+    selected?.versions.find((version) => version.type === "original")?.repo;
   const blockedMessage = unavailableMessage || (!origin && !updateAuthorsAvailable
     ? "Update submissions are temporarily unavailable. Please try again later." : undefined);
   const names = (value: string) => value.split(/[;；]/).map(name => name.trim()).filter(Boolean).map(name => ({ name }));
@@ -41,7 +43,7 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
   function select(id: string) {
     const item = items.find((candidate) => candidate.id === id);
     setPipelineId(id);
-    setParentVersionId("");
+    setParentVersionId(defaultParentVersionId(item));
     setMaintainers(seedCredits(item, "maintainers"));
   }
 
@@ -50,6 +52,11 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
     if (inFlight.current || blockedMessage) return;
     const form = new FormData(event.currentTarget);
     const value = (key: string) => String(form.get(key) ?? "");
+    const updateSource = value("updateSource") as RegistryDraftV2["updateSource"];
+    if (!origin && updateSource === "upstream_pr" && !value("repository")) {
+      setError("Choose a based-on version with a registered repository.");
+      return;
+    }
     const body: RegistryDraftV2 = {
       requestId: requestId.current ?? (requestId.current = crypto.randomUUID()),
       type, name: selected?.name ?? value("name"), description: selected?.description ?? value("description"),
@@ -61,7 +68,7 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
       maintainers: origin ? maintainers.map(parseCredit) : [],
       ...((origin ? citation : updateCitation).trim() ? { citation: (origin ? citation : updateCitation).trim() } : {}),
       ...(origin ? {} : { pipelineId, parentVersionId: value("parentVersionId"), changeSummary: value("changeSummary"),
-        updateSource: value("updateSource") as RegistryDraftV2["updateSource"],
+        updateSource,
         verificationKind: value("verificationKind") as RegistryDraftV2["verificationKind"],
         ...(value("evidenceUrl").trim() ? { evidenceUrl: value("evidenceUrl").trim() } : {}) })
     };
@@ -127,7 +134,8 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
               {parents.map((version) => <option key={version.id} value={version.id}>{version.label}</option>)}
             </select></label>
             <label className="community-field-wide">Change summary<textarea name="changeSummary" required maxLength={2000} rows={4} /></label>
-            <UpdateVerificationFields key={pipelineId + ":" + parentVersionId} upstreamRepository={upstream?.repo} />
+            <UpdateVerificationFields targetKey={pipelineId + ":" + parentVersionId}
+              originalRepository={originalRepository} upstreamRepository={upstream?.repo} />
           </>}
           {origin && <label>Public GitHub repository<input key="original-repository" name="repository" type="url" required maxLength={160} placeholder="https://github.com/owner/repository" /></label>}
           <label>Version label<input name="label" required maxLength={120} placeholder="v1.0.0" /></label>
@@ -165,6 +173,11 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
       </div>
     </form>
   );
+}
+
+function defaultParentVersionId(item: RegistryItemV2 | undefined) {
+  const versions = item?.versions.filter((version) => !version.withdrawn) ?? [];
+  return versions.length === 1 ? versions[0].id : "";
 }
 
 function seedCredits(item: RegistryItemV2 | undefined, field: "authors" | "maintainers") {

@@ -27,7 +27,7 @@ const Fields = require("../app/community/registry/submit/UpdateVerificationField
 const root = createRoot(document.getElementById("root"));
 let instance = 0;
 async function render(repository = "https://github.com/example/upstream") {
-  await act(() => root.render(createElement("form", {}, createElement(Fields, { key: ++instance, upstreamRepository: repository }))));
+  await act(() => root.render(createElement("form", {}, createElement(Fields, { key: ++instance, targetKey: repository, upstreamRepository: repository }))));
 }
 async function choose(name, value) {
   const select = document.querySelector(`[name="${name}"]`);
@@ -80,6 +80,47 @@ test("changing the based-on version remounts repository and verification fields 
   assert.equal(values().repository, "https://github.com/example/different");
 });
 
+test("choosing a tool in PR mode shows its recorded repository before a version is selected", async () => {
+  const Form = require("../app/community/registry/submit/RegistryFormV2.tsx").default;
+  const original = { id: "cv_original", type: "original", label: "1.0", repo: "https://github.com/example/upstream", authors: [], maintainers: [] };
+  const fork = { ...original, id: "cv_fork", type: "update", label: "1.1", repo: "https://github.com/example/fork" };
+  const tool = { id: "cp_example", name: "Example", versions: [original, fork], repositories: [{ url: original.repo, primary: true }] };
+  const solo = { ...tool, id: "cp_solo", name: "Solo", versions: [
+    { ...original, id: "cv_solo", repo: "https://github.com/example/solo" }, { ...fork, withdrawn: true }
+  ], repositories: [{ url: "https://github.com/example/solo", primary: true }] };
+  await act(() => root.render(createElement(Form, { key: ++instance, items: [tool, solo], submitter: { id: "123456", login: "tester" }, updateAuthorsAvailable: true })));
+  await choose("type", "update");
+  await choose("updateSource", "upstream_pr");
+  async function selectTool(id) {
+    const select = [...document.querySelectorAll("select")].find(node => node.labels[0].textContent.startsWith("Existing tool"));
+    await act(() => { select.value = id; select.dispatchEvent(new dom.window.Event("change", { bubbles: true })); });
+  }
+  await selectTool(tool.id);
+  assert.equal(values().updateSource, "upstream_pr");
+  const repositoryField = () => [...document.querySelectorAll("input")].find(input => input.labels[0]?.textContent.includes("repository"));
+  assert.equal(repositoryField().value, "https://github.com/example/upstream");
+  assert.equal(repositoryField().readOnly, true);
+  assert.equal(values().repository, undefined);
+  assert.equal(values().parentVersionId, "");
+  await choose("parentVersionId", fork.id);
+  assert.equal(values().repository, "https://github.com/example/fork");
+  document.querySelector('[name="evidenceUrl"]').value = "https://github.com/example/fork/pull/15";
+  await selectTool(solo.id);
+  assert.equal(values().parentVersionId, "cv_solo");
+  assert.equal(values().repository, "https://github.com/example/solo");
+  assert.equal(values().evidenceUrl, "");
+});
+
+test("a tool preselected by its detail page defaults to its only published version", async () => {
+  const Form = require("../app/community/registry/submit/RegistryFormV2.tsx").default;
+  const original = { id: "cv_original", type: "original", label: "1.0", repo: "https://github.com/example/upstream", authors: [], maintainers: [] };
+  const tool = { id: "cp_example", name: "Example", versions: [original] };
+  await act(() => root.render(createElement(Form, { key: ++instance, initialId: tool.id, items: [tool], submitter: { id: "123456", login: "tester" }, updateAuthorsAvailable: true })));
+  await choose("updateSource", "upstream_pr");
+  assert.equal(values().parentVersionId, "cv_original");
+  assert.equal(values().repository, "https://github.com/example/upstream");
+});
+
 test("the complete Update form sends the correct repository and verification fields through its real submit handler", async () => {
   const Form = require("../app/community/registry/submit/RegistryFormV2.tsx").default;
   const item = { id: "cp_example", name: "Example", description: "Align sequences", domain: "genomics", versions: [
@@ -119,9 +160,9 @@ test("the complete Update form sends the correct repository and verification fie
       assert.equal(body.parentVersionId, "cv_example");
       assert.equal(body.type, "update");
       await choose("parentVersionId", "cv_second");
-      assert.equal(values().updateSource, "new_repository");
-      assert.equal(values().repository, "");
+      assert.equal(values().updateSource, source);
       assert.equal(values().evidenceUrl, "");
+      assert.equal(values().repository, source === "new_repository" ? "" : "https://github.com/example/different");
       await choose("updateSource", "upstream_pr");
       assert.equal(values().repository, "https://github.com/example/different");
       await act(() => field("evidenceUrl", "https://github.com/example/different/pull/15"));
