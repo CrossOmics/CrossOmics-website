@@ -33,13 +33,11 @@ function RepositoryAndVerification({
     {upstream ? <>
       <label className="community-field-wide">{upstreamRepository ? "PR target repository" : "Original repository"}
         <input name={upstreamRepository ? "repository" : undefined}
-          type="url" value={repository} readOnly aria-describedby="update-repository-help" />
+          type="url" value={repository} readOnly aria-describedby={repository ? "update-repository-help" : undefined} />
       </label>
-      <p id="update-repository-help" className="community-field-wide">{upstreamRepository
+      {repository && <p id="update-repository-help" className="community-field-wide">{upstreamRepository
         ? "Filled from the selected based-on version."
-        : repository
-          ? "This is the tool’s original repository. Choose the based-on version to confirm the PR target."
-          : "Choose a tool and a based-on version to fill in the repository."}</p>
+        : "This is the tool’s original repository. Choose the based-on version to confirm the PR target."}</p>}
     </> : <label className="community-field-wide">New repository URL
       <input key={source} name="repository" type="url" required maxLength={160} placeholder="https://github.com/owner/new-repository" />
     </label>}
@@ -50,7 +48,7 @@ function RepositoryAndVerification({
           <option value="pull_request">Pull request</option>
         </select>
       </label>}
-    <label className="community-field-wide">{kind === "benchmark" ? "Verification URL: benchmark" : "Verification URL: pull request"}
+    <label className="community-field-wide">{kind === "benchmark" ? "Verification URL: benchmark" : "Pull Request Link"}
       <input key={source + kind} name="evidenceUrl" type="url" pattern="https://.*" required maxLength={2048}
         aria-describedby="update-verification-help" placeholder={kind === "benchmark"
           ? "https://github.com/owner/new-repository/blob/main/benchmark.md"
