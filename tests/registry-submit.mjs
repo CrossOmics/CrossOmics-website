@@ -9,7 +9,8 @@ import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const gardenerTarget = process.env.GARDENER_TEST_TARGET ?? "https://gardener.example.test";
-let service, web, workspace, base, output = "", catalogUnavailable = false, detailMetadata = false;
+let service, web, workspace, base, output = "", catalogUnavailable = false, detailMetadata = false, reviewsUnavailable = false;
+const reviewRequests = new Map();
 const pipeline = {
   id: "cp_example", name: "Example tool", description: "Example analysis", domain: "genomics",
   kind: "tool", status: "active", modalities: [], algorithms: [], keywords: [], inputs: [], outputs: [],
@@ -19,6 +20,7 @@ const pipeline = {
     improvement: null, evidence_url: "https://github.com/example/pipeline/blob/main/benchmark.md", withdrawn: false, authors: [{ name: "Original author" }], citation: "Upstream paper citation", maintainers: [{ name: "Maintainer" }] }]
 };
 
+const governanceEventFixture={hash:"c".repeat(64),signature:"public-signature",body:{schemaVersion:1,logId:"fixture-log",sequence:2,eventId:"00000000-0000-4000-8000-000000000001",toolId:"cp_managed",action:"recommendation.changed",actor:{id:"member-public",name:"Tool maintainer"},recordedAt:"2026-11-22T00:00:00Z",policyVersion:"v1",reason:"Fixed commit reviewed",previousEventHash:"b".repeat(64),beforeStateHash:"a".repeat(64),afterStateHash:"d".repeat(64),change:{field:"recommendations",before:[],after:[{repository:"https://github.com/example/pipeline",versionId:"cv_example",commit:"a".repeat(40),label:"v1"}]},references:[{kind:"authority",id:"00000000-0000-4000-8000-000000000010"}]}};
 const managed = { ...pipeline, id: "cp_managed", name: "Managed tool", maintainers: [{ name: "Tool maintainer" }], recommendedVersionIds: ["cv_recommended"],
   versions: [...pipeline.versions, { ...pipeline.versions[0], id: "cv_recommended", type: "update", label: "Recommended update", parent: "cv_example", updateAuthors: [{ name: "NuSTAR Developer" }], upstreamCitation: "Upstream paper citation", citation: "NuSTAR software citation", maintainers: [{ name: "Version-only maintainer" }] }] };
 
@@ -39,8 +41,22 @@ before(async () => {
         signInAvailable: mode !== "login-none", signInProviders: mode === "login-none" ? [] : ["github", "google", "apple"],
         registrySubmissionAvailable: true, registryV2Enabled: mode !== "legacy",
         registryV2Available: !["legacy", "unavailable"].includes(mode),
-        registryUpdateAuthorsAvailable: mode !== "old-authors", canManageRegistry: mode === "admin", desktopAuthAvailable: true, canPostBounties: false, canManageBounties: false
+        governanceAvailable: mode === "governance", registryUpdateAuthorsAvailable: mode !== "old-authors", canManageRegistry: mode === "admin", desktopAuthAvailable: true, canPostBounties: false, canManageBounties: false
       }));
+    } else if(request.url==="/api/community/v2/governance/events/00000000-0000-4000-8000-000000000001"){
+      response.end(JSON.stringify({event:governanceEventFixture,dependencies:[],checkpoint:{body:{logId:"fixture-log",keyId:"fixture-key",treeSize:2,rootHash:"e".repeat(64),lastEventHash:governanceEventFixture.hash,stateHash:"d".repeat(64),previousCheckpointHash:null,recordedAt:"2026-11-22T00:00:00Z"},signature:"public-signature"},assurance:{signatureType:"service",independentWitnesses:false,blockchainAnchored:false}}));
+    } else if(request.url==="/api/community/v2/catalog/cp_managed/governance/reviews"){
+      reviewRequests.set(mode,(reviewRequests.get(mode)||0)+1);
+      if(!["governance","reviewer"].includes(mode)){response.writeHead(403).end("{}");return;}
+      if(reviewsUnavailable){response.writeHead(503).end("{}");return;}
+      const update={id:"00000000-0000-4000-8000-000000000020",type:"update",name:"Pending scoped update",label:"2.0",description:"Pending performance update",repository:"https://github.com/example/review-update",commit:"a".repeat(40),pipelineId:"cp_managed",status:"submitted",contributor:{id:"google:"+"f".repeat(64),login:"public-review-author"},createdAt:"2026-11-22T00:00:00Z",authors:[],maintainers:[]};
+      response.end(JSON.stringify({submissions:[update,{...update,id:"00000000-0000-4000-8000-000000000021",name:"My pending update",contributor:{id:"123456",login:"test-user"}},{...update,id:"00000000-0000-4000-8000-000000000022",type:"original",name:"Original must stay out"},{...update,id:"00000000-0000-4000-8000-000000000023",pipelineId:"cp_other",name:"Other Tool draft must stay out"}]}));
+    } else if (request.url?.startsWith("/api/community/v2/catalog/cp_managed/governance")) {
+      if (mode === "unavailable") { response.writeHead(503).end("{}"); return; }
+      if (!["anonymous","governance","candidate","pending","reviewer"].includes(mode)) {response.writeHead(404).end("{}");return;}
+      const state={toolId:"cp_managed",version:3,membershipVersion:2,policyVersion:"v1",members:[{actorId:"member-public",name:"Tool maintainer",credit:{name:"Tool maintainer"},grantEventId:"00000000-0000-4000-8000-000000000001"}],recommendations:[],adminPick:null,lastEventHash:null,proposals:[{id:"00000000-0000-4000-8000-000000000002",kind:"invite",candidate:{id:"candidate-public",name:"Candidate maintainer"},subjectId:null,proposer:{id:"member-public",name:"Tool maintainer"},memberIds:["member-public"],membershipVersion:2,policyVersion:"v1",required:1,votes:[],status:"awaiting_acceptance",createdAt:"2026-11-22T00:00:00Z",expiresAt:"2099-11-29T00:00:00Z",reason:"Expand maintenance",createdEventId:"00000000-0000-4000-8000-000000000001",acceptedEventId:null}]};
+      if(request.method==="POST") {let body="";request.on("data",chunk=>body+=chunk);request.on("end",()=>{const command=JSON.parse(body);response.end(JSON.stringify({state,event:null,reused:false,received:command}));});return;}
+      response.end(JSON.stringify({available:true,publishingAvailable:mode!=="pending",pendingReceipts:mode==="pending"?[{status:"pending",body:{toolId:"cp_managed",reason:"Access restricted during outage"},signature:"signed-receipt",publicKey:{kty:"OKP",crv:"Ed25519",x:"public-only"}}]:[],state,events:[governanceEventFixture],hasMore:false,cursor:null,capabilities:{canManage:["governance","reviewer"].includes(mode),isAdmin:mode==="governance",actorId:mode==="candidate"?"candidate-public":["governance","reviewer"].includes(mode)?"member-public":null},assurance:{signatureType:"service",independentWitnesses:false,blockchainAnchored:false}}));
     } else if (request.url?.startsWith("/api/community/v2/me/contributions")) {
       const params = new URL(request.url,"http://fixture").searchParams;
       const section = params.get("section") || "original";
@@ -48,7 +64,7 @@ before(async () => {
       const entries = section === "maintained" ? [{kind:"maintained",tool:managed}] : [{kind:"submission",submission}];
       response.end(JSON.stringify({ section, entries, page: Number(params.get("page") || 1), hasMore: section !== "maintained", total: 21, counts:{original:21,update:2,maintained:1} }));
     } else if (request.url === "/api/community/v2/catalog/cp_managed/management") {
-      if (!["admin","maintainer"].includes(mode)) {response.writeHead(403).end("{}");return;}
+      if (!["admin","maintainer","governance"].includes(mode)) {response.writeHead(403).end("{}");return;}
       response.end(JSON.stringify({item:managed,canAssignMaintainers:mode === "admin",maintainers:[{name:"Tool maintainer",...(mode === "admin" ? {contributorId:"123456"} : {})}]}));
     } else if (request.url === "/api/community/v2/catalog/cp_invalid") {
       response.end(JSON.stringify({item:{...pipeline,id:"cp_invalid",versions:[
@@ -616,4 +632,59 @@ test("maintenance ranking is a native Community route with current home navigati
   assert.match(html, /Not ranked/);
   assert.match(html, /How the score is computed/);
   assert.doesNotMatch(html, /href="https:\/\/crossomics.github.io\/pipeline-registry\/ranking/);
+});
+
+
+test("governance public page works anonymously and explains service signature limits",async()=>{
+ const response=await fetch(base+"/community/catalog/cp_managed/governance");assert.equal(response.status,200);
+ const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,"");
+ assert.match(html,/<h1>Governance/);assert.match(html,/Public log/);assert.match(html,/Team and proposals/);assert.match(html,/independent witnesses/i);assert.doesNotMatch(html,/Accept invitation|Create proposal|Save maintainers/);
+});
+test("candidate can accept their invitation before receiving management access",async()=>{
+ const response=await fetch(base+"/community/catalog/cp_managed/governance?tab=team",{headers:{cookie:"community_session=candidate"}});
+ const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,"");
+ assert.match(html,/Accept invitation/);assert.match(html,/Candidate maintainer/);assert.doesNotMatch(html,/Create proposal|Save maintainers/);
+});
+test("governance unavailable and stale event links report actual absence",async()=>{
+ const response=await fetch(base+"/community/catalog/cp_managed/governance",{headers:{cookie:"community_session=unavailable"}});
+ assert.match(await response.text(),/Governance is unavailable/);
+ const missing=await fetch(base+"/community/catalog/cp_managed/governance/events/00000000-0000-4000-8000-000000000099");
+ assert.match(await missing.text(),/Event unavailable/);
+});
+test("governance command proxy preserves request identity and rejects desktop credentials",async()=>{
+ const path=base+"/api/community/v2/catalog/cp_managed/governance/commands";
+ const command={requestId:"00000000-0000-4000-8000-000000000003",expectedVersion:3,action:"accept",reason:"I accept",proposalId:"00000000-0000-4000-8000-000000000002"};
+ const response=await fetch(path,{method:"POST",headers:{origin:base,"content-type":"application/json",cookie:"community_session=candidate"},body:JSON.stringify(command)});assert.equal(response.status,200);assert.deepEqual((await response.json()).received,command);
+ const denied=await fetch(path,{method:"POST",headers:{authorization:"Bearer desktop-fixture",cookie:"community_session=candidate"}});assert.equal(denied.status,403);
+ const unknown=await fetch(path+"/extra");assert.equal(unknown.status,404);
+});
+test("enabled management replaces direct maintainer assignments with governance",async()=>{
+ const response=await fetch(base+"/community/catalog/cp_managed/manage",{headers:{cookie:"community_session=governance"}});const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,"");
+ assert.match(html,/Open governance/);assert.doesNotMatch(html,/Save maintainers|Save recommendations/);
+});
+
+
+test("event details show fixed commits, missing authority evidence and scoped download links",async()=>{
+ const response=await fetch(base+"/community/catalog/cp_managed/governance/events/00000000-0000-4000-8000-000000000001");assert.equal(response.status,200);const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,"");
+ assert.match(html,/Team recommendation changed/);assert.match(html,/Governance dependencies/);assert.match(html,/Evidence incomplete/);assert.match(html,/github.com\/example\/pipeline\/commit\/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/);assert.match(html,/Download evidence package/);assert.match(html,/not personal user signatures|No independent witnesses/i);assert.doesNotMatch(html,/community_session=|candidateId|privateKey/);
+});
+
+test("pending emergency restrictions remain visible alongside readable public history",async()=>{
+ const response=await fetch(base+"/community/catalog/cp_managed/governance",{headers:{cookie:"community_session=pending"}});const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,"");
+ assert.match(html,/Public log publication is pending/);assert.match(html,/Download signed receipt/);assert.match(html,/Fixed commit reviewed/);assert.doesNotMatch(html,/Blockchain verified|Independently verified/);
+});
+
+test("governance private Update review queue is fetched only for authenticated Tool managers",async()=>{
+ for(const mode of ["anonymous","candidate"]){const before=reviewRequests.get(mode)||0;const response=await fetch(base+"/community/catalog/cp_managed/governance?tab=team",{headers:{cookie:"community_session="+mode}});const html=await response.text();assert.equal(reviewRequests.get(mode)||0,before);assert.doesNotMatch(html,/Pending scoped update|Pending Update reviews/);}
+ const before=reviewRequests.get("reviewer")||0,response=await fetch(base+"/community/catalog/cp_managed/governance?tab=team",{headers:{cookie:"community_session=reviewer"}}),raw=await response.text(),html=raw.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,"");
+ assert.equal(reviewRequests.get("reviewer"),before+1);assert.match(html,/Pending Update reviews/);assert.match(html,/Pending scoped update/);assert.match(html.replaceAll("<!-- -->",""),/@public-review-author/);assert.match(html,/https:\/\/github.com\/example\/review-update/);assert.match(html,/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/);assert.match(html,/Independent reviewer required/);assert.equal((html.match(/Review this submission/g)||[]).length,1);assert.match(html,/name="reason"[^>]*required/);assert.doesNotMatch(raw,/google:ffffffff|Original must stay out|Other Tool draft must stay out/);
+});
+test("Update review queue failures are shown without substitute drafts",async()=>{
+ reviewsUnavailable=true;try{const response=await fetch(base+"/community/catalog/cp_managed/governance?tab=team",{headers:{cookie:"community_session=governance"}}),html=await response.text();assert.match(html,/Update reviews are unavailable/);assert.doesNotMatch(html,/Pending scoped update/);}finally{reviewsUnavailable=false;}
+});
+test("Update review queue proxy allows only scoped website GET requests",async()=>{
+ const path=base+"/api/community/v2/catalog/cp_managed/governance/reviews";
+ const response=await fetch(path,{headers:{cookie:"community_session=governance"}});assert.equal(response.status,200);assert.equal((await response.json()).submissions[0].name,"Pending scoped update");
+ assert.equal((await fetch(path,{headers:{authorization:"Bearer desktop",cookie:"community_session=governance"}})).status,403);
+ assert.equal((await fetch(path,{method:"POST"})).status,405);assert.equal((await fetch(path+"/extra")).status,404);
 });

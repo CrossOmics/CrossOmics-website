@@ -41,6 +41,8 @@ export const communitySession = cache(async function () {
     registryV2Available?: boolean;
     registryUpdateAuthorsAvailable?: boolean;
     canManageRegistry?: boolean;
+    governanceEnabled?: boolean;
+    governanceAvailable?: boolean;
     desktopAuthAvailable?: boolean;
     canPostBounties?: boolean;
     canManageBounties?: boolean;
@@ -57,6 +59,8 @@ export const communitySession = cache(async function () {
     registryV2Available: session.registryV2Available === true,
     registryUpdateAuthorsAvailable: session.registryUpdateAuthorsAvailable === true,
     canManageRegistry: session.canManageRegistry === true,
+    governanceEnabled: (session.governanceEnabled ?? session.governanceAvailable) === true,
+    governanceAvailable: session.governanceAvailable === true,
     desktopAuthAvailable: session.desktopAuthAvailable === true,
     canPostBounties: (session.canPostBounties ?? session.canManageBounties) === true,
     canManageBounties: session.canManageBounties === true
@@ -183,4 +187,27 @@ export async function personalContributions(section: import("./tool-maintenance"
       return { ...entry, contribution: { ...entry.contribution, type } };
     }) };
   } catch { return null; }
+}
+
+
+export async function toolGovernance(id: string, filters: { cursor?: string; actor?: string; action?: string; repository?: string } = {}) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) if (value) query.set(key, value);
+  try {
+    const data = await communityData<import("./governance").GovernanceResponse>(`catalog/${encodeURIComponent(id)}/governance?${query}`, true, "v2");
+    return { data: data.available && data.state ? data : null, status: 200 };
+  } catch (error) { return { data: null, status: error instanceof ServiceError ? error.status : 503 }; }
+}
+
+export async function governanceEvent(id: string) {
+  if (!/^(?:[0-9a-f]{64}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i.test(id)) return null;
+  try { return await communityData<import("./governance").GovernanceEventDetail>(`governance/events/${encodeURIComponent(id)}`, false, "v2"); }
+  catch { return null; }
+}
+
+export async function toolGovernanceReviews(id: string) {
+  try {
+    const data = await communityData<{ submissions: RegistrySubmissionV2[] }>(`catalog/${encodeURIComponent(id)}/governance/reviews`, true, "v2");
+    return { data: { submissions: data.submissions.map(normalizeRegistrySubmission).filter(item => item.type === "update" && item.status === "submitted" && item.pipelineId === id) }, status: 200 };
+  } catch (error) { return { data: null, status: error instanceof ServiceError ? error.status : 503 }; }
 }

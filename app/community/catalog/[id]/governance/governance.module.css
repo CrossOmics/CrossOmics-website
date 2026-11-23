@@ -1,0 +1,29 @@
+.explorer { --log-border: #d7e4ea; color: var(--community-ink); }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 16px; border-bottom: 1px solid var(--log-border); margin-bottom: 24px; }
+.tabs a { padding: 9px 16px; border-radius: 6px; text-decoration: none; color: inherit; }
+.tabs a[aria-current="page"] { background: #e7f3f8; color: #125775; font-weight: 650; }
+.assurance { border-left: 4px solid #6187a2; padding: 12px 18px; background: #f1f6f9; margin: 20px 0 28px; font-size: 14px; }
+.assurance p { margin: 4px 0; max-width: 85ch; }
+.filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin: 20px 0; }
+.filters label { display: grid; gap: 5px; flex: 1 1 160px; font-size: 14px; }
+.filters input, .filters select { width: 100%; min-height: 42px; padding: 8px; border: 1px solid var(--log-border); border-radius: 6px; background: white; color: inherit; }
+.events, .proposals, .members { list-style: none; padding: 0; }
+.events > li { border-bottom: 1px solid var(--log-border); padding: 20px 0; }
+.events h3 { font-size: 18px; margin: 0 0 8px; }
+.meta { font-size: 14px; color: #536575; overflow-wrap: anywhere; }
+.proposals > li { padding: 22px; border: 1px solid var(--log-border); margin: 18px 0; border-radius: 8px; }
+.proposals h3 { margin-top: 0; }
+.members > li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; padding: 14px 0; border-bottom: 1px solid var(--log-border); }
+.details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.details > div { min-width: 0; }
+.json { background: #f4f7f9; border: 1px solid var(--log-border); padding: 16px; border-radius: 6px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; max-height: 480px; overflow: auto; }
+.dependencies { padding-left: 24px; }
+.dependencies li { padding: 10px 0; }
+.commands { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--log-border); }
+.compact { margin: 18px 0; max-width: 700px; }
+.compact label { display: grid; gap: 6px; margin: 14px 0; }
+.compact input, .compact textarea, .compact select { width: 100%; padding: 10px; border: 1px solid var(--log-border); border-radius: 6px; font: inherit; color: inherit; background: white; }
+.compact fieldset { border: 0; padding: 0; margin: 0; }
+.compact legend { font-size: 19px; font-weight: 650; }
+.explorer a:focus-visible, .explorer button:focus-visible, .explorer input:focus-visible, .explorer select:focus-visible, .explorer textarea:focus-visible { outline: 3px solid #267a9d; outline-offset: 3px; }
+@media (max-width: 640px) { .details { grid-template-columns: minmax(0, 1fr); } .proposals > li { padding: 16px; } .filters { align-items: stretch; } .tabs a { padding: 8px 10px; } }

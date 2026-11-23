@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import RegistryCredits from "../../RegistryCredits";
-import { communityCatalogItem, communitySession, registryV2Item, toolManagement } from "@/lib/community/service";
+import { communityCatalogItem, communitySession, registryV2Item, toolManagement, toolGovernance } from "@/lib/community/service";
 import { toolMaintainers } from "@/lib/community/tool-maintenance";
 import type { RegistryItemV2 } from "@/lib/community/registry-v2";
 import EditProjectMetadata from "./EditProjectMetadata";
@@ -20,6 +20,7 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
   const citations = item.metrics?.recent_citations;
   const managed = v2 && session?.contributor ? await toolManagement(item.id) : null;
   const v2Item = v2 ? item as RegistryItemV2 : null;
+  const governance = v2 ? await toolGovernance(item.id) : null;
   const maintainers = v2Item ? toolMaintainers(v2Item) : [];
   return (
     <>
@@ -29,6 +30,7 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
         <p>{item.description}</p>
         <div className="community-actions">
           {project && <a className="community-secondary" href={project}>Source repository <span aria-hidden>↗</span></a>}
+          <Link className="community-secondary" href={`/community/catalog/${item.id}/governance`}>Public governance</Link>
           <Link className="community-secondary" href={`/community/activity?catalogId=${item.id}`}>View contributions</Link>
           {v2 && <Link className="community-primary" href={`/community/registry/submit?pipelineId=${item.id}`}>Submit an update</Link>}
           <Link className="community-secondary" href={`/community/submit?mode=record&catalogId=${item.id}`}>Record work on this tool</Link>
@@ -48,7 +50,7 @@ export default async function RegistryDetail({ params }: { params: Promise<{ id:
           <RegistryMetadata metadata={{ algorithms: item.algorithms, inputs: item.inputs, outputs: item.outputs }} />
         </section>}
       {v2 && session?.canManageRegistry && !managed?.data && <EditProjectMetadata pipelineId={item.id} metadata={item} />}
-      <RepositoryVersions item={item} v2={v2} canManage={session?.canManageRegistry === true} />
+      <RepositoryVersions item={item} v2={v2} canManage={session?.canManageRegistry === true} governanceState={governance?.data?.state} />
       {item.papers.length > 0 && (
         <section className="community-section">
           <h2>Related papers</h2>

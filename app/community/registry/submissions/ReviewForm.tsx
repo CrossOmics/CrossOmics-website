@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { communityRequest } from "../../client";
 
-export default function ReviewForm({ id }: { id: string }) {
+export default function ReviewForm({ id, requireReason = false }: { id: string; requireReason?: boolean }) {
   const router = useRouter();
   const [decision, setDecision] = useState<"published" | "rejected">("published");
   const [pending, setPending] = useState(false);
@@ -14,6 +14,7 @@ export default function ReviewForm({ id }: { id: string }) {
     event.preventDefault();
     if (pending) return;
     const reason = String(new FormData(event.currentTarget).get("reason") ?? "").trim();
+    if ((requireReason || decision === "rejected") && !reason) { setError("Enter a public reason for this review."); return; }
     setPending(true);
     setError("");
     try {
@@ -36,7 +37,7 @@ export default function ReviewForm({ id }: { id: string }) {
           <option value="published">Publish</option>
           <option value="rejected">Reject</option>
         </select></label>
-        <label>Reason<input name="reason" required={decision === "rejected"} maxLength={1000} /></label>
+        <label>{requireReason ? "Public reason" : "Reason"}<input name="reason" required={requireReason || decision === "rejected"} maxLength={1000} /></label>
         <div className="community-actions"><button className="community-primary" type="submit">
           {decision === "published" ? "Publish registration" : "Reject registration"}
         </button></div>
