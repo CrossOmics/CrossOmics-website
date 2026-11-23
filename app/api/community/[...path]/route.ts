@@ -5,16 +5,19 @@ export const dynamic = "force-dynamic";
 
 const desktopRoutes = /^v1\/desktop-auth\/(?:attempts\/[0-9a-f-]{36}(?:\/approve)?|sessions)$/i;
 const registryRoutes = /^v2\/(?:me\/contributions|catalog(?:\/cp_[a-z0-9_]{1,61}(?:\/metadata|\/management|\/maintainers|\/recommendations|\/versions\/cv_[a-z0-9_]{1,124}\/(?:withdraw|credits))?)?|registry\/submissions(?:\/[0-9a-f-]{36}(?:\/review)?)?)$/i;
+const governanceRoutes = /^v2\/(?:catalog\/cp_[a-z0-9_]{1,61}\/governance(?:\/(?:commands|reviews))?|governance\/(?:trust-config|events\/(?:[0-9a-f]{64}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:\/proof)?))$/i;
 const routes = /^(?:auth\/(?:login|callback(?:\/(?:google|apple))?|logout)|v1\/(?:catalog|session|contributions|app-token|registry-import|registry-submissions(?:\/(?:preview|callback))?|bounty-editors|bounties(?:\/[0-9a-f-]{36}(?:\/replies)?)?|contributions\/[0-9a-f-]{36}\/impact))$/i;
 
 async function forward(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const path = (await params).path.join("/");
-  if (!routes.test(path) && !desktopRoutes.test(path) && !registryRoutes.test(path)) return Response.json({ message: "Community route not found." }, { status: 404 });
+  if (!routes.test(path) && !desktopRoutes.test(path) && !registryRoutes.test(path) && !governanceRoutes.test(path)) return Response.json({ message: "Community route not found." }, { status: 404 });
 
-  const privateToolRoute = /^v2\/(?:me\/contributions|catalog\/cp_[a-z0-9_]{1,61}\/(?:management|maintainers|recommendations|metadata))$/i;
+  const privateToolRoute = /^v2\/(?:me\/contributions|catalog\/cp_[a-z0-9_]{1,61}\/(?:management|maintainers|recommendations|metadata|governance\/(?:commands|reviews)))$/i;
   if (request.headers.has("authorization") && privateToolRoute.test(path)) {
     return Response.json({ message: "Use your Community website session for this action." }, { status: 403 });
   }
+
+  if (governanceRoutes.test(path) && !(request.method === "GET" && !path.endsWith("/commands")) && !(request.method === "POST" && path.endsWith("/commands"))) return Response.json({ message: "Method not allowed." }, { status: 405 });
 
   const headers = new Headers();
   for (const name of ["origin", "content-type"]) {

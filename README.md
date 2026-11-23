@@ -79,3 +79,9 @@ Each Tool's Versions section has one card per repository, showing its latest kno
 `lib/community/repositories.ts` holds administrator-curated repositories. STAR currently pins `BioCode-Commons/NuSTAR`, with a verified commit snapshot until the registry includes it. Tool details refresh its latest GitHub commit with a 15-minute cache and four-second timeout. Observed commit snapshots retain a fallback during outages and do not expose registry mutation controls or invent authors/parents. Original repository maintenance metrics stay unchanged.
 
 `npm run test:registry` covers grouping, latest selection, pinning, shared lineage validation, GitHub fallback, ranking, and interactive per-repository history. `npm run test:registry-submit` covers the existing Registry v2 workflows and native ranking route using an isolated API fixture.
+
+## Tool governance
+
+`/community/catalog/{id}/governance` provides the English public event log, current team/proposals, dependency lineage and evidence checks. Current Tool managers also get a private Update review queue. The feature uses the paired backend API and real Community sessions; it never imports the browser demo. The standalone English prototype source remains under `demos/governance-transparency`.
+
+See [Governance rollout](docs/governance-rollout.md) for migration 005, signing/trust configuration, receipt recovery and activation order. Signing keys, publisher credentials and database access belong only to the backend. Until that backend is configured, the website shows an explicit unavailable state. This implementation provides service-signed records; independent witnesses, personal user signatures and public blockchain anchoring are separate deployment phases.

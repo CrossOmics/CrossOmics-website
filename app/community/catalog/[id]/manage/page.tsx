@@ -19,8 +19,11 @@ export default async function ManageTool({params}:{params:Promise<{id:string}>})
       <h1>Manage {data.item.name}</h1>
       <p>Maintain Tool data and choose recommended versions. Version publication, withdrawal and maintainer assignments are controlled by administrators.</p>
     </header>
-    <RecommendationsForm item={data.item} />
+    {session.governanceEnabled ? <section className="community-section"><h2>Team governance and recommendations</h2>
+      <p>Manage invitations, team proposals, recommendations and administrator picks with a public record of each change.</p>
+      <Link className="community-primary" href={`/community/catalog/${data.item.id}/governance?tab=team`}>Open governance</Link>
+    </section> : <RecommendationsForm item={data.item} />}
     <EditProjectMetadata pipelineId={data.item.id} metadata={data.item} />
-    {data.canAssignMaintainers && <section className="community-section"><h2>Administrator controls</h2><MaintainersForm id={data.item.id} maintainers={data.maintainers} /></section>}
+    {!session.governanceEnabled && data.canAssignMaintainers && <section className="community-section"><h2>Administrator controls</h2><MaintainersForm id={data.item.id} maintainers={data.maintainers} /></section>}
   </>;
 }
