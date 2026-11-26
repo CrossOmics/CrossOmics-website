@@ -99,7 +99,7 @@
   margin-top: 12px;
 }
 
-.community-diagram { width: 100%; max-height: 220px; }
+.community-diagram { display: block; width: 100%; max-height: 280px; overflow: visible; }
 .community-section { margin-top: clamp(32px, 5vw, 56px); }
 .community-section-heading {
   display: flex;
@@ -383,7 +383,7 @@
 @media (max-width: 570px) {
   .community-main { padding-top: 14px; }
   .community-hero { grid-template-columns: minmax(0, 1fr); gap: 8px; }
-  .community-diagram { max-width: 280px; }
+  .community-diagram { max-width: 330px; margin-inline: auto; }
   .community-nav { justify-content: flex-start; gap: 8px 14px; padding-bottom: 7px; }
   .community-nav-links a { padding-block: 8px; }
   .community-nav-actions { padding-bottom: 0; }

@@ -52,7 +52,8 @@ export default function GovernanceForms({data}:{data:GovernanceResponse}){
   if(!capabilities.canManage&&!capabilities.isAdmin)return null;
   if(!available.length)return <p>Governance changes are paused until public log publication resumes.</p>;
   const candidate=["invite","propose_add","propose_transfer"].includes(action),subject=["propose_remove","revoke"].includes(action),target=["recommend","admin_pick"].includes(action);
-  return <section className={styles.commands}><h2>Manage governance</h2><p>Changes are checked against current permissions and state before they enter the public log. Submitting a proposal records your yes vote in its public event. Other eligible members must vote before candidate acceptance when a majority requires more than one approval.</p>
+  return <section className={styles.commands}><h2>Manage governance</h2><p>Invite a maintainer, propose a team change or update this tool’s recommendations.</p>
+    <details className={styles.recordDetails}><summary>How approvals work</summary><p>Changes are checked against current permissions and state before they enter the public log. Submitting a proposal records your yes vote in its public event. Other eligible members must vote before candidate acceptance when a majority requires more than one approval.</p></details>
     <label>Action <select value={action} onChange={event=>setAction(event.target.value as GovernanceAction)}>
       {available.map(value=><option key={value} value={value}>{{invite:"Invite a maintainer",propose_add:"Propose adding a maintainer",propose_transfer:"Propose a handoff",propose_remove:"Propose removing a maintainer",recommend:"Set Maintainer Picks",admin_pick:"Set platform endorsement",revoke:"Emergency revoke",leave:"Leave the team",vote:"Approve proposal",accept:"Accept invitation"}[value]}</option>)}
     </select></label>

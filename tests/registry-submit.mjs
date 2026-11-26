@@ -631,7 +631,7 @@ test("maintenance ranking is a native Community route with current home navigati
 test("governance public page works anonymously and explains service signature limits",async()=>{
  const response=await fetch(base+"/community/catalog/cp_managed/governance");assert.equal(response.status,200);
  const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,"");
- assert.match(html,/<h1>Governance/);assert.match(html,/Public log/);assert.match(html,/Team and proposals/);assert.match(html,/independent witnesses/i);assert.doesNotMatch(html,/Accept invitation|Create proposal|Save maintainers/);
+ assert.match(html,/<h1>Tool governance/);assert.match(html,/Public log/);assert.match(html,/Team and proposals/);assert.match(html,/independent witnesses/i);assert.doesNotMatch(html,/Accept invitation|Create proposal|Save maintainers/);
 });
 test("candidate can accept their invitation before receiving management access",async()=>{
  const response=await fetch(base+"/community/catalog/cp_managed/governance?tab=team",{headers:{cookie:"community_session=candidate"}});
