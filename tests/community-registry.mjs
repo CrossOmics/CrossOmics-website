@@ -196,3 +196,48 @@ test("newly published web updates with no release date become latest instead of 
   assert.deepEqual(repositories.repositoryVersionDate(groups[0].latest),{value:"2026-11-25T18:00:00Z",kind:"publication"});
   assert.deepEqual(repositories.repositoryVersionDate(groups[0].versions[0]),{value:"2025-01-01",kind:"update"});
 });
+
+
+test("implementation lineage names repositories and prefers published records over observed snapshots", () => {
+  const tool=item([
+    version("star", original,"2024-01-01",null,{label:"2.7.11b"}),
+    version("nustar",nuStar,"2026-01-01","star",{label:"v1.1.0",improvement:"Published implementation"})
+  ],{id:"cp_star",name:"STAR"});
+  const nodes=repositories.implementationLineage(tool);
+  assert.equal(nodes.length,2);
+  const derived=nodes.find(node=>node.name==="NuSTAR");
+  const base=nodes.find(node=>node.name==="STAR");
+  assert.equal(derived.version.id,"nustar");
+  assert.equal(derived.parent,base.version.id);
+  assert.equal(repositories.repositoryGroups(tool)[0].latest.id,"nustar");
+  assert.equal(repositories.repositoryGroups(tool)[0].versions.length,2);
+});
+
+test("implementation projection diagnoses ambiguous origins and repository cycles instead of inventing edges", () => {
+  const other="https://github.com/example/other";
+  const ambiguous=repositories.implementationLineage(item([
+    version("a",original,"2024-01-01"),version("b",other,"2024-01-01"),
+    version("c",fork,"2025-01-01","a"),version("d",fork,"2026-01-01","b")
+  ]));
+  const node=ambiguous.find(node=>node.repository.url===fork);
+  assert.equal(node.parent,null);assert.equal(node.issue,"ambiguous-parent");
+  const cycle=repositories.implementationLineage(item([
+    version("a1",original,"2024-01-01"),version("b1",fork,"2025-01-01","a1"),
+    version("a2",original,"2026-01-01","b1")
+  ]));
+  assert.ok(cycle.every(node=>node.parent===null&&node.issue==="cycle"));
+});
+
+test("value summary preserves published compatibility and pending performance without fabricating results",()=>{
+  const improvement="NuSTAR is a refactored reimplementation based on STAR 2.7.11b.\nIt introduces a modular C++20 architecture.\nNuSTAR requires its own native index and does not support every STAR workflow. Performance measurements for the current implementation are pending.";
+  const tool=item([version("nustar",nuStar,"2026-11-25",null,{improvement})],{id:"cp_star"});
+  const summary=repositories.repositorySummary(tool,repositories.repositoryGroups(tool)[0]);
+  assert.equal(summary.purpose,"NuSTAR is a refactored reimplementation based on STAR 2.7.11b.");
+  assert.match(summary.compatibility,/requires its own native index/);
+  assert.match(summary.performance,/pending/);
+  assert.doesNotMatch(JSON.stringify(summary),/1.3|verified|drop-in/);
+  const empty=item();
+  const unknown=repositories.repositorySummary(empty,repositories.repositoryGroups(empty)[0]);
+  assert.equal(unknown.purpose,"Aligner");
+  assert.match(unknown.performance,/No benchmark evidence provided/);
+});

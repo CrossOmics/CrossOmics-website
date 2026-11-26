@@ -62,10 +62,14 @@ test("tool lineage spans repositories while cards link to repository contributio
   const toggle = document.querySelector('#lineage [aria-expanded="false"]');
   await act(() => toggle.click());
   const nodes = [...document.querySelectorAll("button[aria-pressed]")];
-  assert.equal(nodes.length, 3);
-  assert.match(nodes.find(node => node.textContent.includes("fork-root")).getAttribute("aria-label"), /based on v2/);
-  await act(() => nodes.find(node => node.getAttribute("aria-label").startsWith("v1,")).click());
-  assert.equal(document.querySelector("#lineage [data-version-id]").dataset.versionId, "v1");
+  assert.equal(nodes.length, 2);
+  assert.match(nodes.find(node => node.textContent.includes("fork-root")).getAttribute("aria-label"), /based on Tool/);
+  const history=document.querySelector("#lineage .community-lineage-history");
+  await act(() => { history.open=true; history.dispatchEvent(new window.Event("toggle")); });
+  const historyToggle=[...history.querySelectorAll("button")].find(button=>button.textContent==="View lineage");
+  await act(() => historyToggle.click());
+  await act(() => [...history.querySelectorAll("button[aria-pressed]")].find(node=>node.getAttribute("aria-label").startsWith("v1,")).click());
+  assert.equal(history.querySelector("[data-version-id]").dataset.versionId, "v1");
   assert.match(document.querySelector("[data-version-id]").textContent, /Withdraw this version/);
 });
 
@@ -93,4 +97,21 @@ test("curated snapshots do not invent benchmark results or expose registry mutat
   await act(() => root.render(render({key:"star",item:star,v2:true,canManage:true})));
   assert.match(document.body.textContent, /NuSTAR.*Platform endorsement/);
   assert.doesNotMatch(document.body.textContent, /1.3×|Formal verification|Withdraw this version|Correct author credits/);
+});
+
+
+test("top lineage link opens the diagram on first and repeated clicks and direct hash navigation",async()=>{
+  const ToolLineage=require("../app/community/catalog/[id]/ToolLineage.tsx").default;
+  await act(()=>root.render(createElement("div",{key:"top-link"},createElement("a",{href:"#lineage"},"Top lineage"),createElement(ToolLineage,{item,v2:true}))));
+  const link=document.querySelector('a[href="#lineage"]');
+  await act(async()=>{link.click(); await new Promise(resolve=>setTimeout(resolve,20));});
+  assert.ok(document.querySelector('#lineage [aria-label="Implementation lineage canvas"]'));
+  await act(()=>document.querySelector('#lineage button[aria-expanded="true"]').click());
+  assert.ok(!document.querySelector('#lineage [aria-label="Implementation lineage canvas"]'));
+  await act(async()=>{link.click(); await new Promise(resolve=>setTimeout(resolve,20));});
+  assert.ok(document.querySelector('#lineage [aria-label="Implementation lineage canvas"]'));
+  window.history.replaceState(null,"","#lineage");
+  await act(()=>root.render(createElement(ToolLineage,{key:"direct-hash",item,v2:true})));
+  assert.ok(document.querySelector('#lineage [aria-label="Implementation lineage canvas"]'));
+  window.history.replaceState(null,"","/");
 });

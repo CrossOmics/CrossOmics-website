@@ -1,8 +1,8 @@
 export type LineageVersion = { id: string; parent: string | null };
-export type LineageNode = { id: string; x: number; y: number; issue: "missing-parent" | "cycle" | null };
+export type LineageNode = { id: string; x: number; y: number; issue: "missing-parent" | "cycle" | "ambiguous-parent" | null };
 export type LineageLayout = { nodes: LineageNode[]; edges: { parent: string; child: string }[]; width: number; height: number };
 export type LineageView = { scale: number; x: number; y: number };
-export const lineageIssueLabels = { "missing-parent": "Parent not available", cycle: "Invalid parent relationship" };
+export const lineageIssueLabels = { "missing-parent": "Parent not available", cycle: "Invalid parent relationship", "ambiguous-parent": "Multiple recorded origins" };
 export const lineageNodeSize = { width: 244, height: 152 };
 
 /** Build a forest from identity links, never API/recommendation ordering. Iterative for deep chains. */

@@ -1,5 +1,6 @@
 import type { RegistryItem, RegistryRepository, RegistryVersion } from "./types";
 import type { RegistryItemV2, RegistryVersionV2 } from "./registry-v2";
+import { httpsUrl } from "./https-url";
 import { buildLineage, type LineageNode } from "./lineage";
 
 export type RepositoryVersion = RegistryVersion | RegistryVersionV2;
@@ -96,7 +97,8 @@ export function repositoryGroups(item: RepositoryItem): RepositoryGroup[] {
   for (const group of groups.values()) {
     group.versions.sort((a, b) => timestamp(a) - timestamp(b) || a.id.localeCompare(b.id));
     const active = group.versions.filter((version) => !version.withdrawn);
-    group.latest = (active.length ? active : group.versions).at(-1) ?? null;
+    const published = active.filter(version => version.source !== "repository");
+    group.latest = (published.length ? published : active.length ? active : group.versions).at(-1) ?? null;
     const recommended = "recommendedVersionIds" in item ? item.recommendedVersionIds ?? [] : [];
     group.pinned = group.pinned || active.some(version => recommended.includes(version.id));
     const byId = new Map(group.versions.map(version => [version.id, version]));
@@ -125,4 +127,45 @@ export function browseRepositories(groups: RepositoryGroup[], query = "", sort: 
 export function sameRepository(a: string, b: string) {
   const key = repositoryKey(a);
   return key !== null && key === repositoryKey(b);
+}
+
+
+export type ImplementationNode = {
+  name: string; repository: RepositoryGroup; version: RepositoryVersion;
+  parent: string | null; issue: LineageNode["issue"];
+};
+
+/** Collapse version ancestry to implementations; ambiguous or cyclic origins remain disconnected. */
+export function implementationLineage(item: RepositoryItem): ImplementationNode[] {
+  const groups = repositoryGroups(item).filter(group => group.latest);
+  const versions = groups.flatMap(group => group.versions);
+  const graph = buildLineage(versions);
+  const owners = new Map(groups.flatMap(group => group.versions.map(version => [version.id, group] as const)));
+  const origins = new Map(groups.map(group => [group, new Set<RepositoryGroup>()]));
+  for (const edge of graph.edges) {
+    const child = owners.get(edge.child)!, parent = owners.get(edge.parent)!;
+    if (child !== parent) origins.get(child)!.add(parent);
+  }
+  const issues = new Map(graph.nodes.map(node => [node.id, node.issue]));
+  const nodes: ImplementationNode[] = groups.map(group => {
+    const parents = [...origins.get(group)!];
+    return { name: group.primary ? item.name : group.name, repository: group, version: group.latest!,
+      parent: parents.length === 1 ? parents[0].latest!.id : null,
+      issue: parents.length > 1 ? "ambiguous-parent" : issues.get(group.latest!.id) ?? null };
+  });
+  const projected = buildLineage(nodes.map(node => ({id: node.version.id, parent: node.parent})));
+  const parents = new Map(projected.edges.map(edge => [edge.child, edge.parent]));
+  const projectedIssues = new Map(projected.nodes.map(node => [node.id, node.issue]));
+  return nodes.map(node => ({...node, parent: parents.get(node.version.id) ?? null,
+    issue: projectedIssues.get(node.version.id) ?? node.issue}));
+}
+
+/** Use published wording; absence of evidence never becomes a verification claim. */
+export function repositorySummary(item: RepositoryItem, repository: RepositoryGroup) {
+  const sentences = (repository.latest?.improvement ?? "").split(/\n+|(?<=[.!?])\s+(?=[A-Z])/).map(value => value.trim()).filter(Boolean);
+  const compatibility = sentences.filter(value => /\b(?:compatib|requires? |does not support|native index)/i.test(value)).join(" ");
+  const performance = sentences.filter(value => /\b(?:performance|benchmark|wall time|peak rss)\b/i.test(value)).join(" ");
+  const purpose = repository.highlights?.join(" ") || sentences.find(value => !/\b(?:compatib|requires? |does not support|native index|performance|benchmark|wall time|peak rss)/i.test(value)) || repository.description || (repository.primary ? item.description : "Implementation details have not been provided.");
+  return {purpose, compatibility: compatibility || "Compatibility information not provided.",
+    performance: performance || (httpsUrl(repository.benchmark?.url) ? "Benchmark results are available in the linked report." : "No benchmark evidence provided.")};
 }

@@ -66,6 +66,11 @@ before(async () => {
     } else if (request.url?.startsWith("/api/community/v2/admin/tools")) {
       if(mode!=="admin"){response.writeHead(403).end("{}");return;}
       response.end(JSON.stringify({items:[managed],page:1,hasMore:false}));
+    } else if (request.url === "/api/community/v2/me/profile") {
+      if(mode==="profile-old"){response.writeHead(404).end("{}");return;}
+      const profile={displayName:"Jiapeng Zhang",contributor:{slug:"contributor_"+"a".repeat(64),name:"Jiapeng Zhang",login:"test-user"}};
+      if(request.method==="PATCH") {let body="";request.on("data",chunk=>body+=chunk);request.on("end",()=>response.end(JSON.stringify({...profile,...JSON.parse(body)})));return;}
+      response.end(JSON.stringify(profile));
     } else if (request.url?.startsWith("/api/community/v2/me/contributions")) {
       const params = new URL(request.url,"http://fixture").searchParams;
       const section = params.get("section") || "original";
@@ -206,7 +211,7 @@ test("Update offers a new repository or a based-on repository PR with benchmark 
   const response = await fetch(base + "/community/catalog/cp_example");
   const detail = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
   assert.match(detail, /Verification/);
-  assert.doesNotMatch(detail, />Evidence/);
+  assert.match(detail, /<dt>Evidence<\/dt>/);
   const history = await fetch(base + "/community/mine", { headers: { cookie: "community_session=legacy" } });
   const historyHtml = (await history.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
   assert.match(historyHtml, /Add or update impact verification/);
@@ -706,4 +711,19 @@ test("admin dashboard requires global permission and proxy rejects desktop crede
   assert.equal(bearer.status,403);
   const publicWrite=await fetch(base+"/api/community/v2/contributors",{method:"POST",body:"{}"});
   assert.equal(publicWrite.status,405);
+});
+
+
+test("public name settings use the self-profile route and survive an older backend",async()=>{
+ const response=await fetch(base+"/community/mine",{headers:{cookie:"community_session=ready"}});
+ const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+ assert.match(html,/Public display name/);assert.match(html,/Jiapeng Zhang/);
+ const saved=await fetch(base+"/api/community/v2/me/profile",{method:"PATCH",headers:{cookie:"community_session=ready","content-type":"application/json",origin:base},body:JSON.stringify({displayName:"New public name"})});
+ assert.equal(saved.status,200);assert.equal((await saved.json()).displayName,"New public name");
+ const bearer=await fetch(base+"/api/community/v2/me/profile",{headers:{cookie:"community_session=ready",authorization:"Bearer desktop"}});assert.equal(bearer.status,403);
+ const wrongMethod=await fetch(base+"/api/community/v2/me/profile",{method:"POST",body:"{}"});assert.equal(wrongMethod.status,405);
+ const extra=await fetch(base+"/api/community/v2/me/profile/another-user");assert.equal(extra.status,404);
+ const old=await fetch(base+"/community/mine",{headers:{cookie:"community_session=profile-old"}});
+ const oldHtml=(await old.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+ assert.match(oldHtml,/public name settings are temporarily unavailable/i);assert.match(oldHtml,/My Contributions/);
 });

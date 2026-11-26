@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { GovernanceState } from "@/lib/community/governance";
-import { browseRepositories, repositoryGroups, repositoryVersionDate, sameRepository, type RepositoryItem } from "@/lib/community/repositories";
+import { browseRepositories, repositoryGroups, repositoryVersionDate, repositorySummary, sameRepository, type RepositoryItem } from "@/lib/community/repositories";
 import VersionDetails from "./VersionDetails";
 import { httpsUrl } from "@/lib/community/https-url";
 
@@ -33,6 +33,7 @@ export default function RepositoryVersions({ item, governanceState, v2 = false, 
       <ul className="community-repositories">{groups.map(repo => {
         const latest = repo.latest;
         const date = latest ? repositoryVersionDate(latest) : null;
+        const summary = repositorySummary(item, repo);
         const evidence = latest && "evidence_url" in latest ? httpsUrl(latest.evidence_url) : null;
         const benchmark = httpsUrl(repo.benchmark?.url) || (latest && "verificationKind" in latest && latest.verificationKind === "benchmark" ? evidence : null);
         const picks = governanceState?.recommendations.filter(target => sameRepository(target.repository, repo.url)) ?? [];
@@ -46,9 +47,14 @@ export default function RepositoryVersions({ item, governanceState, v2 = false, 
             </div>
             <p className="community-repository-path">{new URL(repo.url).hostname}{new URL(repo.url).pathname}</p>
           </div><p className="community-latest">{date?.kind === "publication" ? "Latest publication" : "Latest update"}<br />{date ? <time dateTime={date.value}>{date.value.slice(0, 10)}</time> : "Date unavailable"}</p></div>
-          {repo.description && <p>{repo.description}</p>}
-          {(repo.highlights?.length || latest?.improvement) ? <div className="community-repository-highlights"><h4>Highlights</h4>
-            {repo.highlights?.length ? <ul>{repo.highlights.map(highlight => <li key={highlight}>{highlight}</li>)}</ul> : <p>{latest?.improvement}</p>}</div> : <p>Explore this repository and its recorded contributions.</p>}
+          <dl className="community-value-summary">
+            <div className="community-value-purpose"><dt>Purpose</dt><dd>{summary.purpose}</dd></div>
+            <div><dt>Compatibility</dt><dd>{summary.compatibility}</dd></div>
+            <div><dt>Performance</dt><dd>{summary.performance}</dd></div>
+            <div><dt>Evidence</dt><dd>{benchmark ? <a className="community-link" href={benchmark}>Benchmark report ↗</a> : evidence ?
+              <a className="community-link" href={evidence}>{/\/pull\/\d+(?:$|[/?#])/.test(evidence) ? "Pull request evidence" : "Submitted evidence"} ↗</a> :
+              "No review or benchmark evidence provided."}</dd></div>
+          </dl>
           {repo.benchmark && benchmark && (repo.benchmark.wallTime || repo.benchmark.peakRss) && <dl className="community-benchmark-metrics">
             {repo.benchmark.wallTime && <div><dt>Wall time</dt><dd>{repo.benchmark.wallTime}</dd></div>}
             {repo.benchmark.peakRss && <div><dt>Peak RSS</dt><dd>{repo.benchmark.peakRss}</dd></div>}
@@ -64,8 +70,6 @@ export default function RepositoryVersions({ item, governanceState, v2 = false, 
           <div className="community-actions">
             <a className="community-secondary" href={repo.url}>View repository</a>
             <Link className="community-secondary" href={`/community/activity?${new URLSearchParams({ catalogId: item.id, repository: repo.url })}`}>View contributions</Link>
-            {benchmark && <a className="community-link" href={benchmark}>Benchmark results ↗</a>}
-            {evidence && !benchmark && <a className="community-link" href={evidence}>Verification evidence ↗</a>}
             <Link className="community-link" href={`/community/catalog/${item.id}/governance?${new URLSearchParams({ repository: repo.url })}`}>Governance</Link>
           </div>
         </li>;
