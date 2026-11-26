@@ -41,8 +41,9 @@ export default async function CommunityRegistry({ searchParams: query }: { searc
     <>
       <section className="community-hero">
         <div>
-          <h1>Community Tracking</h1>
-          <p>Discover computational biology tools and track the work that improves them.</p>
+          <h1>Collaborative research software development</h1>
+          <p>Discover, improve and maintain scientific tools through transparent community contributions.</p>
+          <div className="community-actions"><Link className="community-primary" href="#registry">Find a tool</Link><Link className="community-secondary" href="/community/guide">How to participate</Link></div>
         </div>
         <RegistryDiagram />
       </section>
@@ -50,8 +51,9 @@ export default async function CommunityRegistry({ searchParams: query }: { searc
         <div className="community-section-heading">
           <div>
             <h2 id="registry-title">Explore Existing Tools</h2>
-            <p>Browse registered tools and their versions.</p>
+            <p>Find a tool family, compare its repositories and follow the work behind each implementation.</p>
           </div>
+          <Link className="community-primary" href="/community/registry/submit">+ Submit a Tool</Link>
         </div>
         <form className="community-search" action="/#registry">
           <label>Search Tools<input type="search" name="q" maxLength={120} defaultValue={q} placeholder="Try STAR, alignment, or single-cell" /></label>
@@ -78,6 +80,7 @@ export default async function CommunityRegistry({ searchParams: query }: { searc
                       <p>{item.description}</p>
                       {item.algorithms.length > 0 && <small>{item.algorithms.slice(0, 3).join(" · ")}</small>}
                     </Link>
+                    <div className="community-catalog-actions"><Link className="community-link" href={`/community/catalog/${item.id}`}>View tool</Link><Link className="community-link" href={`/community/registry/submit?pipelineId=${item.id}`}>+ Submit an Update</Link></div>
                   </li>
                 ))}
               </ul>

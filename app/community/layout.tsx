@@ -11,8 +11,8 @@ import "./community.css";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Community Tracking | CrossOmics",
-  description: "Explore computational biology tools and record the work that keeps them useful."
+  title: "CrossOmics Community",
+  description: "Discover, improve and maintain scientific tools through transparent community contributions."
 };
 
 export default async function CommunityLayout({ children }: { children: ReactNode }) {
@@ -26,7 +26,7 @@ export default async function CommunityLayout({ children }: { children: ReactNod
     <div className="page">
       <SiteHeader />
       <main className="community-main container">
-        <nav className="community-breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><span aria-hidden>/</span><Link href="/">Community Tracking</Link></nav>
+        <nav className="community-breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><span aria-hidden>/</span><Link href="/">Community</Link></nav>
         <CommunityNav signedIn={Boolean(session?.contributor)} />
         {children}
         {(discord || slack || mailto) && (

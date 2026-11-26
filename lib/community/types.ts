@@ -17,7 +17,7 @@ export const impactMetrics = {
 export const signInLabels = { github: "GitHub", google: "Google", apple: "Apple" } as const;
 export type SignInProvider = keyof typeof signInLabels;
 
-export type Contributor = { id: string; login: string };
+export type Contributor = { id: string; login: string; name?: string; slug?: string };
 export type ContributionInput = {
   type: keyof typeof contributionTypes;
   subjectKind: keyof typeof subjectKinds;
@@ -53,12 +53,14 @@ export type RegistryVersion = {
   repo: string;
   commit: string;
   released_at: string | null;
+  published_at?: string | null;
   improvement: string | null;
   withdrawn: boolean;
   source?: "repository";
 };
 
-export type RegistryRepository = { url: string; primary: boolean; name?: string; pinned?: boolean; description?: string };
+export type RegistryRepository = { url: string; primary: boolean; name?: string; pinned?: boolean; description?: string;
+  highlights?: string[]; stars?: number; benchmark?: { url: string; wallTime?: string; peakRss?: string } };
 
 export type RegistryMetrics = {
   recent_citations: number | null;

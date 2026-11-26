@@ -433,3 +433,75 @@
 .community-upstream-credits { margin: 16px 0; }
 .community-upstream-credits h3 { font-size: 17px; }
 .community-upstream-credits h4 { margin-top: 14px; }
+
+/* Tool families lead; repository rows keep their evidence and actions together. */
+.community-hero h1 { font-size: clamp(32px, 4vw, 49px); max-width: 19ch; }
+.community-tool-lineage { margin-top: 32px; padding: 22px; border: 1px solid var(--community-border); border-radius: 12px; background: #f8fbff; scroll-margin-top: 90px; }
+.community-tool-lineage > p { font-size: 14px; max-width: 80ch; }
+.community-tool-lineage .community-section { margin-top: 14px; }
+.community-repository-filters { display: grid; grid-template-columns: minmax(0, 1fr) minmax(200px, 285px); gap: 16px; margin-top: 22px; }
+.community-repositories { gap: 12px; margin-top: 12px; }
+.community-repository { padding: 20px 24px; }
+.community-repository-heading h3 { font-size: 22px; }
+.community-repository-heading .community-latest { margin: 0; font-size: 12px; text-align: right; line-height: 1.7; }
+.community-latest time { color: var(--community-ink); font-size: 14px; font-variant-numeric: tabular-nums; }
+.community-repository-highlights { margin: 14px 0; }
+.community-repository-highlights h4 { margin-bottom: 5px; }
+.community-repository-highlights ul { padding-left: 18px; list-style: disc; color: var(--community-quiet); }
+.community-repository-highlights p, .community-repository > p { font-size: 14px; }
+.community-update-details { margin: 12px 0 16px; }
+.community-update-details summary { color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; padding-block: 5px; }
+.community-update-details .community-record { padding: 16px; background: #f8fbff; }
+.community-update-details .community-detail-grid { margin-top: 12px; }
+.community-benchmark-metrics { display: flex; flex-wrap: wrap; gap: 24px; margin-block: 12px; }
+.community-benchmark-metrics dt { color: var(--community-quiet); font-size: 12px; }
+.community-benchmark-metrics dd { font-weight: 600; }
+.community-catalog > li { border: 1px solid var(--community-border); border-radius: var(--community-radius); overflow: hidden; display: flex; flex-direction: column; }
+.community-catalog-card { border: 0; border-radius: 0; flex: 1; }
+.community-catalog-actions { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--community-border); background: #f8fbff; }
+.community-profile-section, .community-guide-content section { scroll-margin-top: 90px; }
+.community-personal-tabs { position: sticky; top: var(--header-h); z-index: 5; padding-block: 12px; background: white; border-bottom: 1px solid var(--community-border); margin-top: 22px; }
+.community-personal-tabs a:hover { border-color: var(--accent); color: var(--accent); }
+.community-account-settings { border-top: 1px solid var(--community-border); margin-top: 40px; padding-top: 20px; }
+.community-account-settings > summary { font-weight: 600; color: var(--community-ink); cursor: pointer; }
+.community-contributor-directory { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; }
+.community-contributor-directory > li { display: flex; gap: 16px; padding: 26px 0; border-bottom: 1px solid var(--community-border); }
+.community-contributor-directory h2 { font-size: 21px; }
+.community-contributor-directory p { font-size: 14px; margin-block: 5px; }
+.community-avatar { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #e5effc; color: var(--accent); font-size: 20px; flex: none; }
+.community-admin-tools > li { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; padding: 22px 0; border-bottom: 1px solid var(--community-border); }
+.community-admin-tools p { margin-top: 8px; max-width: 70ch; font-size: 14px; }
+.community-admin-tools .community-secondary { flex: none; }
+.community-overview-links { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; margin-top: 22px; }
+.community-overview-links > a { padding: 20px 0; border-top: 3px solid #b3cbea; }
+.community-overview-links a:hover h3 { color: var(--accent); }
+.community-overview-links p { font-size: 15px; margin-top: 12px; }
+.community-explainer { max-width: 78ch; }
+.community-explainer > p { margin-top: 14px; line-height: 1.8; }
+.community-role-list { margin-top: 16px; }
+.community-role-list > div { display: grid; grid-template-columns: 175px minmax(0,1fr); gap: 20px; padding: 18px 0; border-bottom: 1px solid var(--community-border); }
+.community-role-list dt { font-weight: 600; color: var(--community-ink); }
+.community-role-list dd { color: var(--community-quiet); }
+.community-guide-layout { display: grid; grid-template-columns: 220px minmax(0,1fr); gap: 48px; margin-top: 34px; }
+.community-guide-layout > nav { position: sticky; top: 100px; align-self: start; display: grid; gap: 4px; border-left: 2px solid var(--community-border); padding-left: 18px; }
+.community-guide-layout > nav a { color: var(--community-quiet); padding-block: 7px; font-size: 14px; }
+.community-guide-layout > nav a:hover { color: var(--accent); }
+.community-guide-content { max-width: 76ch; }
+.community-guide-content section { margin-bottom: 44px; }
+.community-guide-content p { margin-top: 14px; line-height: 1.8; }
+.community-guide-content section > a { display: inline-block; margin-top: 14px; }
+@media (max-width: 780px) {
+  .community-personal-tabs { position: static; }
+  .community-guide-layout { grid-template-columns: 1fr; gap: 28px; }
+  .community-guide-layout > nav { position: static; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .community-overview-links { grid-template-columns: 1fr; gap: 8px; }
+  .community-admin-tools > li { flex-direction: column; gap: 14px; }
+}
+@media (max-width: 570px) {
+  .community-repository-filters, .community-contributor-directory { grid-template-columns: minmax(0,1fr); }
+  .community-repository { padding: 18px; }
+  .community-repository-heading .community-latest { text-align: left; }
+  .community-role-list > div { grid-template-columns: 1fr; gap: 8px; }
+  .community-tool-lineage { padding: 16px; }
+  .community-catalog-actions { padding: 12px 16px; }
+}

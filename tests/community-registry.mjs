@@ -173,3 +173,26 @@ test("ranking uses collection metadata and can infer years with the existing dep
   assert.equal(ranking.maintenanceRanking(catalog).collectedAt, "2026-11-16T10:28:07Z");
   assert.deepEqual(ranking.maintenanceRanking({ ...catalog, config: { citation_years: [2025, 2026], activity_window_days: 180 } }).years, [2025, 2026]);
 });
+
+
+test("repository browser sorts by latest update after pinned picks and searches names or URLs", () => {
+  assert.equal(typeof repositories.browseRepositories, "function");
+  const groups = repositories.repositoryGroups(item([
+    version("old", original, "2024-01-01"), version("new", fork, "2026-01-01")
+  ]));
+  assert.deepEqual(repositories.browseRepositories(groups).map(group=>group.url), [fork, original]);
+  assert.equal(repositories.browseRepositories(groups, "EXAMPLE").length, 1);
+  assert.equal(repositories.browseRepositories(groups, "does-not-exist").length, 0);
+  groups.find(group=>group.url===original).pinned=true;
+  assert.equal(repositories.browseRepositories(groups)[0].url, original);
+});
+
+test("newly published web updates with no release date become latest instead of stale imported versions", () => {
+  const groups = repositories.repositoryGroups(item([
+    version("dated-import", original, "2025-01-01"),
+    version("web-update", original, null, "dated-import", {published_at:"2026-11-25T18:00:00Z"})
+  ]));
+  assert.equal(groups[0].latest.id,"web-update");
+  assert.deepEqual(repositories.repositoryVersionDate(groups[0].latest),{value:"2026-11-25T18:00:00Z",kind:"publication"});
+  assert.deepEqual(repositories.repositoryVersionDate(groups[0].versions[0]),{value:"2025-01-01",kind:"update"});
+});

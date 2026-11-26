@@ -45,9 +45,10 @@ test("the Tool UI can write through the existing backend during a frontend-first
 
 
 const { toolMaintainers, orderedToolVersions } = require("../lib/community/tool-maintenance.ts");
-test("explicitly empty Tool maintainer credits never fall back to per-version credits", () => {
+test("Tool maintainers never default to historical per-version author or maintainer credits", () => {
   const item={versions:[{id:"cv_original",type:"original",maintainers:[{name:"Old maintainer"}]}]};
-  assert.deepEqual(toolMaintainers(item),[{name:"Old maintainer"}]);
+  assert.deepEqual(toolMaintainers(item),[]);
+  assert.deepEqual(toolMaintainers({...item,maintainers:[{name:"Registered maintainer"}]}),[{name:"Registered maintainer"}]);
   assert.deepEqual(toolMaintainers({...item,maintainers:[]}),[]);
 });
 

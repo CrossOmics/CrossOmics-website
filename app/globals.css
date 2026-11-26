@@ -230,3 +230,15 @@ img { max-width: 100%; display: block; }
 
 .site-logo small { font-size: 14px; font-weight: 500; color: var(--muted); margin-left: 6px; }
 @media (max-width: 600px) { .site-logo small { display: none; } }
+
+.site-logo { display: inline-flex; align-items: center; gap: 9px; }
+.site-logo-mark { width: 32px; height: 32px; color: var(--accent); flex: none; }
+.site-primary-nav { margin-left: auto; display: flex; align-items: center; flex-wrap: wrap; gap: 10px 26px; font-size: 14px; font-weight: 550; }
+.site-primary-nav a { padding-block: 10px; color: var(--muted); }
+.site-primary-nav a:hover { color: var(--accent); }
+@media (max-width: 780px) {
+  .site-header { height: auto; min-height: var(--header-h); position: relative; }
+  .site-header-inner { flex-wrap: wrap; gap: 10px; padding-block: 15px; }
+  .site-primary-nav { width: 100%; margin-left: 0; gap: 3px 20px; }
+}
+.site-primary-nav a[aria-current="page"] { color: var(--accent); }

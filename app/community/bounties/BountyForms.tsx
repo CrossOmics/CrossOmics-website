@@ -17,7 +17,7 @@ export function NewBountyForm() {
       const { id } = await communityRequest<{ id: string }>("bounties", "POST", Object.fromEntries(new FormData(event.currentTarget)));
       window.location.assign(`/community/bounties/${id}`);
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Could not post the bounty.");
+      setError(error instanceof Error ? error.message : "Could not post the request.");
       setPending(false);
     }
   }
@@ -25,7 +25,7 @@ export function NewBountyForm() {
   return (
     <form className="community-form community-bounty-form" method="post" onSubmit={submit}>
       <fieldset disabled={pending}>
-        <legend>Bounty details</legend>
+        <legend>Request details</legend>
         <div className="community-form-grid">
           <label>Title<input name="title" maxLength={120} required /></label>
           <label>Category
@@ -42,7 +42,7 @@ export function NewBountyForm() {
         </div>
       </fieldset>
       {error && <p className="community-error" role="alert">{error}</p>}
-      <button className="community-primary" type="submit" disabled={pending}>{pending ? "Posting…" : "Post bounty"}</button>
+      <button className="community-primary" type="submit" disabled={pending}>{pending ? "Posting…" : "Post request"}</button>
     </form>
   );
 }
@@ -72,7 +72,7 @@ export function BountyStatusForm({ id, status }: { id: string; status: BountySta
   return (
     <form className="community-bounty-status-form" method="post" onSubmit={submit}>
       <div className="community-bounty-status-controls">
-        <label>Bounty status
+        <label>Request status
           <select name="status" defaultValue={status} disabled={pending}>
             {Object.entries(bountyStatuses).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
           </select>

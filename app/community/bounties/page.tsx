@@ -12,13 +12,13 @@ export default async function BountiesPage({ searchParams }: { searchParams: Pro
     <>
       <header className="community-heading">
         <h1>Tools Wanted</h1>
-        <p>Find requests from the community for new tools, improvements, maintenance, and benchmarks. Offer help or post a bounty for work you need.</p>
+        <p>Need help developing, improving or optimizing a research tool? Post a request to connect with community members who can contribute, or explore existing requests and offer your expertise.</p>
         <div className="community-actions">
-          <Link href="/community/bounties/new" className="community-primary">Post a bounty</Link>
+          <Link href="/community/bounties/new" className="community-primary">Post a Request</Link>
         </div>
       </header>
       <form className="community-search" action="/community/bounties">
-        <label>Search bounties<input type="search" name="q" maxLength={120} defaultValue={q} placeholder="Try a tool, workflow, or benchmark" /></label>
+        <label>Search requests<input type="search" name="q" maxLength={120} defaultValue={q} placeholder="Try a tool, workflow, or benchmark" /></label>
         <label>Status
           <select name="status" defaultValue={status}>
             <option value="">All statuses</option>
@@ -29,7 +29,7 @@ export default async function BountiesPage({ searchParams }: { searchParams: Pro
         {(q || status) && <Link className="community-link" href="/community/bounties">Clear filters</Link>}
       </form>
       {!data ? <p className="community-notice" role="status">{error}</p> : data.items.length === 0 ? (
-        <p className="community-notice">{q || status ? "No bounties match these filters." : "No one has posted a bounty yet."}</p>
+        <p className="community-notice">{q || status ? "No requests match these filters." : "No one has posted a request yet."}</p>
       ) : (
         <>
           <ul className="community-bounty-list">

@@ -17,13 +17,13 @@ export default async function ManageTool({params}:{params:Promise<{id:string}>})
     <header className="community-heading">
       <Link className="community-link" href={`/community/catalog/${data.item.id}`}>← Back to tool</Link>
       <h1>Manage {data.item.name}</h1>
-      <p>Maintain Tool data and choose recommended versions. Version publication, withdrawal and maintainer assignments are controlled by administrators.</p>
+      <p>Maintain tool information and choose Maintainer Picks. Manage registered maintainers through the tool’s governance process.</p>
     </header>
-    {session.governanceEnabled ? <section className="community-section"><h2>Team governance and recommendations</h2>
-      <p>Manage invitations, team proposals, recommendations and administrator picks with a public record of each change.</p>
+    {session.governanceEnabled ? <section className="community-section"><h2>Maintainers and recommendations</h2>
+      <p>Manage invitations, team proposals, recommendations and platform endorsements with a public record of each change.</p>
       <Link className="community-primary" href={`/community/catalog/${data.item.id}/governance?tab=team`}>Open governance</Link>
     </section> : <RecommendationsForm item={data.item} />}
     <EditProjectMetadata pipelineId={data.item.id} metadata={data.item} />
-    {!session.governanceEnabled && data.canAssignMaintainers && <section className="community-section"><h2>Administrator controls</h2><MaintainersForm id={data.item.id} maintainers={data.maintainers} /></section>}
+    {!session.governanceEnabled && data.canAssignMaintainers && <section className="community-section"><h2>Maintainer management</h2><MaintainersForm id={data.item.id} maintainers={data.maintainers} /></section>}
   </>;
 }

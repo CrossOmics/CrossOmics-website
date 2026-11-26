@@ -8,6 +8,7 @@ import { JSDOM } from "jsdom";
 
 const dom = new JSDOM("<!doctype html><div id='root'></div>", { url: "https://test.example" });
 globalThis.window = dom.window;
+globalThis.self = dom.window;
 globalThis.document = dom.window.document;
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 globalThis.ResizeObserver = class { observe() {} disconnect() {} };
@@ -43,48 +44,53 @@ const item = { id: "cp_fixture", name: "Tool", kind: "tool", description: "Fixtu
   ] };
 after(async () => { await act(() => root.unmount()); Module._resolveFilename = resolveFilename; dom.window.close(); });
 
-test("repository graphs expand independently, select historical details and retain v2 credits and controls", async () => {
-  await act(() => root.render(render({ item, v2: true, canManage: true })));
+test("tool lineage spans repositories while cards link to repository contributions", async () => {
+  const ToolLineage = require("../app/community/catalog/[id]/ToolLineage.tsx").default;
+  await act(() => root.render(createElement(AppRouterContext.Provider, { value: { refresh() {} } },
+    createElement("div", null, createElement(ToolLineage, { item, v2: true, canManage: true }), createElement(Repositories, { item, v2: true, canManage: true })))));
   const cards = [...document.querySelectorAll(".community-repository")];
   assert.equal(cards.length, 2);
-  assert.equal(cards[0].getAttribute("data-repository"), fork);
-  assert.match(cards[0].textContent, /Pinned · Recommended/);
-  assert.match(cards[0].textContent, /Upstream authors.*Upstream author.*Update authors.*Update developer/);
-  assert.match(cards[0].textContent, /Update citation/);
-  assert.match(cards[0].textContent, /Derived from v2/);
-  assert.doesNotMatch(cards[0].textContent, /Parent not available/);
-  assert.equal(cards[1].querySelectorAll("[data-version-id]").length, 1);
-  assert.equal(cards[1].querySelector("[data-version-id]").dataset.versionId, "v2");
-  assert.match(cards[1].textContent, /Withdraw this version/);
-  const toggle = cards[1].querySelector('[aria-expanded="false"]');
+  assert.equal(cards[0].dataset.repository, fork);
+  assert.match(cards[0].textContent, /Maintainer Pick/);
+  assert.ok(cards.every(card => !card.textContent.includes("View lineage")));
+  for (const card of cards) {
+    const url = new URL([...card.querySelectorAll("a")].find(link => link.textContent === "View contributions").href);
+    assert.equal(url.searchParams.get("repository"), card.dataset.repository);
+    assert.equal(url.searchParams.get("catalogId"), item.id);
+  }
+  assert.doesNotMatch(document.body.textContent, /a{40}/);
+  const toggle = document.querySelector('#lineage [aria-expanded="false"]');
   await act(() => toggle.click());
-  assert.equal(cards[0].querySelector("[aria-expanded]").getAttribute("aria-expanded"), "false");
-  const nodes = [...cards[1].querySelectorAll("button[aria-pressed]")];
-  assert.equal(nodes.length, 2);
-  assert.ok(nodes.every(node => !node.textContent.includes("fork-root")));
+  const nodes = [...document.querySelectorAll("button[aria-pressed]")];
+  assert.equal(nodes.length, 3);
+  assert.match(nodes.find(node => node.textContent.includes("fork-root")).getAttribute("aria-label"), /based on v2/);
   await act(() => nodes.find(node => node.getAttribute("aria-label").startsWith("v1,")).click());
-  assert.equal(cards[1].querySelector("[data-version-id]").dataset.versionId, "v1");
-  await act(() => toggle.click());
-  assert.equal(cards[1].querySelector("[data-version-id]").dataset.versionId, "v2");
+  assert.equal(document.querySelector("#lineage [data-version-id]").dataset.versionId, "v1");
+  assert.match(document.querySelector("[data-version-id]").textContent, /Withdraw this version/);
 });
 
-test("invalid historical parents remain diagnosed after selecting their own repository node", async () => {
-  const invalid = { ...item, id: "cp_invalid", versions: [
-    version("orphan", upstream, "2024-01-01", "absent", { type: "update" }),
-    version("self", upstream, "2025-01-01", "self", { type: "update" })
-  ] };
-  await act(() => root.render(render({ key: "invalid", item: invalid, v2: true })));
+test("repository search reports an empty result and update sorting retains picks first", async () => {
+  await act(() => root.render(render({ key: "search", item })));
+  const search = document.querySelector('input[type="search"]');
+  assert.ok(search);
+  const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+  await act(() => { setter.call(search, "missing repository"); search.dispatchEvent(new window.Event("input", { bubbles: true })); });
+  assert.equal(document.querySelectorAll(".community-repository").length, 0);
+  assert.match(document.body.textContent, /No repositories match/);
+});
+
+test("invalid tool ancestry stays diagnosed without fabricated cross-repository edges", async () => {
+  const ToolLineage = require("../app/community/catalog/[id]/ToolLineage.tsx").default;
+  const invalid = { ...item, versions: [version("orphan", upstream, "2024-01-01", "absent", {type:"update"})] };
+  await act(() => root.render(createElement(ToolLineage, {key:"invalid", item:invalid, v2:true})));
   await act(() => document.querySelector('[aria-expanded="false"]').click());
-  const orphan = [...document.querySelectorAll("button[aria-pressed]")].find(node => node.getAttribute("aria-label").startsWith("orphan,"));
-  await act(() => orphan.click());
-  const details = document.querySelector("[data-version-id]");
-  assert.match(details.textContent, /Parent not available/);
-  assert.doesNotMatch(details.textContent, /Based on|Original authors/);
+  assert.match(document.querySelector("[data-version-id]").textContent, /Parent not available/);
+  assert.doesNotMatch(document.querySelector("[data-version-id]").textContent, /Based on|Original authors/);
 });
 
-test("curated commit snapshots cannot expose withdrawal actions for unregistered versions", async () => {
-  const star = { ...item, id: "cp_star", versions: [], repositories: [] };
-  await act(() => root.render(render({ key: "star", item: star, v2: true, canManage: true })));
-  assert.match(document.body.textContent, /NuSTAR.*Pinned · Admin selected/);
-  assert.doesNotMatch(document.body.textContent, /Withdraw this version|Correct author credits/);
+test("curated snapshots do not invent benchmark results or expose registry mutation controls", async () => {
+  const star = { ...item, id:"cp_star", versions:[], repositories:[] };
+  await act(() => root.render(render({key:"star",item:star,v2:true,canManage:true})));
+  assert.match(document.body.textContent, /NuSTAR.*Platform endorsement/);
+  assert.doesNotMatch(document.body.textContent, /1.3×|Formal verification|Withdraw this version|Correct author credits/);
 });

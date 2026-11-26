@@ -7,8 +7,8 @@ import styles from "./VersionLineage.module.css";
 type Version = { id: string; label: string; parent: string | null; type: string; repo: string; withdrawn: boolean; authors: string; issue?: LineageNode["issue"] };
 type Point = { x: number; y: number };
 
-export default function VersionLineage({ versions, recommendedIds = [], details, latestId, repositoryName }: {
-  versions: Version[]; recommendedIds?: string[]; details: ReactNode[]; latestId?: string; repositoryName?: string;
+export default function VersionLineage({ versions, recommendedIds = [], details, latestId, repositoryName, toolLevel = false }: {
+  versions: Version[]; recommendedIds?: string[]; details: ReactNode[]; latestId?: string; repositoryName?: string; toolLevel?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(latestId ?? versions[0]?.id ?? "");
@@ -90,7 +90,7 @@ export default function VersionLineage({ versions, recommendedIds = [], details,
 
   return <section className={repositoryName ? "community-repository-versions" : "community-section"} aria-label={repositoryName ? `${repositoryName} versions` : "Tool versions"}>
     <div className={styles.heading}>
-      {repositoryName ? <h4>{open ? `${repositoryName} lineage` : "Latest known update"}</h4> : <h2>Versions</h2>}
+      {repositoryName ? <h4>{open ? `${repositoryName} lineage` : "Latest known update"}</h4> : <h2>{toolLevel ? "Tool lineage" : "Versions"}</h2>}
       {versions.length > 0 && <button className="community-primary" type="button" aria-expanded={open} aria-controls={graphId}
         onClick={() => setOpen(!open)}>{open ? (repositoryName ? "View latest update" : "View version list") : "View lineage"}</button>}
     </div>
@@ -148,7 +148,7 @@ export default function VersionLineage({ versions, recommendedIds = [], details,
       <p className={styles.selection} role="status">Selected version: {versions[currentIndex]?.label}</p>
     </div>}
     <ul id={open ? `${graphId}-details` : undefined} className={`community-record-list ${styles.details}`}>
-      {open ? details[currentIndex] : latestId ? details[Math.max(0, versions.findIndex(version => version.id === latestId))] : details}
+      {open ? details[currentIndex] : toolLevel ? null : latestId ? details[Math.max(0, versions.findIndex(version => version.id === latestId))] : details}
     </ul>
   </section>;
 }

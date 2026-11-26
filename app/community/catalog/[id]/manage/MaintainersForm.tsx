@@ -8,7 +8,7 @@ import { emptyCredit, parseCredit, withEmptyCreditFields } from "../../../regist
 
 const empty = { ...emptyCredit, contributorId:"" };
 export default function MaintainersForm({ id, maintainers }: { id:string;maintainers:ToolMaintainer[] }) {
-  const [rows, setRows] = useState(maintainers.map(credit => ({...withEmptyCreditFields(credit),contributorId:credit.contributorId ?? ""})));
+  const [rows, setRows] = useState(maintainers.filter(credit => credit.contributorId).map(credit => ({...withEmptyCreditFields(credit),contributorId:credit.contributorId ?? ""})));
   const [pending,setPending] = useState(false);
   const [message,setMessage] = useState<{text:string;error:boolean}>();
   const router=useRouter();
@@ -26,12 +26,12 @@ export default function MaintainersForm({ id, maintainers }: { id:string;maintai
   return <form className="community-form" onSubmit={submit}>
     <fieldset disabled={pending}>
       <legend>Tool maintainers and management access</legend>
-      <p>Names and profiles appear publicly. An optional Community Contributor ID grants management access to that account. GitHub handles alone do not grant access.</p>
+      <p>Names and profiles appear publicly. Each maintainer must have a registered Community account. The service validates the account before granting management access. GitHub handles alone do not grant access.</p>
       {rows.map((row,index)=><fieldset key={index}>
         <legend>Maintainer {index+1}</legend>
         <div className="community-form-grid">
           <label>Name<input required maxLength={120} value={row.name} onChange={event=>update(index,"name",event.target.value)} /></label>
-          <label>Contributor ID (optional)<input maxLength={80} value={row.contributorId} onChange={event=>update(index,"contributorId",event.target.value)} placeholder="Community account ID" /></label>
+          <label>Community account ID<input required maxLength={80} value={row.contributorId} onChange={event=>update(index,"contributorId",event.target.value)} placeholder="Community account ID" /></label>
           <label>GitHub handle (optional)<input maxLength={40} value={row.github} onChange={event=>update(index,"github",event.target.value)} /></label>
           <label>ORCID (optional)<input maxLength={19} value={row.orcid} onChange={event=>update(index,"orcid",event.target.value)} /></label>
           <label>Public profile URL (optional)<input type="url" maxLength={400} value={row.url} onChange={event=>update(index,"url",event.target.value)} /></label>

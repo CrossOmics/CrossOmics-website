@@ -92,11 +92,12 @@ export async function communityCatalogItem(id: string) {
   }
 }
 
-export function communityContributions(filters: { mine?: boolean; page?: string; catalogId?: string }) {
+export function communityContributions(filters: { mine?: boolean; page?: string; catalogId?: string; repository?: string }) {
   const query = new URLSearchParams();
   if (filters.mine) query.set("mine", "1");
   if (filters.page) query.set("page", filters.page);
   if (filters.catalogId) query.set("catalogId", filters.catalogId);
+  if (filters.repository) query.set("repository", filters.repository);
   return communityData<{ items: Contribution[]; page: number; hasMore: boolean; total?: number }>(
     `contributions?${query}`, filters.mine
   ).then(data => ({ ...data, items: data.items.map(item => {
@@ -113,7 +114,7 @@ export async function communityBounties(filters: { q?: string; status?: string; 
     return { data: await communityData<{ items: Bounty[]; page: number; hasMore: boolean }>(`bounties?${query}`), error: "" };
   } catch (error) {
     return { data: null, error: error instanceof ServiceError && error.status < 500
-      ? error.message : "The bounty board is temporarily unavailable. Try refreshing this page." };
+      ? error.message : "The request board is temporarily unavailable. Try refreshing this page." };
   }
 }
 
@@ -210,4 +211,30 @@ export async function toolGovernanceReviews(id: string) {
     const data = await communityData<{ submissions: RegistrySubmissionV2[] }>(`catalog/${encodeURIComponent(id)}/governance/reviews`, true, "v2");
     return { data: { submissions: data.submissions.map(normalizeRegistrySubmission).filter(item => item.type === "update" && item.status === "submitted" && item.pipelineId === id) }, status: 200 };
   } catch (error) { return { data: null, status: error instanceof ServiceError ? error.status : 503 }; }
+}
+
+export type PublicContributor = { slug: string; name: string; login: string | null };
+export async function publicContributors(filters: { q?: string; page?: string }) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) if (typeof value === "string") query.set(key, value);
+  try {
+    return await communityData<{ items: PublicContributor[]; page: number; hasMore: boolean }>(`contributors?${query}`, false, "v2");
+  } catch { return null; }
+}
+export async function publicContributor(slug: string, pages: { maintainedPage?: string; originalPage?: string; updatePage?: string }) {
+  if (!/^contributor_[a-f0-9]{64}$/.test(slug)) return { data: null, status: 404 };
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(pages)) if (typeof value === "string" && /^\d{1,4}$/.test(value)) query.set(key, value);
+  try {
+    const data = await communityData<{ contributor: PublicContributor; sections: Record<import("./tool-maintenance").PersonalSection, import("./tool-maintenance").PersonalContributions> }>(`contributors/${slug}?${query}`, false, "v2");
+    return { data, status: 200 };
+  } catch (error) { return { data: null, status: error instanceof ServiceError ? error.status : 503 }; }
+}
+export async function adminTools(filters: { q?: string; page?: string }) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) if (typeof value === "string") query.set(key, value);
+  try {
+    const data = await communityData<{ items: RegistryItemV2[]; page: number; hasMore: boolean }>(`admin/tools?${query}`, true, "v2");
+    return { ...data, items: data.items.map(normalizeRegistryItem) };
+  } catch { return null; }
 }

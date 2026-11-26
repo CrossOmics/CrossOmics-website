@@ -26,7 +26,7 @@ export default async function CommunitySignInPage({ searchParams }: { searchPara
           <ul className="account-benefits">
             <li><strong>Share your work</strong><span>Register a tool or contribute an improvement.</span></li>
             <li><strong>Keep your history</strong><span>Find your submissions and contributions in one place.</span></li>
-            <li><strong>Build together</strong><span>Explore bounties and help useful tools grow.</span></li>
+            <li><strong>Build together</strong><span>Explore requests and help useful tools grow.</span></li>
           </ul>
           <div className="account-lineage" aria-hidden="true">
             <span>Tool</span><i /><span>Review</span><i /><span>Community</span>

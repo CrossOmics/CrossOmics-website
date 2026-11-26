@@ -1,4 +1,4 @@
-import type { RepositoryVersion } from "@/lib/community/repositories";
+import { repositoryVersionDate, type RepositoryVersion } from "@/lib/community/repositories";
 import { toolTypeLabel } from "@/lib/community/tool-types";
 import { lineageIssueLabels, type LineageNode } from "@/lib/community/lineage";
 import { httpsUrl } from "@/lib/community/https-url";
@@ -11,18 +11,19 @@ export default function VersionDetails({ version, parent, upstreamParent, issue,
   pipelineId: string; canManage: boolean; v2: boolean; recommended: boolean;
 }) {
   const repo = httpsUrl(version.repo);
+  const date = repositoryVersionDate(version);
   const evidence = "evidence_url" in version ? httpsUrl(version.evidence_url) : null;
   const isUpdate = toolTypeLabel("type" in version ? version.type : version.kind) === "Update";
   const registered = version.source !== "repository";
   return (
     <li className="community-record" data-version-id={version.id}>
       <div className="community-actions">
-        <h4>{version.label}</h4>
+        <h4>{version.source === "repository" ? "Observed repository update" : version.label}</h4>
         <span className="community-tag">{toolTypeLabel("type" in version ? version.type : version.kind)}</span>
         {!version.withdrawn && recommended && <span className="community-tag community-recommended">Recommended</span>}
         {version.withdrawn && <span className="community-tag">Withdrawn</span>}
       </div>
-      <p>{[version.released_at, parent && `Based on ${parent.label}`].filter(Boolean).join(" · ") || "Date not recorded"}</p>
+      <p>{[date && `${date.kind === "publication" ? "Published " : ""}${date.value.slice(0, 10)}`, parent && `Based on ${parent.label}`].filter(Boolean).join(" · ") || "Date not recorded"}</p>
       {upstreamParent && <p>Derived from {upstreamParent.label} in {upstreamParent.repo}.</p>}
       {issue && <p>{lineageIssueLabels[issue]}</p>}
       {"authors" in version && <dl className="community-detail-grid">
@@ -34,7 +35,6 @@ export default function VersionDetails({ version, parent, upstreamParent, issue,
       {"citation" in version && version.citation && <div><h4>{isUpdate && !version.updateAuthors ? "Recorded citation" : "How to cite this version"}</h4><p className="community-citation">{version.citation}</p></div>}
       {repo && <a href={repo} className="community-link">Version repository</a>}
       {evidence && <a href={evidence} className="community-link">Verification</a>}
-      <code>{version.commit}</code>
       {registered && canManage && "legacyKind" in version &&
         <CorrectVersionCredits pipelineId={pipelineId} versionId={version.id} existingAuthors={version.authors} existingMaintainers={version.maintainers} />}
       {registered && v2 && canManage && !version.withdrawn &&

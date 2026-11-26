@@ -1,4 +1,4 @@
-const communityPath = /^\/community(?:\/(?:activity|mine|submit|registry\/(?:submit|submissions)|desktop-sign-in|catalog\/cp_[a-z0-9_]{1,61}(?:\/manage)?|bounties(?:\/(?:new|[a-f0-9-]{36}))?))?$/;
+const communityPath = /^\/community(?:\/(?:activity|mine|submit|admin|registry\/(?:submit|submissions)|desktop-sign-in|catalog\/cp_[a-z0-9_]{1,61}(?:\/manage)?|bounties(?:\/(?:new|[a-f0-9-]{36}))?))?$/;
 
 export function safeCommunityReturn(value: unknown, fallback = "/community/mine"): string {
   if (typeof value !== "string" || value.length > 220) return fallback;
