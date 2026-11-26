@@ -58,7 +58,7 @@ export default function RepositoryVersions({ item, governanceState, v2 = false, 
             {repo.benchmark.peakRss && <div><dt>Peak RSS</dt><dd>{repo.benchmark.peakRss}</dd></div>}
           </dl>}
           {picks.filter(target => target.versionId).map(target => <p className="community-repository-path" key={target.versionId}>Pick applies to {target.label || "a specific published version"}.</p>)}
-          {latest && <details className="community-update-details"><summary>{repo.latestPublished ? "Latest published update and credits" : "Latest repository observation"}</summary><ul className="community-record-list">
+          {latest && <details className="community-update-details"><summary>{latest.source === "repository" ? "Latest repository observation" : latest.withdrawn ? "Withdrawn version and credits" : "Latest published update and credits"}</summary><ul className="community-record-list">
             <VersionDetails version={latest} parent={repo.lineage.find(entry => entry.version.id === latest.id)?.parent ?? null}
               upstreamParent={repo.lineage.find(entry => entry.version.id === latest.id)?.upstreamParent ?? null}
               issue={repo.lineage.find(entry => entry.version.id === latest.id)?.issue ?? null} pipelineId={item.id}

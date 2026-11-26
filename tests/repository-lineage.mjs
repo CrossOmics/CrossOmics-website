@@ -152,3 +152,10 @@ test("mouse wheel zooms around the pointer, clamps scale, and leaves page scroll
  await act(()=>document.querySelector('#lineage button[aria-expanded="true"]').click());
  const closed=new window.WheelEvent("wheel",{deltaY:120,cancelable:true});canvas.dispatchEvent(closed);assert.equal(closed.defaultPrevented,false);
 });
+
+test("withdrawn publications retain an explicit publication label rather than an observation label",async()=>{
+ const tool={...item,versions:[version("withdrawn",upstream,"2026-11-25",null,{withdrawn:true})]};
+ await act(()=>root.render(render({key:"withdrawn-label",item:tool,v2:true})));
+ assert.match(document.querySelector('.community-update-details summary').textContent,/Withdrawn version/);
+ assert.doesNotMatch(document.querySelector('.community-update-details summary').textContent,/observation/);
+});
