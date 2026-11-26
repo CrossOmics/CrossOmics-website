@@ -38,7 +38,17 @@ export default function VersionLineage({ versions, recommendedIds = [], details,
     const element = viewport.current;
     const observer = new ResizeObserver(() => updateView(fitLineage(layout, { width: element.clientWidth, height: element.clientHeight })));
     observer.observe(element);
-    return () => { observer.disconnect(); pointers.current.clear(); gesture.current = null; };
+    const wheel = (event: WheelEvent) => {
+      if (!event.deltaY) return;
+      event.preventDefault();
+      const rect = element.getBoundingClientRect();
+      const pixels = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? element.clientHeight : 1);
+      const factor = Math.exp(-Math.max(-240, Math.min(240, pixels)) / 500);
+      updateView(zoomLineage(viewRef.current, viewRef.current.scale * factor, { x: event.clientX - rect.left, y: event.clientY - rect.top }));
+      beginGesture(true);
+    };
+    element.addEventListener("wheel", wheel, { passive: false });
+    return () => { observer.disconnect(); element.removeEventListener("wheel", wheel); pointers.current.clear(); gesture.current = null; };
   }, [open, layout]);
 
   useEffect(() => {
@@ -158,7 +168,7 @@ export default function VersionLineage({ versions, recommendedIds = [], details,
           })}
         </div>
       </div>
-      <p id={`${graphId}-help`} className={styles.help}>Drag to pan · Pinch or use + / − to zoom · Arrow keys pan the focused canvas</p>
+      <p id={`${graphId}-help`} className={styles.help}>Drag to pan · Scroll, pinch or use + / − to zoom · Arrow keys pan the focused canvas</p>
       {layout.nodes.some(node=>node.issue) && <p className={styles.warning} role="status">Some parent relationships are unavailable or invalid. Those versions are shown without a connecting parent.</p>}
       <p className={styles.selection} role="status">{implementationLevel ? "Selected implementation" : "Selected version"}: {versions[currentIndex]?.label}</p>
     </div>}

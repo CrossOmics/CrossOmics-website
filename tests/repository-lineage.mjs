@@ -115,3 +115,40 @@ test("top lineage link opens the diagram on first and repeated clicks and direct
   assert.ok(document.querySelector('#lineage [aria-label="Implementation lineage canvas"]'));
   window.history.replaceState(null,"","/");
 });
+
+
+test("repository cards retain both benchmark and distinct review evidence",async()=>{
+ const report="https://example.org/benchmark.md",pr="https://github.com/example/tool/pull/9";
+ const tool={...item,repositories:[{url:upstream,primary:true,benchmark:{url:report}}],versions:[version("published",upstream,"2026-11-25",null,{evidence_url:pr})]};
+ await act(()=>root.render(render({key:"both-evidence",item:tool,v2:true})));
+ const links=[...document.querySelectorAll(".community-value-summary a")].map(link=>link.href);
+ assert.deepEqual(links,[report,pr]);
+});
+
+test("mouse wheel zooms around the pointer, clamps scale, and leaves page scrolling outside the canvas",async()=>{
+ const ToolLineage=require("../app/community/catalog/[id]/ToolLineage.tsx").default;
+ await act(()=>root.render(createElement(ToolLineage,{key:"wheel",item,v2:true})));
+ await act(()=>document.querySelector('#lineage button[aria-expanded="false"]').click());
+ const canvas=document.querySelector('[aria-label="Implementation lineage canvas"]');
+ canvas.getBoundingClientRect=()=>({left:10,top:20,width:600,height:390});
+ const transform=()=>{const m=canvas.firstElementChild.style.transform.match(/translate\(([-\d.e]+)px, ([-\d.e]+)px\) scale\(([-\d.e]+)\)/);return {x:Number(m[1]),y:Number(m[2]),scale:Number(m[3])};};
+ const before=transform();
+ const wheel=new window.WheelEvent("wheel",{deltaY:-120,clientX:130,clientY:100,bubbles:true,cancelable:true});
+ await act(()=>canvas.dispatchEvent(wheel));
+ const after=transform();assert.ok(after.scale>before.scale);assert.equal(wheel.defaultPrevented,true);
+ assert.ok(Math.abs((120-before.x)/before.scale-(120-after.x)/after.scale)<1e-9);
+ assert.ok(Math.abs((80-before.y)/before.scale-(80-after.y)/after.scale)<1e-9);
+ await act(()=>{for(let i=0;i<30;i++)canvas.dispatchEvent(new window.WheelEvent("wheel",{deltaY:-120,bubbles:true,cancelable:true}));});
+ assert.equal(transform().scale,2);
+ await act(()=>{for(let i=0;i<40;i++)canvas.dispatchEvent(new window.WheelEvent("wheel",{deltaY:120,deltaMode:1,bubbles:true,cancelable:true}));});
+ assert.equal(transform().scale,.1);
+ const reset=[...document.querySelectorAll('#lineage button')].find(button=>button.textContent==="Reset");
+ await act(()=>reset.click());
+ Object.defineProperty(canvas,"clientHeight",{value:390,configurable:true});
+ await act(()=>canvas.dispatchEvent(new window.WheelEvent("wheel",{deltaY:-1,deltaMode:2,bubbles:true,cancelable:true})));
+ assert.ok(transform().scale>1 && transform().scale<=2);
+ const outside=new window.WheelEvent("wheel",{deltaY:120,bubbles:true,cancelable:true});
+ await act(()=>document.body.dispatchEvent(outside));assert.equal(outside.defaultPrevented,false);assert.ok(transform().scale>1);
+ await act(()=>document.querySelector('#lineage button[aria-expanded="true"]').click());
+ const closed=new window.WheelEvent("wheel",{deltaY:120,cancelable:true});canvas.dispatchEvent(closed);assert.equal(closed.defaultPrevented,false);
+});

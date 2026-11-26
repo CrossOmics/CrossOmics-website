@@ -57,6 +57,7 @@ export type RepositoryGroup = RegistryRepository & {
   adminSelected: boolean;
   versions: RepositoryVersion[];
   latest: RepositoryVersion | null;
+  latestPublished: RepositoryVersion | null;
   lineage: { version: RepositoryVersion; parent: RepositoryVersion | null; upstreamParent: RepositoryVersion | null;
     depth: number; issue: LineageNode["issue"] }[];
 };
@@ -73,7 +74,7 @@ export function repositoryGroups(item: RepositoryItem): RepositoryGroup[] {
     groups.set(key, { ...existing, ...repo, url: existing?.url ?? url, name,
       primary: repo.primary || existing?.primary || false, pinned: repo.pinned || existing?.pinned || false,
       adminSelected: Boolean(repo.pinned || existing?.adminSelected),
-      versions: existing?.versions ?? [], latest: null, lineage: [] });
+      versions: existing?.versions ?? [], latest: null, latestPublished: null, lineage: [] });
   }
   const snapshots = curated.flatMap((repo) => repo.versions).filter((snapshot) => !item.versions.some((version) =>
     repositoryKey(version.repo) === repositoryKey(snapshot.repo) && version.commit === snapshot.commit));
@@ -88,7 +89,7 @@ export function repositoryGroups(item: RepositoryItem): RepositoryGroup[] {
     if (!key || !url) continue;
     if (!groups.has(key)) groups.set(key, { url, primary: false, pinned: false, adminSelected: false,
       name: new URL(url).pathname.split("/").filter(Boolean).pop() || new URL(url).hostname,
-      versions: [], latest: null, lineage: [] });
+      versions: [], latest: null, latestPublished: null, lineage: [] });
     const group = groups.get(key)!;
     if (!group.versions.some((existing) => existing.id === version.id)) {
       group.versions.push(version);
@@ -98,7 +99,8 @@ export function repositoryGroups(item: RepositoryItem): RepositoryGroup[] {
     group.versions.sort((a, b) => timestamp(a) - timestamp(b) || a.id.localeCompare(b.id));
     const active = group.versions.filter((version) => !version.withdrawn);
     const published = active.filter(version => version.source !== "repository");
-    group.latest = (published.length ? published : active.length ? active : group.versions).at(-1) ?? null;
+    group.latest = (active.length ? active : group.versions).at(-1) ?? null;
+    group.latestPublished = published.at(-1) ?? null;
     const recommended = "recommendedVersionIds" in item ? item.recommendedVersionIds ?? [] : [];
     group.pinned = group.pinned || active.some(version => recommended.includes(version.id));
     const byId = new Map(group.versions.map(version => [version.id, version]));
@@ -147,11 +149,12 @@ export function implementationLineage(item: RepositoryItem): ImplementationNode[
     if (child !== parent) origins.get(child)!.add(parent);
   }
   const issues = new Map(graph.nodes.map(node => [node.id, node.issue]));
+  const representatives = new Map(groups.map(group => [group, group.latestPublished ?? group.latest!]));
   const nodes: ImplementationNode[] = groups.map(group => {
     const parents = [...origins.get(group)!];
-    return { name: group.primary ? item.name : group.name, repository: group, version: group.latest!,
-      parent: parents.length === 1 ? parents[0].latest!.id : null,
-      issue: parents.length > 1 ? "ambiguous-parent" : issues.get(group.latest!.id) ?? null };
+    return { name: group.primary ? item.name : group.name, repository: group, version: representatives.get(group)!,
+      parent: parents.length === 1 ? representatives.get(parents[0])!.id : null,
+      issue: parents.length > 1 ? "ambiguous-parent" : parents.length === 1 ? null : issues.get(representatives.get(group)!.id) ?? null };
   });
   const projected = buildLineage(nodes.map(node => ({id: node.version.id, parent: node.parent})));
   const parents = new Map(projected.edges.map(edge => [edge.child, edge.parent]));
@@ -162,10 +165,13 @@ export function implementationLineage(item: RepositoryItem): ImplementationNode[
 
 /** Use published wording; absence of evidence never becomes a verification claim. */
 export function repositorySummary(item: RepositoryItem, repository: RepositoryGroup) {
-  const sentences = (repository.latest?.improvement ?? "").split(/\n+|(?<=[.!?])\s+(?=[A-Z])/).map(value => value.trim()).filter(Boolean);
+  const published = repository.latestPublished;
+  const evidence = published && "evidence_url" in published ? httpsUrl(published.evidence_url) : null;
+  const benchmark = httpsUrl(repository.benchmark?.url) || (published && "verificationKind" in published && published.verificationKind === "benchmark" ? evidence : null);
+  const sentences = (published?.improvement ?? "").split(/\n+|(?<=[.!?])\s+(?=[A-Z])/).map(value => value.trim()).filter(Boolean);
   const compatibility = sentences.filter(value => /\b(?:compatib|requires? |does not support|native index)/i.test(value)).join(" ");
   const performance = sentences.filter(value => /\b(?:performance|benchmark|wall time|peak rss)\b/i.test(value)).join(" ");
   const purpose = repository.highlights?.join(" ") || sentences.find(value => !/\b(?:compatib|requires? |does not support|native index|performance|benchmark|wall time|peak rss)/i.test(value)) || repository.description || (repository.primary ? item.description : "Implementation details have not been provided.");
-  return {purpose, compatibility: compatibility || "Compatibility information not provided.",
-    performance: performance || (httpsUrl(repository.benchmark?.url) ? "Benchmark results are available in the linked report." : "No benchmark evidence provided.")};
+  return {purpose, evidence, benchmark, compatibility: compatibility || "Compatibility information not provided.",
+    performance: performance || (benchmark ? "Benchmark results are available in the linked report." : "No benchmark evidence provided.")};
 }

@@ -35,7 +35,7 @@ Public name precedence: explicit public_name, existing bound maintainer name, cu
 ### Task 2: Website profile, implementation lineage and value summaries
 **Files:** app/community/mine/PublicName.tsx, mine/page.tsx, lib/community/service.ts, API proxy; ToolLineage.tsx, VersionLineage.tsx and CSS, repositories.ts, RepositoryVersions.tsx; existing profile/lineage/proxy tests.
 **Consumes:** Task 1 profile API contract.
-- [ ] Add failing interaction tests for one-click/direct-hash lineage opening, implementation-name nodes, secondary full history, disconnected/ambiguous ancestry and registered-over-observed selection; name form save/clear/failure; safe proxy restrictions.
+- [ ] Add failing interaction tests for one-click/direct-hash lineage opening, implementation-name nodes, secondary full history, mouse wheel zoom anchored at the pointer with bounds and scoped scroll capture, disconnected/ambiguous ancestry and registered-over-observed selection; name form save/clear/failure; safe proxy restrictions.
 - [ ] Implement a repository projection that connects implementations only when recorded cross-repository ancestry has a unique valid parent; conflicting parents and cycles have explicit unavailable relationships. Keep complete version graph in a secondary disclosure.
 - [ ] Implement public name form and graceful old-backend fallback, narrow GET/PATCH proxy allowlist with bearer rejection.
 - [ ] Present purpose, compatibility, performance status and evidence in repository cards, keeping technical details secondary. NuSTAR facts must come from the published version text/evidence, not a universal repository claim.

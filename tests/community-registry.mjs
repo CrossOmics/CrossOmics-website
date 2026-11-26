@@ -209,7 +209,7 @@ test("implementation lineage names repositories and prefers published records ov
   const base=nodes.find(node=>node.name==="STAR");
   assert.equal(derived.version.id,"nustar");
   assert.equal(derived.parent,base.version.id);
-  assert.equal(repositories.repositoryGroups(tool)[0].latest.id,"nustar");
+  assert.equal(repositories.repositoryGroups(tool)[0].latestPublished.id,"nustar");
   assert.equal(repositories.repositoryGroups(tool)[0].versions.length,2);
 });
 
@@ -240,4 +240,43 @@ test("value summary preserves published compatibility and pending performance wi
   const unknown=repositories.repositorySummary(empty,repositories.repositoryGroups(empty)[0]);
   assert.equal(unknown.purpose,"Aligner");
   assert.match(unknown.performance,/No benchmark evidence provided/);
+});
+
+
+test("observed commit subjects stay out of compatibility and performance summaries",()=>{
+ const tool=item([version("observed",fork,"2026-11-25",null,{source:"repository",improvement:"NuSTAR is drop-in compatible. Benchmark proves a 5x speedup."})]);
+ const summary=repositories.repositorySummary(tool,repositories.repositoryGroups(tool).find(group=>group.url===fork));
+ assert.match(summary.compatibility,/not provided/);assert.match(summary.performance,/No benchmark evidence provided/);
+ assert.doesNotMatch(JSON.stringify(summary),/drop-in|5x/);
+ const snapshot=item([],{id:"cp_star"});
+ assert.match(repositories.repositorySummary(snapshot,repositories.repositoryGroups(snapshot)[0]).performance,/No benchmark evidence provided/);
+});
+
+test("published representatives preserve chronological observed dates and newest-first sorting",()=>{
+ const tool=item([
+  version("old-published",original,"2025-01-01"),
+  version("observation",original,"2026-11-25",null,{source:"repository"}),
+  version("competitor",fork,"2026-10-01")
+ ]);
+ const groups=repositories.repositoryGroups(tool),base=groups.find(group=>group.primary);
+ assert.equal(base.latest.id,"observation");assert.equal(base.latestPublished.id,"old-published");
+ assert.equal(repositories.browseRepositories(groups)[0].url,original);
+ assert.equal(repositories.implementationLineage(tool).find(node=>node.repository.primary).version.id,"old-published");
+});
+
+test("version-level benchmark evidence agrees with availability and retains a distinct PR link",()=>{
+ const report="https://example.org/benchmark.md",pr="https://github.com/example/tool/pull/9";
+ const tool=item([version("published",original,"2026-11-25",null,{improvement:"Adds paired-read support.",verificationKind:"benchmark",evidence_url:report})]);
+ const summary=repositories.repositorySummary(tool,repositories.repositoryGroups(tool)[0]);
+ assert.equal(summary.benchmark,report);assert.doesNotMatch(summary.performance,/No benchmark/);
+ const both=item([version("published",original,"2026-11-25",null,{evidence_url:pr})],{repositories:[{url:original,primary:true,benchmark:{url:report}}]});
+ const combined=repositories.repositorySummary(both,repositories.repositoryGroups(both)[0]);
+ assert.equal(combined.benchmark,report);assert.equal(combined.evidence,pr);
+});
+
+test("historical implementation ancestry does not inherit an unrelated latest-version warning",()=>{
+ const tool=item([version("base",original,"2024-01-01"),version("first",fork,"2025-01-01","base"),version("latest",fork,"2026-01-01","missing")]);
+ const derived=repositories.implementationLineage(tool).find(node=>node.repository.url===fork);
+ assert.equal(derived.parent,"base");assert.equal(derived.issue,null);
+ assert.equal(repositories.repositoryGroups(tool).find(group=>group.url===fork).lineage.find(entry=>entry.version.id==="latest").issue,"missing-parent");
 });

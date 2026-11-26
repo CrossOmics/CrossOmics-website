@@ -58,7 +58,8 @@ before(async () => {
       if(request.method==="POST") {let body="";request.on("data",chunk=>body+=chunk);request.on("end",()=>{const command=JSON.parse(body);response.end(JSON.stringify({state,event:null,reused:false,received:command}));});return;}
       response.end(JSON.stringify({available:true,publishingAvailable:mode!=="pending",pendingReceipts:mode==="pending"?[{status:"pending",body:{toolId:"cp_managed",reason:"Access restricted during outage"},signature:"signed-receipt",publicKey:{kty:"OKP",crv:"Ed25519",x:"public-only"}}]:[],state,events:[governanceEventFixture],hasMore:false,cursor:null,capabilities:{canManage:["governance","reviewer"].includes(mode),isAdmin:mode==="governance",actorId:mode==="candidate"?"candidate-public":["governance","reviewer"].includes(mode)?"member-public":null},assurance:{signatureType:"service",independentWitnesses:false,blockchainAnchored:false}}));
     } else if (request.url?.startsWith("/api/community/v2/contributors")) {
-      const contributor={slug:"contributor_"+"a".repeat(64),name:"Public Researcher",login:"researcher"};
+      const q=new URL(request.url,"http://fixture").searchParams.get("q")||"";
+      const contributor={slug:"contributor_"+"a".repeat(64),name:q.startsWith("𠮷")?q:"Public Researcher",login:"researcher"};
       if(request.url.includes("/contributor_")) {
         const empty=section=>({section,entries:[],page:1,hasMore:false,total:0,counts:{maintained:1,original:0,update:0}});
         response.end(JSON.stringify({contributor,sections:{maintained:{...empty("maintained"),entries:[{kind:"maintained",tool:managed}],total:1},original:empty("original"),update:empty("update")}}));
@@ -726,4 +727,16 @@ test("public name settings use the self-profile route and survive an older backe
  const old=await fetch(base+"/community/mine",{headers:{cookie:"community_session=profile-old"}});
  const oldHtml=(await old.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
  assert.match(oldHtml,/public name settings are temporarily unavailable/i);assert.match(oldHtml,/My Contributions/);
+});
+
+
+test("contributor search accepts complete supplementary names and explains overlong queries",async()=>{
+ const name="𠮷".repeat(60)+"Zhang";
+ const response=await fetch(base+"/community/contributors?"+new URLSearchParams({q:name}));
+ const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+ const limit=Number(html.match(/maxLength="(\d+)"/)?.[1]);assert.ok(limit>=name.length);
+ assert.match(html,/<span class="community-avatar"[^>]*>𠮷<\/span>/);
+ const invalid=await fetch(base+"/community/contributors?"+new URLSearchParams({q:"a".repeat(121)}));
+ const invalidHtml=(await invalid.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+ assert.match(invalidHtml,/120 characters/);assert.doesNotMatch(invalidHtml,/directory is temporarily unavailable/);
 });

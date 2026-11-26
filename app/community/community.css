@@ -524,3 +524,5 @@
 .community-public-name [role="alert"] { color: #a12e26; margin-top: 12px; }
 .community-public-name [role="status"] { color: #17644b; }
 @media(max-width:650px) { .community-value-summary { grid-template-columns: 1fr; gap: 0; } .community-value-summary > div + div { border-top: 1px solid var(--community-border); } .community-value-summary .community-value-purpose { border-bottom: 0; } .community-public-name { padding: 18px; } }
+
+.community-value-evidence { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
