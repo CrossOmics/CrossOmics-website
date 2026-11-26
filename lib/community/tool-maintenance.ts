@@ -11,7 +11,7 @@ export type PersonalContributions = { section: PersonalSection; entries: Persona
 
 export function toolMaintainers(item: RegistryItemV2): RegistryCredit[] {
   if (item.maintainers !== undefined) return item.maintainers;
-  return (item.versions.find(version => version.type === "original") ?? item.versions[0])?.maintainers ?? [];
+  return [];
 }
 
 export function orderedToolVersions(item: RegistryItemV2) {

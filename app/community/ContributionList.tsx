@@ -18,6 +18,9 @@ export default function ContributionList({ items, mine = false }: { items: Contr
       {items.map((item) => {
         const project = httpsUrl(item.projectUrl);
         const evidence = httpsUrl(item.evidenceUrl);
+        const name = item.contributor.name || (item.contributor.login ? `@${item.contributor.login}` : "Community member");
+        const memberHref = item.contributor.slug && /^contributor_[a-f0-9]{64}$/.test(item.contributor.slug)
+          ? `/community/contributors/${item.contributor.slug}` : "/community/contributors?" + new URLSearchParams({q:item.contributor.login || name});
         return (
           <li key={item.id} className="community-record" id={`contribution-${item.id}`}>
             <div className="community-actions">
@@ -26,7 +29,7 @@ export default function ContributionList({ items, mine = false }: { items: Contr
             </div>
             <h3>{item.catalogId ? <Link href={`/community/catalog/${item.catalogId}`}>{item.subjectName}</Link> : item.subjectName}</h3>
             <p className="community-record-meta">
-              {subjectKinds[item.subjectKind]} · @{item.contributor.login} · <time dateTime={item.occurredOn}>{item.occurredOn}</time> · via {item.channel === "gardener" ? "Gardener" : "Web"}
+              {subjectKinds[item.subjectKind]} · <Link href={memberHref}>{name}</Link> · <time dateTime={item.occurredOn}>{item.occurredOn}</time> · via {item.channel === "gardener" ? "Gardener" : "Web"}
             </p>
             <p className="community-record-copy">{item.summary}</p>
             <div className="community-actions">
@@ -53,11 +56,12 @@ export default function ContributionList({ items, mine = false }: { items: Contr
   );
 }
 
-export function ContributionPager({ route, page, hasMore, catalogId }: { route: string; page: number; hasMore: boolean; catalogId?: string }) {
+export function ContributionPager({ route, page, hasMore, catalogId, repository }: { route: string; page: number; hasMore: boolean; catalogId?: string; repository?: string }) {
   if (page === 1 && !hasMore) return null;
   function href(to: number) {
     const params = new URLSearchParams({ page: String(to) });
     if (catalogId) params.set("catalogId", catalogId);
+    if (repository) params.set("repository", repository);
     return `${route}?${params}`;
   }
   return (

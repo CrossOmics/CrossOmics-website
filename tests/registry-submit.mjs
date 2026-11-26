@@ -57,6 +57,15 @@ before(async () => {
       const state={toolId:"cp_managed",version:3,membershipVersion:2,policyVersion:"v1",members:[{actorId:"member-public",name:"Tool maintainer",credit:{name:"Tool maintainer"},grantEventId:"00000000-0000-4000-8000-000000000001"}],recommendations:[],adminPick:null,lastEventHash:null,proposals:[{id:"00000000-0000-4000-8000-000000000002",kind:"invite",candidate:{id:"candidate-public",name:"Candidate maintainer"},subjectId:null,proposer:{id:"member-public",name:"Tool maintainer"},memberIds:["member-public"],membershipVersion:2,policyVersion:"v1",required:1,votes:[],status:"awaiting_acceptance",createdAt:"2026-11-22T00:00:00Z",expiresAt:"2099-11-29T00:00:00Z",reason:"Expand maintenance",createdEventId:"00000000-0000-4000-8000-000000000001",acceptedEventId:null}]};
       if(request.method==="POST") {let body="";request.on("data",chunk=>body+=chunk);request.on("end",()=>{const command=JSON.parse(body);response.end(JSON.stringify({state,event:null,reused:false,received:command}));});return;}
       response.end(JSON.stringify({available:true,publishingAvailable:mode!=="pending",pendingReceipts:mode==="pending"?[{status:"pending",body:{toolId:"cp_managed",reason:"Access restricted during outage"},signature:"signed-receipt",publicKey:{kty:"OKP",crv:"Ed25519",x:"public-only"}}]:[],state,events:[governanceEventFixture],hasMore:false,cursor:null,capabilities:{canManage:["governance","reviewer"].includes(mode),isAdmin:mode==="governance",actorId:mode==="candidate"?"candidate-public":["governance","reviewer"].includes(mode)?"member-public":null},assurance:{signatureType:"service",independentWitnesses:false,blockchainAnchored:false}}));
+    } else if (request.url?.startsWith("/api/community/v2/contributors")) {
+      const contributor={slug:"contributor_"+"a".repeat(64),name:"Public Researcher",login:"researcher"};
+      if(request.url.includes("/contributor_")) {
+        const empty=section=>({section,entries:[],page:1,hasMore:false,total:0,counts:{maintained:1,original:0,update:0}});
+        response.end(JSON.stringify({contributor,sections:{maintained:{...empty("maintained"),entries:[{kind:"maintained",tool:managed}],total:1},original:empty("original"),update:empty("update")}}));
+      } else response.end(JSON.stringify({items:[contributor],page:1,hasMore:false}));
+    } else if (request.url?.startsWith("/api/community/v2/admin/tools")) {
+      if(mode!=="admin"){response.writeHead(403).end("{}");return;}
+      response.end(JSON.stringify({items:[managed],page:1,hasMore:false}));
     } else if (request.url?.startsWith("/api/community/v2/me/contributions")) {
       const params = new URL(request.url,"http://fixture").searchParams;
       const section = params.get("section") || "original";
@@ -178,7 +187,8 @@ test("original tool asks for actual authors and citation without requiring a cha
   assert.match(html, /Citation information \(optional\)/);
   assert.doesNotMatch(html, /name="changeSummary"/);
   assert.match(html, /no earlier version is needed/);
-  assert.match(html, /<legend>Maintainers<\/legend>/);
+  assert.doesNotMatch(html, /<legend>Maintainers<\/legend>/);
+  assert.match(html, /maintainers must be registered members/);
   assert.match(html, /<button[^>]*type="submit">Submit registration<\/button>/);
 });
 
@@ -303,7 +313,7 @@ test("Community root is the registry and keeps query filters", async () => {
   const response = await fetch(base + "/?q=example&type=fix");
   assert.equal(response.status, 200);
   const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
-  assert.match(html, /Community Tracking/);
+  assert.match(html, /Collaborative research software development/);
   assert.match(html, /Example tool/);
   assert.match(html, /action="\/#registry"/);
   assert.match(html, /name="q"[^>]*value="example"/);
@@ -366,7 +376,7 @@ test("everyone sees the bounty publishing entry and anonymous visitors return af
     const response = await fetch(base + "/community/bounties", { headers: { cookie: "community_session=" + mode } });
     assert.equal(response.status, 200);
     const html = await response.text();
-    assert.match(html, /href="\/community\/bounties\/new"[^>]*>Post a bounty/);
+    assert.match(html, /href="\/community\/bounties\/new"[^>]*>Post a Request/);
   }
   const anonymous = await fetch(base + "/community/bounties/new", { redirect: "manual" });
   assert.equal(anonymous.status, 307);
@@ -379,7 +389,7 @@ test("all authenticated accounts see the bounty form without contributions or ed
     assert.equal(response.status, 200);
     const html = await response.text();
     assert.match(html, /Reward or recognition/);
-    assert.match(html, /<button[^>]*type="submit"[^>]*>Post bounty/);
+    assert.match(html, /<button[^>]*type="submit"[^>]*>Post request/);
     assert.doesNotMatch(html, /Record a contribution|editor access to post/);
   }
 });
@@ -418,30 +428,20 @@ test("project metadata correction is forwarded by the authenticated proxy", asyn
 });
 
 
-test("registry and contribution forms share Original/Update and offer only tools", async () => {
-  const registry = await page("ready");
-  entryTypes(registry);
-  assert.match(registry, /Tool name/);
-  assert.doesNotMatch(registry, /Project name|>Workflow<|>Performance improvement<|>Bug fix</);
-  const contributionResponse = await fetch(base + "/community/submit?mode=record", { headers: { cookie: "community_session=ready" } });
-  assert.equal(contributionResponse.status, 200);
-  const contribution = (await contributionResponse.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
-  const menu = contribution.match(/<select id="contribution-type"[^>]*>(.*?)<\/select>/s)?.[1];
-  assert.ok(menu);
-  assert.deepEqual([...menu.matchAll(/<option value="([^"]+)"[^>]*>([^<]+)<\/option>/g)].map(m => [m[1],m[2]]), [["original","Original"],["update","Update"]]);
-  assert.match(contribution, /name="subjectKind"[^>]*value="tool"/);
-  assert.match(contribution, /Tool name/);
-  assert.doesNotMatch(contribution, /Item type|Workflow fixture/);
-  const detail = await fetch(base + "/community/catalog/cp_example", { headers: { cookie: "community_session=ready" } });
-  const detailHtml = (await detail.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
-  assert.doesNotMatch(detailHtml, />Tool<\/span>/);
-  assert.match(detailHtml, />Original<\/span>/);
+test("registration keeps Original/Update while old self-recording links redirect to review", async () => {
+  entryTypes(await page("ready"));
+  const response = await fetch(base+"/community/submit?mode=record&catalogId=cp_example",{redirect:"manual"});
+  assert.equal(response.status,307);
+  assert.equal(response.headers.get("location"),"/community/registry/submit?pipelineId=cp_example");
+  const post=await fetch(base+"/api/community/v1/contributions",{method:"POST",headers:{cookie:"community_session=ready"},body:"{}"});
+  assert.equal(post.status,410);
 });
+
 
 test("tool catalog excludes workflow entries and uses Tool registration vocabulary", async () => {
   const response = await fetch(base + "/", { headers: { cookie: "community_session=ready" } });
   const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
-  assert.match(html, /Submit a Contribution/);
+  assert.match(html, /Contribute/);
   assert.doesNotMatch(html, /Workflow fixture|Register a project|>Workflows<|>Project<\/span>|>Tool<\/span>/);
 });
 
@@ -482,9 +482,9 @@ test("Community navigation uses task labels with a single submission entry", asy
   const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
   const nav = html.match(/<nav[^>]*aria-label="Community"[^>]*>(.*?)<\/nav>/s)?.[1];
   assert.ok(nav);
-  for (const label of ["Submit a Contribution", "Explore Existing Tools", "Maintenance Needed", "Tools Wanted"]) assert.match(nav, new RegExp(label));
+  for (const label of ["Contribute", "Explore Existing Tools", "Contributors", "Public Governance", "Tools Wanted"]) assert.match(nav, new RegExp(label));
   assert.equal([...nav.matchAll(/href="\/community\/submit"/g)].length, 1);
-  assert.match(nav, /href="\/community\/ranking"/);
+  assert.match(html, /href="\/community\/ranking"/);
   assert.doesNotMatch(nav, />Registry<|>Bounties<|>Contributions<|Log a contribution/);
   const registry = html.match(/<section[^>]*id="registry"[\s\S]*?<\/section>/)?.[0];
   assert.ok(registry);
@@ -492,31 +492,22 @@ test("Community navigation uses task labels with a single submission entry", asy
 });
 
 
-test("one submission hub explains reviewed tools versus directly published records", async () => {
-  for (const mode of ["ready", "google", "apple"]) {
-    const response = await fetch(base + "/community/submit?catalogId=cp_example", { headers: { cookie: "community_session=" + mode } });
-    const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
-    assert.match(html, /Submit a Contribution/);
-    assert.match(html, /Submit a Tool or Update/);
-    assert.match(html, /Record a Contribution/);
-    assert.match(html, /Administrator review/);
-    assert.match(html, /Published directly/);
-    assert.match(html, /href="\/community\/registry\/submit\?pipelineId=cp_example"/);
-    assert.match(html, /href="\/community\/submit\?mode=record&amp;catalogId=cp_example"/);
-    assert.doesNotMatch(html, /id="contribution-type"/);
-  }
+test("submission hub explains reviewed new tools and updates without direct recording", async () => {
+  const response=await fetch(base+"/community/submit?catalogId=cp_example");
+  assert.equal(response.status,200);
+  const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,"");
+  assert.match(html,/Submit a Tool/);assert.match(html,/Submit an Update/);
+  assert.match(html,/href="\/community\/registry\/submit"/);
+  assert.match(html,/href="\/community\/registry\/submit\?pipelineId=cp_example"/);
+  assert.doesNotMatch(html,/Published directly|Record a Contribution|mode=record/);
 });
 
-test("record mode preserves sign-in destination and existing Tool selection", async () => {
-  const anonymous = await fetch(base + "/community/submit?mode=record&catalogId=cp_example", { redirect: "manual" });
-  assert.equal(anonymous.status, 307);
-  assert.equal(anonymous.headers.get("location"), "/community/sign-in?returnTo=%2Fcommunity%2Fsubmit%3Fmode%3Drecord%26catalogId%3Dcp_example");
-  const response = await fetch(base + "/community/submit?mode=record&catalogId=cp_example", { headers: { cookie: "community_session=ready" } });
-  const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
-  assert.match(html, /Record a Contribution/);
-  assert.match(html, /id="contribution-type"/);
-  assert.match(html, /value="cp_example" selected=""/);
-  assert.match(html, /value="Example tool"/);
+test("legacy record bookmarks preserve the selected Tool through reviewed sign-in", async()=>{
+  const response=await fetch(base+"/community/submit?mode=record&catalogId=cp_example",{redirect:"manual"});
+  assert.equal(response.status,307);
+  assert.equal(response.headers.get("location"),"/community/registry/submit?pipelineId=cp_example");
+  const registration=await fetch(base+response.headers.get("location"),{redirect:"manual"});
+  assert.match(registration.headers.get("location"),/returnTo=%2Fcommunity%2Fregistry%2Fsubmit%3FpipelineId%3Dcp_example/);
 });
 
 
@@ -525,22 +516,24 @@ test("tool details show global maintainers once and the latest repository update
   const html = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
   assert.match(html, /Tool maintainer/); assert.doesNotMatch(html, /Version-only maintainer/);
   assert.match(html, /Recommended update/);
-  assert.match(html, /Pinned · Recommended/);
+  assert.match(html, /Maintainer Pick/);
   assert.equal((html.match(/data-version-id=/g) ?? []).length, 1);
   assert.match(html, /href="\/community\/catalog\/cp_managed\/manage"/);
   assert.match(html, /href="\/community\/registry\/submit\?pipelineId=cp_managed"/);
-  assert.match(html, /href="\/community\/submit\?mode=record&amp;catalogId=cp_managed"/);
+  assert.doesNotMatch(html, /mode=record|Record work on this tool/);
   assert.doesNotMatch(html, /href="\/community\/submit\?catalogId=cp_managed"/);
 });
 
-test("My Contributions has correctly paginated groups and assigned-tool management", async () => {
-  for (const [section,label] of [["tools","My Tools"],["updates","My Updates"],["maintained","My Maintained Tools"]]) {
-    const response = await fetch(base+"/community/mine?section="+section,{headers:{cookie:"community_session=maintainer"}});
-    const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
-    assert.match(html, /My Contributions/); assert.match(html,new RegExp(label));
-    if(section === "maintained") assert.match(html,/Manage this tool/); else { assert.match(html,/My submitted tool/); assert.match(html,/page=2/); }
-  }
+test("My Contributions shows three anchored sections and independent pagination", async()=>{
+  const response=await fetch(base+"/community/mine?originalPage=2&updatePage=3",{headers:{cookie:"community_session=maintainer"}});
+  const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,"");
+  for(const key of ["maintained","original","update"]){assert.match(html,new RegExp(`id="${key}"`));assert.match(html,new RegExp(`href="#${key}"`));}
+  assert.ok(html.indexOf('id="maintained"')<html.indexOf('id="original"'));
+  assert.match(html,/Manage this tool/);assert.match(html,/My submitted tool/);
+  assert.match(html,/originalPage=3&amp;updatePage=3#original/);
+  assert.doesNotMatch(html,/href="\/community\/mine\?section=/);
 });
+
 
 test("Tool management keeps sign-in destinations and hides administrator assignment from maintainers", async () => {
   const anon = await fetch(base+"/community/catalog/cp_managed/manage",{redirect:"manual"});
@@ -548,8 +541,8 @@ test("Tool management keeps sign-in destinations and hides administrator assignm
   for(const mode of ["ready","maintainer","admin"]) {
     const response=await fetch(base+"/community/catalog/cp_managed/manage",{headers:{cookie:"community_session="+mode}});
     const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
-    if(mode === "ready") assert.doesNotMatch(html,/Save recommendations|Save maintainers/);
-    else {assert.match(html,/Save recommendations/);assert.equal(html.includes("Save maintainers"),mode === "admin");}
+    if(mode === "ready") assert.doesNotMatch(html,/Save Maintainer Picks|Save maintainers/);
+    else {assert.match(html,/Save Maintainer Picks/);assert.equal(html.includes("Save maintainers"),mode === "admin");}
   }
 });
 
@@ -615,7 +608,7 @@ test('invalid ancestry never claims a self-parent or turns orphan Update credits
   const response=await fetch(base+'/community/catalog/cp_invalid');
   assert.equal(response.status,200);
   const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,'');
-  assert.doesNotMatch(html,/Based on Cyclic version|<dt>Original authors<\/dt>/);
+  assert.doesNotMatch(html,/Based on Cyclic version/);
   assert.match(html,/Invalid parent relationship/);
   assert.equal((html.match(/<dt>Recorded authors<\/dt>/g)??[]).length,1);
   assert.equal((html.match(/data-version-id=/g) ?? []).length, 1);
@@ -687,4 +680,30 @@ test("Update review queue proxy allows only scoped website GET requests",async()
  const response=await fetch(path,{headers:{cookie:"community_session=governance"}});assert.equal(response.status,200);assert.equal((await response.json()).submissions[0].name,"Pending scoped update");
  assert.equal((await fetch(path,{headers:{authorization:"Bearer desktop",cookie:"community_session=governance"}})).status,403);
  assert.equal((await fetch(path,{method:"POST"})).status,405);assert.equal((await fetch(path+"/extra")).status,404);
+});
+
+
+test("public contributor directory links safe profiles without private management controls",async()=>{
+  const directory=await fetch(base+"/community/contributors?q=Public");
+  assert.equal(directory.status,200);
+  const directoryHtml=await directory.text();
+  assert.match(directoryHtml,/Public Researcher/);
+  const profile=await fetch(base+"/community/contributors/contributor_"+"a".repeat(64));
+  const html=await profile.text();
+  assert.equal(profile.status,200);
+  for(const section of ["maintained","original","update"])assert.match(html,new RegExp(`id="${section}"`));
+  assert.doesNotMatch(html,/Manage this tool|Review status|google:|Contributor ID|Account settings/);
+});
+
+test("admin dashboard requires global permission and proxy rejects desktop credentials",async()=>{
+  for(const mode of ["ready","maintainer","admin"]){
+    const response=await fetch(base+"/community/admin",{headers:{cookie:"community_session="+mode}});
+    const html=await response.text();
+    assert.equal(html.includes("Manage registered tools"),mode==="admin");
+    assert.equal(html.includes("cp_managed/manage"),mode==="admin");
+  }
+  const bearer=await fetch(base+"/api/community/v2/admin/tools",{headers:{authorization:"Bearer desktop-fixture",cookie:"community_session=admin"}});
+  assert.equal(bearer.status,403);
+  const publicWrite=await fetch(base+"/api/community/v2/contributors",{method:"POST",body:"{}"});
+  assert.equal(publicWrite.status,405);
 });

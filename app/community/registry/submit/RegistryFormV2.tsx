@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { toolMaintainers } from "@/lib/community/tool-maintenance";
 import { registryRequestType } from "@/lib/community/tool-types";
 import { useRef, useState, type FormEvent } from "react";
 import { registryTypes, registryTypeDescriptions, type RegistryDraftV2, type RegistryItemV2, type RegistrySubmissionV2, type RegistryType } from "@/lib/community/registry-v2";
@@ -9,22 +8,20 @@ import type { Contributor } from "@/lib/community/types";
 import { communityRequest } from "../../client";
 import RegistryMetadataFields, { readRegistryMetadata, changedRegistryMetadata } from "../RegistryMetadataFields";
 import RegistryCredits from "../../RegistryCredits";
-import CreditFields, { emptyCredit, parseCredit, withEmptyCreditFields, type CreditInput } from "../CreditFields";
 import UpdateVerificationFields from "./UpdateVerificationFields";
 
 const domains = ["transcriptomics", "epigenomics", "genomics", "proteomics", "metagenomics", "multi-omics", "imaging"];
-export default function RegistryFormV2({ items, submitter, initialId, unavailableMessage, updateAuthorsAvailable }: {
-  items: RegistryItemV2[]; submitter: Contributor; initialId?: string; unavailableMessage?: string; updateAuthorsAvailable: boolean;
+export default function RegistryFormV2({ items, submitter, initialId, unavailableMessage, updateAuthorsAvailable, initialType }: {
+  items: RegistryItemV2[]; submitter: Contributor; initialId?: string; unavailableMessage?: string; updateAuthorsAvailable: boolean; initialType?: RegistryType;
 }) {
   const initial = items.find((item) => item.id === initialId);
-  const [type, setType] = useState<RegistryType>(initial ? "update" : "original");
+  const [type, setType] = useState<RegistryType>(initial ? "update" : initialType ?? "original");
   const [pipelineId, setPipelineId] = useState(initial?.id ?? "");
   const [authorNames, setAuthorNames] = useState("");
   const [updateAuthorNames, setUpdateAuthorNames] = useState("");
   const [citation, setCitation] = useState("");
   const [updateCitation, setUpdateCitation] = useState("");
   const [parentVersionId, setParentVersionId] = useState(() => defaultParentVersionId(initial));
-  const [maintainers, setMaintainers] = useState<CreditInput[]>(() => seedCredits(initial, "maintainers"));
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<RegistrySubmissionV2 | null>(null);
@@ -44,7 +41,6 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
     const item = items.find((candidate) => candidate.id === id);
     setPipelineId(id);
     setParentVersionId(defaultParentVersionId(item));
-    setMaintainers(seedCredits(item, "maintainers"));
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -65,7 +61,7 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
       ...(selected ? changedRegistryMetadata(readRegistryMetadata(form), selected) : readRegistryMetadata(form)),
       authors: origin ? names(authorNames) : [],
       ...(origin ? {} : { updateAuthors: names(updateAuthorNames) }),
-      maintainers: origin ? maintainers.map(parseCredit) : [],
+      maintainers: [],
       ...((origin ? citation : updateCitation).trim() ? { citation: (origin ? citation : updateCitation).trim() } : {}),
       ...(origin ? {} : { pipelineId, parentVersionId: value("parentVersionId"), changeSummary: value("changeSummary"),
         updateSource,
@@ -127,8 +123,6 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
             </select></label>
             <label>Based on version<select name="parentVersionId" key={pipelineId} required value={parentVersionId} onChange={(event) => {
               setParentVersionId(event.target.value);
-              const parent = parents.find((version) => version.id === event.target.value);
-              if (parent && selected) setMaintainers(toolMaintainers(selected).map(withEmptyCreditFields));
             }}>
               <option value="">Choose a version</option>
               {parents.map((version) => <option key={version.id} value={version.id}>{version.label}</option>)}
@@ -163,8 +157,7 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
           placeholder={origin ? "Paper or software citation, DOI, URL, or BibTeX" : "Citation for this update, if one exists; otherwise leave blank"}
           onChange={(event) => origin ? setCitation(event.target.value) : setUpdateCitation(event.target.value)} /></label>
         <p>Submitting as @{submitter.login}. Authors and maintainers are recorded separately.</p>
-        {origin && <p>These maintainer credits belong to the whole Tool. Management access is assigned separately by an administrator.</p>}
-        {origin ? <CreditFields label="Maintainers" credits={maintainers} onChange={(value) => { requestId.current = null; setMaintainers(value); }} /> : <p>Maintainers belong to the Tool. Submitting an update does not change its maintainers or grant management access.</p>}
+        <p>Community maintainers must be registered members and are assigned through tool management after review. Submitting work does not grant maintenance access.</p>
       </fieldset>
       <div className="community-form-footer">
         <button className="community-primary" type="submit" disabled={pending || Boolean(blockedMessage)}>Submit registration</button>
@@ -178,10 +171,4 @@ export default function RegistryFormV2({ items, submitter, initialId, unavailabl
 function defaultParentVersionId(item: RegistryItemV2 | undefined) {
   const versions = item?.versions.filter((version) => !version.withdrawn) ?? [];
   return versions.length === 1 ? versions[0].id : "";
-}
-
-function seedCredits(item: RegistryItemV2 | undefined, field: "authors" | "maintainers") {
-  const origin = item?.versions.find((version) => version.type === "original");
-  const values = item && field === "maintainers" ? toolMaintainers(item) : origin?.[field] ?? [];
-  return values.length ? values.map(withEmptyCreditFields) : [emptyCredit];
 }

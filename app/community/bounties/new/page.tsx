@@ -10,8 +10,8 @@ export default async function NewBountyPage() {
   return (
     <>
       <header className="community-heading">
-        <Link href="/community/bounties" className="community-link">← Back to bounties</Link>
-        <h1>Post a bounty</h1>
+        <Link href="/community/bounties" className="community-link">← Back to requests</Link>
+        <h1>Post a Request</h1>
         <p>Describe a concrete task the community can help with.</p>
       </header>
       <NewBountyForm />

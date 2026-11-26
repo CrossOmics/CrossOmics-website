@@ -85,3 +85,8 @@ Each Tool's Versions section has one card per repository, showing its latest kno
 `/community/catalog/{id}/governance` provides the English public event log, current team/proposals, dependency lineage and evidence checks. Current Tool managers also get a private Update review queue. The feature uses the paired backend API and real Community sessions; it never imports the browser demo. The standalone English prototype source remains under `demos/governance-transparency`.
 
 See [Governance rollout](docs/governance-rollout.md) for migration 005, signing/trust configuration, receipt recovery and activation order. Signing keys, publisher credentials and database access belong only to the backend. Until that backend is configured, the website shows an explicit unavailable state. This implementation provides service-signed records; independent witnesses, personal user signatures and public blockchain anchoring are separate deployment phases.
+
+
+## Community information architecture update
+
+See [Community restructure rollout](docs/community-restructure.md) for the current Tool-wide lineage, reviewed submission entry points, repository contribution filtering, shared public/personal contributor profiles, administrator dashboard and paired API migration. This section supersedes the older per-repository lineage and direct web recording descriptions above. The isolated local suites are now available together with `npm test`.

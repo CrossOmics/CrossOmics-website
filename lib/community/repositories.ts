@@ -39,9 +39,16 @@ function repositoryKey(value: string): string | null {
   return url && (new URL(url).hostname === "github.com" ? url.toLowerCase() : url);
 }
 
+export function repositoryVersionDate(version: RepositoryVersion): { value: string; kind: "update" | "publication" } | null {
+  for (const [value, kind] of [[version.released_at, "update"], [version.published_at, "publication"]] as const) {
+    if (value && Number.isFinite(Date.parse(value))) return { value, kind };
+  }
+  return null;
+}
+
 function timestamp(version: RepositoryVersion) {
-  const time = version.released_at ? Date.parse(version.released_at) : NaN;
-  return Number.isFinite(time) ? time : -Infinity;
+  const date = repositoryVersionDate(version);
+  return date ? Date.parse(date.value) : -Infinity;
 }
 
 export type RepositoryGroup = RegistryRepository & {
@@ -104,4 +111,18 @@ export function repositoryGroups(item: RepositoryItem): RepositoryGroup[] {
   }
   return [...groups.values()].sort((a, b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)) ||
     Number(b.primary) - Number(a.primary) || a.name.localeCompare(b.name));
+}
+
+/** Pinned implementations stay first; unknown dates and popularity stay last. */
+export function browseRepositories(groups: RepositoryGroup[], query = "", sort: "updated" | "popularity" = "updated") {
+  const q = query.trim().toLocaleLowerCase();
+  return groups.filter(repo => [repo.name, repo.url, repo.description ?? "", ...(repo.highlights ?? [])].some(value => value.toLocaleLowerCase().includes(q)))
+    .sort((a, b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)) ||
+      (sort === "popularity" ? (b.stars ?? -1) - (a.stars ?? -1) : (b.latest ? timestamp(b.latest) : -Infinity) - (a.latest ? timestamp(a.latest) : -Infinity)) || a.name.localeCompare(b.name));
+}
+
+/** Compare exact repositories, never arbitrary URL prefixes. */
+export function sameRepository(a: string, b: string) {
+  const key = repositoryKey(a);
+  return key !== null && key === repositoryKey(b);
 }

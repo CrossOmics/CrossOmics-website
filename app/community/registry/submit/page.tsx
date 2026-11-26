@@ -20,13 +20,13 @@ const legacyResults: Record<string, string> = {
 };
 
 export default async function RegistrySubmitPage({ searchParams }: {
-  searchParams: Promise<{ pr?: string; result?: string; pipelineId?: string }>;
+  searchParams: Promise<{ pr?: string; result?: string; pipelineId?: string; type?: string }>;
 }) {
   const [session, query] = await Promise.all([communitySession(), searchParams]);
   const signedIn = Boolean(session?.contributor);
   const pipelineId = typeof query.pipelineId === "string" && /^cp_[a-z0-9_]{1,61}$/.test(query.pipelineId)
     ? query.pipelineId : undefined;
-  const returnTo = pipelineId ? path + "?" + new URLSearchParams({ pipelineId }) : path;
+  const returnTo = !pipelineId && query.type === "update" ? path + "?type=update" : pipelineId ? path + "?" + new URLSearchParams({ pipelineId }) : path;
   if (session && !session.contributor) redirect(communitySignInPath(returnTo));
   const pr = typeof query.pr === "string" && /^[1-9]\d{0,15}$/.test(query.pr) ? query.pr : null;
   const legacyResult = signedIn && !pr && typeof query.result === "string" && Object.hasOwn(legacyResults, query.result)
@@ -55,7 +55,7 @@ export default async function RegistrySubmitPage({ searchParams }: {
       ) : !session ? (
         <p className="community-notice">Website submissions are temporarily unavailable. Try again shortly.</p>
       ) : (
-        <RegistryFormV2 items={catalog?.data?.items ?? []} submitter={session.contributor!} initialId={pipelineId} unavailableMessage={unavailableMessage} updateAuthorsAvailable={session.registryUpdateAuthorsAvailable} />
+        <RegistryFormV2 items={catalog?.data?.items ?? []} submitter={session.contributor!} initialId={pipelineId} initialType={query.type === "update" ? "update" : "original"} unavailableMessage={unavailableMessage} updateAuthorsAvailable={session.registryUpdateAuthorsAvailable} />
       )}
     </>
   );
