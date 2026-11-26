@@ -1,18 +1,12 @@
 import Link from "next/link";
 import { communitySession, toolGovernance, toolGovernanceReviews } from "@/lib/community/service";
-import { governanceActionLabel, type GovernanceTarget } from "@/lib/community/governance";
+import { governanceActionLabel } from "@/lib/community/governance";
 import { communitySignInPath } from "@/lib/community/return-path";
-import { httpsUrl } from "@/lib/community/https-url";
-import GovernanceForms, { ProposalCommands } from "./GovernanceForms";
+import GovernanceTeam from "./GovernanceTeam";
 import UpdateReviewQueue from "./UpdateReviewQueue";
 import styles from "./governance.module.css";
 
 type Query = { tab?: string; cursor?: string; actor?: string; action?: string; repository?: string };
-function Target({target}:{target:GovernanceTarget}) {
-  const url=httpsUrl(target.repository);
-  return <span>{url?<a className="community-link" href={url}>{target.label||target.repository}</a>:target.label||target.repository}
-    {target.versionId?<> · Version {target.versionId} · Commit <code>{target.commit||"not recorded"}</code></>:" · Repository recommendation"}</span>;
-}
 export default async function Governance({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<Query>}) {
   const [{id},query,session]=await Promise.all([params,searchParams,communitySession()]);
   const filters={cursor:query.cursor,actor:query.actor,action:query.action,repository:query.repository};
@@ -27,8 +21,11 @@ export default async function Governance({params,searchParams}:{params:Promise<{
     createdAt:item.createdAt,submitterLogin:item.contributor.login,ownSubmission:item.contributor.id===session?.contributor?.id
   }))??null;
   return <div className={styles.explorer}>
-    <header className="community-heading"><Link className="community-link" href={`/community/catalog/${id}`}>Back to tool</Link><h1>Governance</h1><p>Public decisions, current maintainers and the evidence behind each change to this tool.</p></header>
-    <aside className={styles.assurance} aria-label="Assurance scope"><p><strong>Service-signed public record</strong></p><p>Signatures attest what the CrossOmics service recorded. They are not personal user signatures. This log has no independent witnesses or blockchain anchor.</p></aside>
+    <header className={`community-heading ${styles.heading}`}><Link className="community-link" href={`/community/catalog/${id}`}>← Back to tool</Link>
+      <div className={styles.headingRow}><div><h1>Tool governance</h1><p>The people, recommendations and decisions behind this tool.</p></div>
+        <span className={styles.viewerRole}>{data.capabilities.isAdmin ? "Super Administrator" : data.capabilities.canManage ? "Tool Maintainer" : session?.contributor ? "Community Member" : "Public view"}</span></div>
+    </header>
+
     {(data.pendingReceipts?.length||data.publishingAvailable===false)&&<aside className={styles.assurance} role="status"><p><strong>{data.pendingReceipts?.length?"Public log publication is pending":"Governance publishing is unavailable"}</strong></p><p>{data.pendingReceipts?.length?"Emergency access restrictions have taken effect and durable signed receipts have been saved. Their full public log records are pending.":"Existing public history remains readable. Ordinary access grants and recommendations cannot be published right now."}</p><p>Ordinary governance changes are paused until publication resumes. A receipt is a service attestation and has no independent witness or blockchain anchor.</p>{data.pendingReceipts?.map((receipt,index)=><p key={index}><a className="community-link" download={`governance-receipt-${index+1}.json`} href={`data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(receipt,null,2))}`}>Download signed receipt {index+1}</a></p>)}</aside>}
     <nav className={styles.tabs} aria-label="Governance views"><Link href={path} aria-current={tab==="log"?"page":undefined}>Public log</Link><Link href={path+"?tab=team"} aria-current={tab==="team"?"page":undefined}>Team and proposals</Link><Link href={path+"?tab=evidence"} aria-current={tab==="evidence"?"page":undefined}>Evidence and trust</Link></nav>
     {tab==="log"&&<section><h2>Public log</h2><p>Open an event for its recorded changes, authority and approval references. Global sequence numbers can skip here because this view is scoped to one tool.</p>
@@ -36,13 +33,13 @@ export default async function Governance({params,searchParams}:{params:Promise<{
       {!data.events.length?<p className="community-notice">No public events match this view.</p>:<ol className={styles.events}>{data.events.map(event=><li key={event.body.eventId}><h3><Link className="community-link" href={`${path}/events/${event.body.eventId}`}>{governanceActionLabel(event.body.action)}</Link></h3><p>{event.body.reason}</p><p className={styles.meta}>{event.body.actor.name} · <time dateTime={event.body.recordedAt}>{event.body.recordedAt}</time> · Sequence {event.body.sequence}</p><p className={styles.meta}>{event.body.references.length} governance references · Hash <code>{event.hash}</code></p></li>)}</ol>}
       {data.hasMore&&data.cursor&&<Link className="community-secondary" href={path+"?"+new URLSearchParams({...Object.fromEntries(Object.entries(filters).filter((entry):entry is [string,string]=>!!entry[1])),cursor:data.cursor})}>Older events</Link>}
     </section>}
-    {tab==="team"&&<>
-      {reviews&&session?.contributor&&<UpdateReviewQueue submissions={reviewItems} publishingAvailable={data.publishingAvailable!==false&&!data.pendingReceipts?.some(receipt=>receipt.status==="pending")} />}
-      <section><h2>Current maintainers</h2><p className={styles.meta}>Membership version {state.membershipVersion} · Policy {state.policyVersion} · State version {state.version}</p>{state.members.length?<ul className={styles.members}>{state.members.map(member=><li key={member.actorId}><span><strong>{member.name}</strong><br/><span className={styles.meta}>{member.actorId}</span></span><Link className="community-link" href={`${path}/events/${member.grantEventId}`}>View authority</Link></li>)}</ul>:<p>No maintainer access has been granted.</p>}</section>
-      <section className="community-section"><h2>Recommendations</h2><h3>Maintainer Picks</h3>{state.recommendations.length?<ul>{state.recommendations.map((target,index)=><li key={index}><Target target={target}/></li>)}</ul>:<p>No Maintainer Picks.</p>}<h3>Platform endorsement</h3>{state.adminPick?<p><Target target={state.adminPick}/></p>:<p>No platform endorsement.</p>}<p className={styles.meta}>Repository recommendations do not endorse every future commit. Version recommendations apply to the recorded commit only.</p></section>
-      <section className="community-section"><h2>Proposals and invitations</h2><p>Membership changes require the recorded member snapshot and approvals. Candidates receive access only after accepting an eligible invitation.</p>{!state.proposals.length?<p>No proposals have been recorded.</p>:<ul className={styles.proposals}>{state.proposals.map(proposal=><li key={proposal.id} id={`proposal-${proposal.id}`}><h3>{proposal.kind==="invite"?"Invitation":proposal.kind==="transfer"?"Handoff proposal":proposal.kind==="remove"?"Removal proposal":"Add maintainer proposal"}{proposal.candidate?`: ${proposal.candidate.name}`:""}</h3><p><strong>{["voting","awaiting_acceptance"].includes(proposal.status)&&Date.parse(proposal.expiresAt)<=Date.now()?"expired":proposal.status.replaceAll("_"," ")}</strong> · {proposal.votes.length} of {proposal.required} approvals</p><p>{proposal.reason}</p><p className={styles.meta}>Proposed by {proposal.proposer.name} · Expires {proposal.expiresAt}</p><p className={styles.meta}>Member snapshot v{proposal.membershipVersion}: {proposal.memberIds.join(", ")||"No members"}</p><Link className="community-link" href={`${path}/events/${proposal.createdEventId}`}>Proposal record</Link>{proposal.votes.length>0&&<ul>{proposal.votes.map(vote=><li key={vote.actorId}><Link className="community-link" href={`${path}/events/${vote.eventId}`}>Approval by {vote.actorId}</Link></li>)}</ul>}<ProposalCommands data={data} proposalId={proposal.id}/></li>)}</ul>}</section>
-      {!session?.contributor&&<p><Link className="community-link" href={communitySignInPath(path+"?tab=team")}>Sign in</Link> to respond to your invitation or manage a tool assigned to you.</p>}<GovernanceForms data={data}/>
-    </>}
+    {tab === "team" && <GovernanceTeam data={data} path={path} signedIn={!!session?.contributor}
+      signInHref={communitySignInPath(path + "?tab=team")}
+      reviews={reviews && session?.contributor ? <UpdateReviewQueue submissions={reviewItems} publishingAvailable={data.publishingAvailable !== false && !data.pendingReceipts?.some(receipt => receipt.status === "pending")} /> : undefined} />}
     {tab==="evidence"&&<section><h2>Evidence and trust</h2><p>Open a public event to download its full evidence package and check event hashes, service signatures, Merkle inclusion and the supplied append-only history.</p><p>A successful cryptographic check establishes consistency with the chosen service key. It does not prove that the service operator is honest, that an account holder personally signed an action, or that every governance rule was followed.</p><p>Independent key pinning and a previously known checkpoint are needed to detect operator key substitution or history rollback. Freshness, user identity, governance policy replay, independent witnesses and blockchain anchoring are not verified by this page.</p><a className="community-secondary" href="/api/community/v2/governance/trust-config" download="crossomics-governance-trust.json">Download service trust configuration</a><p className={styles.meta}>The configuration above comes from the same service. Obtain and retain a trusted key through an independent channel for stronger verification.</p><Link className="community-link" href={path}>Choose an event</Link></section>}
+    <details className={styles.recordNotice} aria-label="Assurance scope"><summary>About this public record<span>Service-signed</span></summary>
+      <p>Signatures attest what the CrossOmics service recorded. They are not personal user signatures. This log has no independent witnesses or blockchain anchor.</p>
+      <Link className="community-link" href={path + "?tab=evidence"}>Evidence and trust</Link>
+    </details>
   </div>;
 }

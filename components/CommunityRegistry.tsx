@@ -1,30 +1,7 @@
 import Link from "next/link";
+import RegistryIllustration from "./RegistryIllustration";
 import { normalizeToolType, isToolKind } from "@/lib/community/tool-types";
 import { communityCatalog, communitySession, registryV2Catalog } from "@/lib/community/service";
-
-function RegistryDiagram() {
-  return (
-    <svg className="community-diagram" aria-hidden="true" viewBox="0 0 420 220" fill="none">
-      <defs>
-        <pattern id="registry-grid" width="14" height="14" patternUnits="userSpaceOnUse">
-          <circle cx="1" cy="1" r="1" fill="#ccd8e5" />
-        </pattern>
-      </defs>
-      <rect width="420" height="220" fill="url(#registry-grid)" />
-      <path d="M114 110H171Q183 110 183 98V70Q183 58 195 58H216M114 110H171Q183 110 183 122V150Q183 162 195 162H216M294 58H318Q330 58 330 70V98Q330 110 342 110H360M294 162H318Q330 162 330 150V122Q330 110 342 110H360" stroke="#8b9fba" strokeWidth="2" />
-      <rect x="24" y="86" width="90" height="48" rx="10" fill="#0b57d0" />
-      <rect x="216" y="35" width="78" height="46" rx="9" fill="#fff" stroke="#a0b2c9" />
-      <rect x="216" y="139" width="78" height="46" rx="9" fill="#fff" stroke="#a0b2c9" />
-      <circle cx="370" cy="110" r="10" fill="#d5f2e6" stroke="#218969" strokeWidth="2" />
-      <g textAnchor="middle" dominantBaseline="central" fontFamily="inherit" fontSize="13" fontWeight="600">
-        <text x="69" y="110" fill="#fff">Tool</text>
-        <text x="255" y="58" fill="#1d3655">Original</text>
-        <text x="255" y="162" fill="#1d3655">Update</text>
-      </g>
-      <circle cx="183" cy="110" r="4" fill="#0b57d0" />
-    </svg>
-  );
-}
 
 export default async function CommunityRegistry({ searchParams: query }: { searchParams: Promise<{ q?: string; kind?: string; type?: string }> }) {
   const searchParams = await query;
@@ -45,7 +22,7 @@ export default async function CommunityRegistry({ searchParams: query }: { searc
           <p>Discover, improve and maintain scientific tools through transparent community contributions.</p>
           <div className="community-actions"><Link className="community-primary" href="#registry">Find a tool</Link><Link className="community-secondary" href="/community/guide">How to participate</Link></div>
         </div>
-        <RegistryDiagram />
+        <RegistryIllustration />
       </section>
       <section className="community-section" id="registry" aria-labelledby="registry-title">
         <div className="community-section-heading">
