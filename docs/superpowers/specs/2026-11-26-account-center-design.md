@@ -26,4 +26,9 @@ Existing explicit post-login destinations and desktop approvals remain intact. N
 
 ## Visual direction
 
-Reuse the website's blue, white, ink and pale-blue palette, existing font and type scale. A quiet identity strip and a narrow vertical account navigation organize the page; contribution counts and existing work are the main content. On narrow screens the navigation becomes a wrapping horizontal list, with visible active state and keyboard focus. Public home uses the same identity vocabulary without private navigation.
+Reuse the website's blue, white, ink and pale-blue palette, existing font and type scale. A quiet identity strip and a narrow vertical account navigation organize the page; contribution counts and existing work are the main content. On narrow screens the navigation becomes a collapsed current-page selector, with visible active state and keyboard focus. Public home uses the same identity vocabulary without private navigation.
+
+
+## Layout refinement from screenshot feedback
+
+The user requested overall organization after seeing the account page at narrow width. Account routes use a single compact brand/community/account header; public navigation and the breadcrumb remain on public Community pages. Desktop account links are grouped into Work, Account and Administration without a duplicate identity strip. Narrow layouts use a closed current-page disclosure; links remain available on expansion and it closes after path/query navigation. The account home consolidates identity, role, edit/public-profile actions into one heading, followed by contribution statistics and work. Remove duplicate public-home prose and redundant footer shortcut cards. Preserve all existing permissions, routes, data and fallbacks.

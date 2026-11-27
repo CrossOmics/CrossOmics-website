@@ -812,3 +812,14 @@ test("sign-in method availability is independent of the current session",async()
  const github=html.match(/<li><strong>GitHub<\/strong><span>([\s\S]*?)<\/span>/)?.[1]?.replace(/<!--.*?-->/g,"");
  assert.match(github,/Current session/);assert.match(github,/Not available on this site/);
 });
+
+
+test("account pages use compact workspace chrome while public pages retain Community navigation",async()=>{
+ const {html}=await accountPage("/community/account");
+ assert.doesNotMatch(html,/aria-label="Breadcrumb"|aria-label="Community"/);
+ assert.match(html,/aria-label="Account navigation"/);
+ assert.match(html,/<h1>Jiapeng Zhang<\/h1>/);
+ assert.match(html,/Your contribution summary/);assert.match(html,/View public profile/);
+ const pub=await accountPage("/community/contributors","anonymous");
+ assert.match(pub.html,/aria-label="Breadcrumb"/);assert.match(pub.html,/aria-label="Community"/);
+});

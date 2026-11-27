@@ -34,3 +34,16 @@ test('account menu dismisses across query-only history navigation',async()=>{
  await act(()=>document.querySelector('summary').click());assert.equal(document.querySelector('details').open,true);
  await render('/community/registry/submissions',{canManageRegistry:true});assert.equal(document.querySelector('details').open,false);
 });
+
+
+test('narrow account navigation starts collapsed and closes when the destination changes',async()=>{
+ const Sidebar=require('../app/community/account/AccountSidebar.tsx').default;
+ async function sidebar(path,query='') {await act(()=>root.render(createElement(PathnameContext.Provider,{value:path},createElement(SearchParamsContext.Provider,{value:new URLSearchParams(query)},createElement(Sidebar,{name:'Researcher',canManageRegistry:true})))));}
+ await sidebar('/community/account');
+ const details=document.querySelector('.community-account-mobile-nav');assert.ok(details);assert.equal(details.open,false);
+ assert.match(details.querySelector('summary').textContent,/Account home/);
+ await act(()=>details.querySelector('summary').click());assert.equal(details.open,true);
+ assert.ok(details.querySelector('a[href="/community/account/settings"]'));
+ await sidebar('/community/account/settings');assert.equal(details.open,false);assert.match(details.querySelector('summary').textContent,/Profile settings/);
+ await sidebar('/community/registry/submissions','all=1');assert.match(details.querySelector('summary').textContent,/Review submissions/);
+});

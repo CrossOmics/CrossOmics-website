@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import type { ReactNode } from "react";
-import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import { httpsUrl } from "@/lib/community/https-url";
 import { accountContext } from "@/lib/community/account";
-import CommunityNav from "./CommunityNav";
+import { CommunityHeader, CommunityPageNavigation } from "./CommunityChrome";
 import "./community.css";
 
 export const dynamic = "force-dynamic";
@@ -24,10 +22,9 @@ export default async function CommunityLayout({ children }: { children: ReactNod
 
   return (
     <div className="page">
-      <SiteHeader />
+      <CommunityHeader signedIn={Boolean(session?.contributor)} accountName={name} canManageRegistry={session?.canManageRegistry} canManageBounties={session?.canManageBounties} />
       <main className="community-main container">
-        <nav className="community-breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><span aria-hidden>/</span><Link href="/">Community</Link></nav>
-        <CommunityNav signedIn={Boolean(session?.contributor)} accountName={name} canManageRegistry={session?.canManageRegistry} canManageBounties={session?.canManageBounties} />
+        <CommunityPageNavigation signedIn={Boolean(session?.contributor)} accountName={name} canManageRegistry={session?.canManageRegistry} canManageBounties={session?.canManageBounties} />
         {children}
         {(discord || slack || mailto) && (
           <aside className="community-contacts" aria-label="Contact CrossOmics">

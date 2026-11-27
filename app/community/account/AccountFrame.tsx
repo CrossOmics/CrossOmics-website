@@ -3,9 +3,9 @@ import { accountContext } from "@/lib/community/account";
 import AccountSidebar from "./AccountSidebar";
 
 export default async function AccountFrame({ children }: { children: ReactNode }) {
-  const {session,name} = await accountContext();
+  const {session} = await accountContext();
   if (!session?.contributor) return children;
-  return <div className="community-account-frame"><AccountSidebar name={name} canManageRegistry={session.canManageRegistry} canManageBounties={session.canManageBounties} />
+  return <div className="community-account-frame"><AccountSidebar canManageRegistry={session.canManageRegistry} canManageBounties={session.canManageBounties} />
     <div className="community-account-content">{children}</div>
   </div>;
 }
