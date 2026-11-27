@@ -21,17 +21,17 @@
 - Account menu works with Escape, outside click, route changes and narrow screens.
 
 ### Task 1: Session metadata and OAuth destinations
-- [ ] Add failing tests for validated provider metadata and exact allowed account routes, preserving desktop and explicit old destinations.
-- [ ] Add session signInProvider and extend both return allowlists; generic login defaults to account home.
-- [ ] Run session/OAuth regression coverage and record RED/GREEN.
+- [x] Add failing tests for validated provider metadata and exact allowed account routes, preserving desktop and explicit old destinations.
+- [x] Add session signInProvider and extend both return allowlists; generic login defaults to account home.
+- [x] Run session/OAuth regression coverage and record RED/GREEN.
 
 ### Task 2: Private account center and signed-in menu
-- [ ] Add failing real Next tests for account routes, name editor relocation, sign-in status, role-based menu, old backend fallback and redirected private destinations; add menu interaction tests.
-- [ ] Implement cached account context, menu, shared sidebar/frame and account overview/settings/security pages. Reframe existing mine, personal submissions and administration pages, preserving pagination and backend permissions.
-- [ ] Move display-name/Gardener settings off contribution history into their dedicated destinations; keep clear links from history and public page.
-- [ ] Run the focused tests, then complete frontend suite and build.
+- [x] Add failing real Next tests for account routes, name editor relocation, sign-in status, role-based menu, old backend fallback and redirected private destinations; add menu interaction tests.
+- [x] Implement cached account context, menu, shared sidebar/frame and account overview/settings/security pages. Reframe existing mine, personal submissions and administration pages, preserving pagination and backend permissions.
+- [x] Move display-name/Gardener settings off contribution history into their dedicated destinations; keep clear links from history and public page.
+- [x] Run the focused tests, then complete frontend suite and build.
 
 ### Task 3: Public personal home and acceptance
-- [ ] Improve existing public contributor home with identity and public contribution summaries, without private controls or provider IDs.
-- [ ] Verify owner/public/anonymous/administrator and provider variations; update guide and local fixture preview.
-- [ ] Perform independent whole-change review, fix material findings, run appropriate final checks, capture local acceptance and preserve preview. Commit changes; do not merge until requested.
+- [x] Improve existing public contributor home with identity and public contribution summaries, without private controls or provider IDs.
+- [x] Verify owner/public/anonymous/administrator and provider variations; update guide and local fixture preview.
+- [x] Perform independent whole-change review, fix material findings, run appropriate final checks, capture local acceptance and preserve preview. Commit changes; do not merge until requested.
