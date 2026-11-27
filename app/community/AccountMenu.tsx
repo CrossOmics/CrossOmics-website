@@ -2,13 +2,14 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { accountLinks, type AccountCapabilities } from "@/lib/community/account-links";
 
 export default function AccountMenu({ name, ...capabilities }: { name: string } & AccountCapabilities) {
   const details = useRef<HTMLDetailsElement>(null);
   const pathname = usePathname();
-  useEffect(() => { if (details.current) details.current.open = false; }, [pathname]);
+  const search = useSearchParams()?.toString();
+  useEffect(() => { if (details.current) details.current.open = false; }, [pathname, search]);
   useEffect(() => {
     const closeOutside = (event: PointerEvent) => {
       if (details.current && event.target instanceof window.Node && !details.current.contains(event.target)) details.current.open = false;

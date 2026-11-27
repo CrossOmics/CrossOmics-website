@@ -607,3 +607,6 @@
   .community-nav { justify-content: flex-start; column-gap: 18px; row-gap: 0; }
   .community-nav-links { display: contents; }
 }
+
+.community-account-welcome h2, .community-public-identity h1 { overflow-wrap: anywhere; }
+.community-public-identity > div { min-width: 0; flex: 1; }

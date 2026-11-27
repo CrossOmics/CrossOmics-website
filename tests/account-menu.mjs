@@ -11,9 +11,9 @@ const require=createRequire(import.meta.url),Module=require('node:module'),resol
 require.extensions['.tsx']=require.extensions['.ts']=(module,file)=>module._compile(ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,file);
 Module._resolveFilename=function(request,...args){return resolve.call(this,request.startsWith('@/')?fileURLToPath(new URL('../'+request.slice(2),import.meta.url)):request,...args);};
 const {createElement,act}=require('react'),{createRoot}=require('react-dom/client');
-const {PathnameContext}=require('next/dist/shared/lib/hooks-client-context.shared-runtime.js');
+const {PathnameContext,SearchParamsContext}=require('next/dist/shared/lib/hooks-client-context.shared-runtime.js');
 const root=createRoot(document.getElementById('root'));
-async function render(path='/community/account',permissions={}){const Menu=require('../app/community/AccountMenu.tsx').default;await act(()=>root.render(createElement(PathnameContext.Provider,{value:path},createElement(Menu,{name:'𠮷 Researcher',...permissions}))));}
+async function render(path='/community/account',permissions={},query=''){const Menu=require('../app/community/AccountMenu.tsx').default;await act(()=>root.render(createElement(PathnameContext.Provider,{value:path},createElement(SearchParamsContext.Provider,{value:new URLSearchParams(query)},createElement(Menu,{name:'𠮷 Researcher',...permissions})))));}
 after(async()=>{await act(()=>root.unmount());Module._resolveFilename=resolve;dom.window.close();});
 
 test('account menu closes on Escape, outside press and route changes, with capability-scoped links',async()=>{
@@ -27,4 +27,10 @@ test('account menu closes on Escape, outside press and route changes, with capab
  await act(()=>summary.click());await render('/community/account/settings',{canManageRegistry:true});assert.equal(details.open,false);
  assert.ok(document.querySelector('a[href="/community/admin"]'));
  assert.equal(document.querySelector('form').getAttribute('action'),'/api/community/auth/logout');
+});
+
+test('account menu dismisses across query-only history navigation',async()=>{
+ await render('/community/registry/submissions',{canManageRegistry:true},'all=1');
+ await act(()=>document.querySelector('summary').click());assert.equal(document.querySelector('details').open,true);
+ await render('/community/registry/submissions',{canManageRegistry:true});assert.equal(document.querySelector('details').open,false);
 });

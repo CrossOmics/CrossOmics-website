@@ -7,11 +7,12 @@ import { AccountUnavailable } from "./AccountFrame";
 export default async function AccountHome() {
   const {session,profile,name} = await requireAccount("/community/account");
   if (!session?.contributor) return <AccountUnavailable />;
-  const [history,publicHome] = await Promise.all([
-    session.registryV2Enabled ? personalContributions("maintained") : null,
+  const [histories,publicHome] = await Promise.all([
+    session.registryV2Enabled ? Promise.all([personalContributions("maintained"),personalContributions("original"),personalContributions("update")]) : [],
     profile ? publicContributor(profile.contributor.slug,{}) : null
   ]);
-  const counts = history?.counts;
+  const counts = histories.find(section => section !== null)?.counts;
+  const work = histories.flatMap(section => section?.entries ?? []).slice(0,3);
   const role = session.canManageRegistry ? "Platform administrator" : counts?.maintained ? "Tool maintainer" : "Community member";
   return <>
     <header className="community-heading community-account-heading"><h1>Account home</h1><p>Your work, profile and account preferences in one place.</p></header>
@@ -30,7 +31,9 @@ export default async function AccountHome() {
         <div key={key}><dt>{label}</dt><dd>{counts?.[key as keyof typeof counts] ?? "—"}</dd></div>)}
     </dl>
     <section className="community-section"><div className="community-section-heading"><h2>Your work</h2><Link className="community-link" href="/community/mine">View all contributions</Link></div>
-      {history ? <PersonalEntries entries={history.entries.slice(0,3)} mine /> : <p>Open My Contributions to view your work and contribution history.</p>}
+      {work.length ? <PersonalEntries entries={work} mine /> : !session.registryV2Enabled ? <p>Open My Contributions to view your work and contribution history.</p> :
+        histories.some(section => section === null) ? <p className="community-notice">Your contribution preview is temporarily unavailable. Try refreshing this page.</p> :
+          <p>Your contributions will appear here as you share tools, submit updates or join a maintenance team.</p>}
     </section>
     <div className="community-account-quick-links"><Link href="/community/registry/submissions"><h3>Submission history</h3><p>Follow your tools and updates through review.</p></Link>
       <Link href="/community/account/security"><h3>Sign-in & access</h3><p>Review your sign-in method and manage Gardener access.</p></Link></div>

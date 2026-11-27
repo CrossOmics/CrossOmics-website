@@ -78,8 +78,8 @@ before(async () => {
       const params = new URL(request.url,"http://fixture").searchParams;
       const section = params.get("section") || "original";
       const submission = { ...pipeline, id: "00000000-0000-4000-8000-000000000003", name: "My submitted tool", type: section === "original" ? "original" : "update", label: "v1", repository: "https://github.com/example/tool", status: "published", contributor: { id: "123456", login: "test-user" }, createdAt: "2026-11-18T00:00:00Z", pipelineId: "cp_example", authors: [], maintainers: [] };
-      const entries = mode === "new-member" ? [] : section === "maintained" ? [{kind:"maintained",tool:managed}] : [{kind:"submission",submission}];
-      response.end(JSON.stringify({ section, entries, page: Number(params.get("page") || 1), hasMore: section !== "maintained", total: mode === "new-member" ? 0 : 21, counts:mode === "new-member" ? {original:0,update:0,maintained:0} : {original:21,update:2,maintained:1} }));
+      const entries = mode === "new-member" || (mode === "submitter-only" && section === "maintained") ? [] : section === "maintained" ? [{kind:"maintained",tool:managed}] : [{kind:"submission",submission}];
+      response.end(JSON.stringify({ section, entries, page: Number(params.get("page") || 1), hasMore: section !== "maintained", total: mode === "new-member" ? 0 : 21, counts:mode === "new-member" ? {original:0,update:0,maintained:0} : mode === "submitter-only" ? {original:1,update:1,maintained:0} : {original:21,update:2,maintained:1} }));
     } else if (request.url === "/api/community/v2/catalog/cp_managed/management") {
       if (!["admin","maintainer","governance"].includes(mode)) {response.writeHead(403).end("{}");return;}
       response.end(JSON.stringify({item:managed,canAssignMaintainers:mode === "admin",maintainers:[{name:"Tool maintainer",...(mode === "admin" ? {contributorId:"123456"} : {})}]}));
@@ -800,4 +800,15 @@ test("public personal home shows only public contribution summaries and identity
  const {response,html}=await accountPage("/community/contributors/contributor_"+"a".repeat(64),"anonymous");assert.equal(response.status,200);
  assert.match(html,/Public contribution summary/);assert.match(html,/Public Researcher/);
  assert.doesNotMatch(html,/Account navigation|name="displayName"|Generate access token|Contributor ID|google:|reviewer_id/);
+});
+
+
+test("account home previews work for submitters without maintenance assignments",async()=>{
+ const {html}=await accountPage("/community/account","submitter-only");
+ assert.match(html,/My submitted tool/);assert.doesNotMatch(html,/Nothing in this group yet/);
+});
+test("sign-in method availability is independent of the current session",async()=>{
+ const {html}=await accountPage("/community/account/security","provider-disabled");
+ const github=html.match(/<li><strong>GitHub<\/strong><span>([\s\S]*?)<\/span>/)?.[1]?.replace(/<!--.*?-->/g,"");
+ assert.match(github,/Current session/);assert.match(github,/Not available on this site/);
 });
