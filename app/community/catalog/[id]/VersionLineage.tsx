@@ -4,11 +4,11 @@ import { useEffect, useId, useMemo, useRef, useState, type PointerEvent, type Re
 import { buildLineage, fitLineage, lineageNodeSize, lineageIssueLabels, zoomLineage, moveLineageGesture, type LineageGesture, type LineageView, type LineageNode } from "@/lib/community/lineage";
 import styles from "./VersionLineage.module.css";
 
-type Version = { id: string; label: string; parent: string | null; type: string; repo: string; withdrawn: boolean; authors: string; issue?: LineageNode["issue"] };
+type Version = { id: string; label: string; parent: string | null; type: string; repo: string; withdrawn: boolean; authors: string; subtitle?: string; issue?: LineageNode["issue"] };
 type Point = { x: number; y: number };
 
-export default function VersionLineage({ versions, recommendedIds = [], details, latestId, repositoryName, toolLevel = false }: {
-  versions: Version[]; recommendedIds?: string[]; details: ReactNode[]; latestId?: string; repositoryName?: string; toolLevel?: boolean;
+export default function VersionLineage({ versions, recommendedIds = [], details, latestId, repositoryName, toolLevel = false, implementationLevel = false }: {
+  versions: Version[]; recommendedIds?: string[]; details: ReactNode[]; latestId?: string; repositoryName?: string; toolLevel?: boolean; implementationLevel?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(latestId ?? versions[0]?.id ?? "");
@@ -38,8 +38,33 @@ export default function VersionLineage({ versions, recommendedIds = [], details,
     const element = viewport.current;
     const observer = new ResizeObserver(() => updateView(fitLineage(layout, { width: element.clientWidth, height: element.clientHeight })));
     observer.observe(element);
-    return () => { observer.disconnect(); pointers.current.clear(); gesture.current = null; };
+    const wheel = (event: WheelEvent) => {
+      if (!event.deltaY) return;
+      event.preventDefault();
+      const rect = element.getBoundingClientRect();
+      const pixels = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? element.clientHeight : 1);
+      const factor = Math.exp(-Math.max(-240, Math.min(240, pixels)) / 500);
+      updateView(zoomLineage(viewRef.current, viewRef.current.scale * factor, { x: event.clientX - rect.left, y: event.clientY - rect.top }));
+      beginGesture(true);
+    };
+    element.addEventListener("wheel", wheel, { passive: false });
+    return () => { observer.disconnect(); element.removeEventListener("wheel", wheel); pointers.current.clear(); gesture.current = null; };
   }, [open, layout]);
+
+  useEffect(() => {
+    if (!toolLevel) return;
+    const reveal = () => { if (window.location.hash === "#lineage") setOpen(true); };
+    const onLink = (event: MouseEvent) => {
+      const link = event.target instanceof window.Element ? event.target.closest("a[href]") : null;
+      if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const target = new URL(link.getAttribute("href")!, window.location.href);
+      if (target.pathname === window.location.pathname && target.search === window.location.search && target.hash === "#lineage") setOpen(true);
+    };
+    reveal();
+    window.addEventListener("hashchange", reveal);
+    document.addEventListener("click", onLink);
+    return () => { window.removeEventListener("hashchange", reveal); document.removeEventListener("click", onLink); };
+  }, [toolLevel]);
 
   const point = (event: PointerEvent) => {
     const rect = viewport.current!.getBoundingClientRect();
@@ -92,10 +117,10 @@ export default function VersionLineage({ versions, recommendedIds = [], details,
     <div className={styles.heading}>
       {repositoryName ? <h4>{open ? `${repositoryName} lineage` : "Latest known update"}</h4> : <h2>{toolLevel ? "Tool lineage" : "Versions"}</h2>}
       {versions.length > 0 && <button className="community-primary" type="button" aria-expanded={open} aria-controls={graphId}
-        onClick={() => setOpen(!open)}>{open ? (repositoryName ? "View latest update" : "View version list") : "View lineage"}</button>}
+        onClick={() => setOpen(!open)}>{open ? (repositoryName ? "View latest update" : "Hide lineage") : "View lineage"}</button>}
     </div>
     {open && <div id={graphId} className={styles.graph}>
-      <div className={styles.caption}><span>Version lineage</span><span>Select a version to view details</span></div>
+      <div className={styles.caption}><span>{implementationLevel ? "Implementation lineage" : "Version lineage"}</span><span>{implementationLevel ? "Select an implementation to view its published update" : "Select a version to view details"}</span></div>
       <div className={styles.toolbar} role="group" aria-label="Lineage view controls">
         <button type="button" className="community-secondary" aria-label="Zoom out" disabled={view.scale <= .1}
           onClick={() => updateView(zoomLineage(viewRef.current,viewRef.current.scale/1.25,center()))}>−</button>
@@ -105,7 +130,7 @@ export default function VersionLineage({ versions, recommendedIds = [], details,
         <button type="button" className="community-secondary" onClick={fit}>Fit to view</button>
         <button type="button" className="community-secondary" onClick={() => updateView(zoomLineage(viewRef.current,1,center()))}>Reset</button>
       </div>
-      <div className={styles.viewport} ref={viewport} tabIndex={0} role="group" aria-label="Version lineage canvas"
+      <div className={styles.viewport} ref={viewport} tabIndex={0} role="group" aria-label={implementationLevel ? "Implementation lineage canvas" : "Version lineage canvas"}
         aria-describedby={`${graphId}-help`} onPointerDown={onPointerDown} onPointerMove={onPointerMove}
         onPointerUp={endPointer} onPointerCancel={endPointer} onLostPointerCapture={endPointer}
         onClickCapture={event => { if (suppressClick.current && event.detail !== 0) { event.preventDefault(); event.stopPropagation(); } }}
@@ -136,16 +161,16 @@ export default function VersionLineage({ versions, recommendedIds = [], details,
               <span className={styles.badges}><span className="community-tag">{version.type}</span>
                 {recommended && <span className="community-tag community-recommended">Recommended</span>}
                 {version.withdrawn && <span className="community-tag community-tag-neutral">Withdrawn</span>}</span>
-              <strong>{version.label}</strong><span className={styles.repository}>{repository}</span>
-              <span className={styles.authors}>{version.authors || "Authors not recorded"}</span>
+              <strong>{version.label}</strong>{version.subtitle && <span className={styles.repository}>{version.subtitle}</span>}<span className={styles.repository}>{repository}</span>
+              {(!implementationLevel || version.authors) && <span className={styles.authors}>{version.authors || "Authors not recorded"}</span>}
               {node.issue && <span className={styles.issue}>{lineageIssueLabels[node.issue]}</span>}
             </button>;
           })}
         </div>
       </div>
-      <p id={`${graphId}-help`} className={styles.help}>Drag to pan · Pinch or use + / − to zoom · Arrow keys pan the focused canvas</p>
+      <p id={`${graphId}-help`} className={styles.help}>Drag to pan · Scroll, pinch or use + / − to zoom · Arrow keys pan the focused canvas</p>
       {layout.nodes.some(node=>node.issue) && <p className={styles.warning} role="status">Some parent relationships are unavailable or invalid. Those versions are shown without a connecting parent.</p>}
-      <p className={styles.selection} role="status">Selected version: {versions[currentIndex]?.label}</p>
+      <p className={styles.selection} role="status">{implementationLevel ? "Selected implementation" : "Selected version"}: {versions[currentIndex]?.label}</p>
     </div>}
     <ul id={open ? `${graphId}-details` : undefined} className={`community-record-list ${styles.details}`}>
       {open ? details[currentIndex] : toolLevel ? null : latestId ? details[Math.max(0, versions.findIndex(version => version.id === latestId))] : details}

@@ -238,3 +238,10 @@ export async function adminTools(filters: { q?: string; page?: string }) {
     return { ...data, items: data.items.map(normalizeRegistryItem) };
   } catch { return null; }
 }
+
+
+export type MyPublicProfile = { displayName: string | null; contributor: PublicContributor };
+export async function myPublicProfile() {
+  try { return await communityData<MyPublicProfile>("me/profile", true, "v2"); }
+  catch { return null; }
+}

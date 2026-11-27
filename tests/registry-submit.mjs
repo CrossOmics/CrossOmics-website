@@ -58,7 +58,8 @@ before(async () => {
       if(request.method==="POST") {let body="";request.on("data",chunk=>body+=chunk);request.on("end",()=>{const command=JSON.parse(body);response.end(JSON.stringify({state,event:null,reused:false,received:command}));});return;}
       response.end(JSON.stringify({available:true,publishingAvailable:mode!=="pending",pendingReceipts:mode==="pending"?[{status:"pending",body:{toolId:"cp_managed",reason:"Access restricted during outage"},signature:"signed-receipt",publicKey:{kty:"OKP",crv:"Ed25519",x:"public-only"}}]:[],state,events:[governanceEventFixture],hasMore:false,cursor:null,capabilities:{canManage:["governance","reviewer"].includes(mode),isAdmin:mode==="governance",actorId:mode==="candidate"?"candidate-public":["governance","reviewer"].includes(mode)?"member-public":null},assurance:{signatureType:"service",independentWitnesses:false,blockchainAnchored:false}}));
     } else if (request.url?.startsWith("/api/community/v2/contributors")) {
-      const contributor={slug:"contributor_"+"a".repeat(64),name:"Public Researcher",login:"researcher"};
+      const q=new URL(request.url,"http://fixture").searchParams.get("q")||"";
+      const contributor={slug:"contributor_"+"a".repeat(64),name:q.startsWith("𠮷")?q:"Public Researcher",login:"researcher"};
       if(request.url.includes("/contributor_")) {
         const empty=section=>({section,entries:[],page:1,hasMore:false,total:0,counts:{maintained:1,original:0,update:0}});
         response.end(JSON.stringify({contributor,sections:{maintained:{...empty("maintained"),entries:[{kind:"maintained",tool:managed}],total:1},original:empty("original"),update:empty("update")}}));
@@ -66,6 +67,11 @@ before(async () => {
     } else if (request.url?.startsWith("/api/community/v2/admin/tools")) {
       if(mode!=="admin"){response.writeHead(403).end("{}");return;}
       response.end(JSON.stringify({items:[managed],page:1,hasMore:false}));
+    } else if (request.url === "/api/community/v2/me/profile") {
+      if(mode==="profile-old"){response.writeHead(404).end("{}");return;}
+      const profile={displayName:"Jiapeng Zhang",contributor:{slug:"contributor_"+"a".repeat(64),name:"Jiapeng Zhang",login:"test-user"}};
+      if(request.method==="PATCH") {let body="";request.on("data",chunk=>body+=chunk);request.on("end",()=>response.end(JSON.stringify({...profile,...JSON.parse(body)})));return;}
+      response.end(JSON.stringify(profile));
     } else if (request.url?.startsWith("/api/community/v2/me/contributions")) {
       const params = new URL(request.url,"http://fixture").searchParams;
       const section = params.get("section") || "original";
@@ -206,7 +212,7 @@ test("Update offers a new repository or a based-on repository PR with benchmark 
   const response = await fetch(base + "/community/catalog/cp_example");
   const detail = (await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
   assert.match(detail, /Verification/);
-  assert.doesNotMatch(detail, />Evidence/);
+  assert.match(detail, /<dt>Evidence<\/dt>/);
   const history = await fetch(base + "/community/mine", { headers: { cookie: "community_session=legacy" } });
   const historyHtml = (await history.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
   assert.match(historyHtml, /Add or update impact verification/);
@@ -706,4 +712,31 @@ test("admin dashboard requires global permission and proxy rejects desktop crede
   assert.equal(bearer.status,403);
   const publicWrite=await fetch(base+"/api/community/v2/contributors",{method:"POST",body:"{}"});
   assert.equal(publicWrite.status,405);
+});
+
+
+test("public name settings use the self-profile route and survive an older backend",async()=>{
+ const response=await fetch(base+"/community/mine",{headers:{cookie:"community_session=ready"}});
+ const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+ assert.match(html,/Public display name/);assert.match(html,/Jiapeng Zhang/);
+ const saved=await fetch(base+"/api/community/v2/me/profile",{method:"PATCH",headers:{cookie:"community_session=ready","content-type":"application/json",origin:base},body:JSON.stringify({displayName:"New public name"})});
+ assert.equal(saved.status,200);assert.equal((await saved.json()).displayName,"New public name");
+ const bearer=await fetch(base+"/api/community/v2/me/profile",{headers:{cookie:"community_session=ready",authorization:"Bearer desktop"}});assert.equal(bearer.status,403);
+ const wrongMethod=await fetch(base+"/api/community/v2/me/profile",{method:"POST",body:"{}"});assert.equal(wrongMethod.status,405);
+ const extra=await fetch(base+"/api/community/v2/me/profile/another-user");assert.equal(extra.status,404);
+ const old=await fetch(base+"/community/mine",{headers:{cookie:"community_session=profile-old"}});
+ const oldHtml=(await old.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+ assert.match(oldHtml,/public name settings are temporarily unavailable/i);assert.match(oldHtml,/My Contributions/);
+});
+
+
+test("contributor search accepts complete supplementary names and explains overlong queries",async()=>{
+ const name="𠮷".repeat(60)+"Zhang";
+ const response=await fetch(base+"/community/contributors?"+new URLSearchParams({q:name}));
+ const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+ const limit=Number(html.match(/maxLength="(\d+)"/)?.[1]);assert.ok(limit>=name.length);
+ assert.match(html,/<span class="community-avatar"[^>]*>𠮷<\/span>/);
+ const invalid=await fetch(base+"/community/contributors?"+new URLSearchParams({q:"a".repeat(121)}));
+ const invalidHtml=(await invalid.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+ assert.match(invalidHtml,/120 characters/);assert.doesNotMatch(invalidHtml,/directory is temporarily unavailable/);
 });

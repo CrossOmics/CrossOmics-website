@@ -62,10 +62,14 @@ test("tool lineage spans repositories while cards link to repository contributio
   const toggle = document.querySelector('#lineage [aria-expanded="false"]');
   await act(() => toggle.click());
   const nodes = [...document.querySelectorAll("button[aria-pressed]")];
-  assert.equal(nodes.length, 3);
-  assert.match(nodes.find(node => node.textContent.includes("fork-root")).getAttribute("aria-label"), /based on v2/);
-  await act(() => nodes.find(node => node.getAttribute("aria-label").startsWith("v1,")).click());
-  assert.equal(document.querySelector("#lineage [data-version-id]").dataset.versionId, "v1");
+  assert.equal(nodes.length, 2);
+  assert.match(nodes.find(node => node.textContent.includes("fork-root")).getAttribute("aria-label"), /based on Tool/);
+  const history=document.querySelector("#lineage .community-lineage-history");
+  await act(() => { history.open=true; history.dispatchEvent(new window.Event("toggle")); });
+  const historyToggle=[...history.querySelectorAll("button")].find(button=>button.textContent==="View lineage");
+  await act(() => historyToggle.click());
+  await act(() => [...history.querySelectorAll("button[aria-pressed]")].find(node=>node.getAttribute("aria-label").startsWith("v1,")).click());
+  assert.equal(history.querySelector("[data-version-id]").dataset.versionId, "v1");
   assert.match(document.querySelector("[data-version-id]").textContent, /Withdraw this version/);
 });
 
@@ -93,4 +97,65 @@ test("curated snapshots do not invent benchmark results or expose registry mutat
   await act(() => root.render(render({key:"star",item:star,v2:true,canManage:true})));
   assert.match(document.body.textContent, /NuSTAR.*Platform endorsement/);
   assert.doesNotMatch(document.body.textContent, /1.3×|Formal verification|Withdraw this version|Correct author credits/);
+});
+
+
+test("top lineage link opens the diagram on first and repeated clicks and direct hash navigation",async()=>{
+  const ToolLineage=require("../app/community/catalog/[id]/ToolLineage.tsx").default;
+  await act(()=>root.render(createElement("div",{key:"top-link"},createElement("a",{href:"#lineage"},"Top lineage"),createElement(ToolLineage,{item,v2:true}))));
+  const link=document.querySelector('a[href="#lineage"]');
+  await act(async()=>{link.click(); await new Promise(resolve=>setTimeout(resolve,20));});
+  assert.ok(document.querySelector('#lineage [aria-label="Implementation lineage canvas"]'));
+  await act(()=>document.querySelector('#lineage button[aria-expanded="true"]').click());
+  assert.ok(!document.querySelector('#lineage [aria-label="Implementation lineage canvas"]'));
+  await act(async()=>{link.click(); await new Promise(resolve=>setTimeout(resolve,20));});
+  assert.ok(document.querySelector('#lineage [aria-label="Implementation lineage canvas"]'));
+  window.history.replaceState(null,"","#lineage");
+  await act(()=>root.render(createElement(ToolLineage,{key:"direct-hash",item,v2:true})));
+  assert.ok(document.querySelector('#lineage [aria-label="Implementation lineage canvas"]'));
+  window.history.replaceState(null,"","/");
+});
+
+
+test("repository cards retain both benchmark and distinct review evidence",async()=>{
+ const report="https://example.org/benchmark.md",pr="https://github.com/example/tool/pull/9";
+ const tool={...item,repositories:[{url:upstream,primary:true,benchmark:{url:report}}],versions:[version("published",upstream,"2026-11-25",null,{evidence_url:pr})]};
+ await act(()=>root.render(render({key:"both-evidence",item:tool,v2:true})));
+ const links=[...document.querySelectorAll(".community-value-summary a")].map(link=>link.href);
+ assert.deepEqual(links,[report,pr]);
+});
+
+test("mouse wheel zooms around the pointer, clamps scale, and leaves page scrolling outside the canvas",async()=>{
+ const ToolLineage=require("../app/community/catalog/[id]/ToolLineage.tsx").default;
+ await act(()=>root.render(createElement(ToolLineage,{key:"wheel",item,v2:true})));
+ await act(()=>document.querySelector('#lineage button[aria-expanded="false"]').click());
+ const canvas=document.querySelector('[aria-label="Implementation lineage canvas"]');
+ canvas.getBoundingClientRect=()=>({left:10,top:20,width:600,height:390});
+ const transform=()=>{const m=canvas.firstElementChild.style.transform.match(/translate\(([-\d.e]+)px, ([-\d.e]+)px\) scale\(([-\d.e]+)\)/);return {x:Number(m[1]),y:Number(m[2]),scale:Number(m[3])};};
+ const before=transform();
+ const wheel=new window.WheelEvent("wheel",{deltaY:-120,clientX:130,clientY:100,bubbles:true,cancelable:true});
+ await act(()=>canvas.dispatchEvent(wheel));
+ const after=transform();assert.ok(after.scale>before.scale);assert.equal(wheel.defaultPrevented,true);
+ assert.ok(Math.abs((120-before.x)/before.scale-(120-after.x)/after.scale)<1e-9);
+ assert.ok(Math.abs((80-before.y)/before.scale-(80-after.y)/after.scale)<1e-9);
+ await act(()=>{for(let i=0;i<30;i++)canvas.dispatchEvent(new window.WheelEvent("wheel",{deltaY:-120,bubbles:true,cancelable:true}));});
+ assert.equal(transform().scale,2);
+ await act(()=>{for(let i=0;i<40;i++)canvas.dispatchEvent(new window.WheelEvent("wheel",{deltaY:120,deltaMode:1,bubbles:true,cancelable:true}));});
+ assert.equal(transform().scale,.1);
+ const reset=[...document.querySelectorAll('#lineage button')].find(button=>button.textContent==="Reset");
+ await act(()=>reset.click());
+ Object.defineProperty(canvas,"clientHeight",{value:390,configurable:true});
+ await act(()=>canvas.dispatchEvent(new window.WheelEvent("wheel",{deltaY:-1,deltaMode:2,bubbles:true,cancelable:true})));
+ assert.ok(transform().scale>1 && transform().scale<=2);
+ const outside=new window.WheelEvent("wheel",{deltaY:120,bubbles:true,cancelable:true});
+ await act(()=>document.body.dispatchEvent(outside));assert.equal(outside.defaultPrevented,false);assert.ok(transform().scale>1);
+ await act(()=>document.querySelector('#lineage button[aria-expanded="true"]').click());
+ const closed=new window.WheelEvent("wheel",{deltaY:120,cancelable:true});canvas.dispatchEvent(closed);assert.equal(closed.defaultPrevented,false);
+});
+
+test("withdrawn publications retain an explicit publication label rather than an observation label",async()=>{
+ const tool={...item,versions:[version("withdrawn",upstream,"2026-11-25",null,{withdrawn:true})]};
+ await act(()=>root.render(render({key:"withdrawn-label",item:tool,v2:true})));
+ assert.match(document.querySelector('.community-update-details summary').textContent,/Withdrawn version/);
+ assert.doesNotMatch(document.querySelector('.community-update-details summary').textContent,/observation/);
 });

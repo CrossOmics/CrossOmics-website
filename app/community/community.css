@@ -505,3 +505,24 @@
   .community-tool-lineage { padding: 16px; }
   .community-catalog-actions { padding: 12px 16px; }
 }
+
+.community-value-summary { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 0 24px; margin: 20px 0; border-block: 1px solid var(--community-border); }
+.community-value-summary > div { padding: 16px 0; min-width: 0; }
+.community-value-summary .community-value-purpose { grid-column: 1 / -1; border-bottom: 1px solid var(--community-border); }
+.community-value-summary dt { color: var(--community-quiet); font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 6px; }
+.community-value-summary dd { color: var(--community-ink); font-size: 14px; line-height: 1.65; overflow-wrap: anywhere; }
+.community-value-purpose dd { font-size: 16px; max-width: 85ch; }
+.community-tool-lineage { scroll-margin-top: 100px; }
+.community-lineage-history { margin-top: 22px; border-top: 1px solid var(--community-border); padding-top: 12px; }
+.community-public-name { margin-top: 28px; padding: 24px; border: 1px solid var(--community-border); border-radius: var(--community-radius); background: #f8fbff; }
+.community-public-name h2 { font-size: 20px; margin-bottom: 8px; }
+.community-public-name p { font-size: 14px; max-width: 80ch; }
+.community-public-name form { margin-top: 18px; max-width: 660px; }
+.community-public-name label { display: grid; gap: 7px; color: var(--community-ink); font-size: 14px; font-weight: 600; }
+.community-public-name input { width: 100%; min-height: 46px; padding: 10px 12px; background: white; border: 1px solid var(--community-border); border-radius: 7px; color: var(--community-ink); font: inherit; font-weight: 400; }
+.community-public-name .community-actions { margin-top: 14px; }
+.community-public-name [role="alert"] { color: #a12e26; margin-top: 12px; }
+.community-public-name [role="status"] { color: #17644b; }
+@media(max-width:650px) { .community-value-summary { grid-template-columns: 1fr; gap: 0; } .community-value-summary > div + div { border-top: 1px solid var(--community-border); } .community-value-summary .community-value-purpose { border-bottom: 0; } .community-public-name { padding: 18px; } }
+
+.community-value-evidence { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
