@@ -27,3 +27,9 @@ test("public profiles omit account management, internal IDs and draft review act
   assert.match(html,/Maintained tool/);assert.match(html,/Published work/);
   assert.doesNotMatch(html,/Manage this tool|Review status|registry\/submissions|google:|Account settings|Contributor ID|Sign out/);
 });
+
+test('private account OAuth returns allow exact account destinations without widening redirects',()=>{
+ const {safeCommunityReturn}=require('../lib/community/return-path.ts');
+ for(const path of ['/community/account','/community/account/settings','/community/account/security'])assert.equal(safeCommunityReturn(path),path);
+ for(const path of ['/community/account/admin','/community/account/settings/extra','//elsewhere.test/community/account','/community/account#private'])assert.equal(safeCommunityReturn(path),'/community/mine');
+});
