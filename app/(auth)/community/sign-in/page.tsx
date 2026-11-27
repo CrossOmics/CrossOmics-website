@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Sign in | CrossOmics Community" };
 
 export default async function CommunitySignInPage({ searchParams }: { searchParams: Promise<{ returnTo?: string; login?: string }> }) {
   const [params, session] = await Promise.all([searchParams, communitySession()]);
-  const returnTo = safeCommunityReturn(params.returnTo, "/community");
+  const returnTo = safeCommunityReturn(params.returnTo, "/community/account");
   if (session?.contributor) redirect(returnTo);
   return (
     <div className="account-page">

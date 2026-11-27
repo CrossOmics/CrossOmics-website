@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import type { ReactNode } from "react";
-import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import { httpsUrl } from "@/lib/community/https-url";
-import { communitySession } from "@/lib/community/service";
-import CommunityNav from "./CommunityNav";
+import { accountContext } from "@/lib/community/account";
+import { CommunityHeader, CommunityPageNavigation } from "./CommunityChrome";
 import "./community.css";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CommunityLayout({ children }: { children: ReactNode }) {
-  const session = await communitySession();
+  const {session,name} = await accountContext();
   const discord = httpsUrl(process.env.COMMUNITY_DISCORD_URL);
   const slack = httpsUrl(process.env.COMMUNITY_SLACK_URL);
   const email = process.env.COMMUNITY_CONTACT_EMAIL;
@@ -24,10 +22,9 @@ export default async function CommunityLayout({ children }: { children: ReactNod
 
   return (
     <div className="page">
-      <SiteHeader />
+      <CommunityHeader signedIn={Boolean(session?.contributor)} accountName={name} canManageRegistry={session?.canManageRegistry} canManageBounties={session?.canManageBounties} />
       <main className="community-main container">
-        <nav className="community-breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><span aria-hidden>/</span><Link href="/">Community</Link></nav>
-        <CommunityNav signedIn={Boolean(session?.contributor)} />
+        <CommunityPageNavigation signedIn={Boolean(session?.contributor)} accountName={name} canManageRegistry={session?.canManageRegistry} canManageBounties={session?.canManageBounties} />
         {children}
         {(discord || slack || mailto) && (
           <aside className="community-contacts" aria-label="Contact CrossOmics">

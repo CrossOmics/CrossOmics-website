@@ -1,3 +1,4 @@
+import AccountFrame from "../../account/AccountFrame";
 import { redirect } from "next/navigation";
 import { communitySignInPath } from "@/lib/community/return-path";
 import Link from "next/link";
@@ -20,7 +21,7 @@ export default async function RegistrySubmissions({ searchParams }: { searchPara
   const all = admin && filter === "1";
   const history = signedIn && available ? await registryV2Submissions(all) : null;
   return (
-    <>
+    <AccountFrame>
       <header className="community-heading">
         <Link className="community-link" href="/community/submit">← Submit a Contribution</Link>
         <h1>{all ? "Tool Review Queue" : "My Tool Submissions"}</h1>
@@ -70,6 +71,6 @@ export default async function RegistrySubmissions({ searchParams }: { searchPara
                   );
                 })}
               </ul>}
-    </>
+    </AccountFrame>
   );
 }

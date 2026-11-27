@@ -38,10 +38,11 @@ before(async () => {
       response.end(JSON.stringify({
         contributor: ["anonymous", "login-old", "login-none"].includes(mode) ? null : { id: ["google", "apple"].includes(mode) ? mode + ":" + "a".repeat(64) : "123456", login: "test-user" },
         ...(mode === "login-old" ? {} : { sessionDurationDays: 30 }),
-        signInAvailable: mode !== "login-none", signInProviders: mode === "login-none" ? [] : ["github", "google", "apple"],
+        signInAvailable: mode !== "login-none", signInProviders: ["login-none","provider-disabled"].includes(mode) ? [] : ["github", "google", "apple"],
+        ...(["legacy","profile-old"].includes(mode) ? {} : {signInProvider:["google","apple"].includes(mode)?mode:"github"}),
         registrySubmissionAvailable: true, registryV2Enabled: mode !== "legacy",
         registryV2Available: !["legacy", "unavailable"].includes(mode),
-        governanceAvailable: mode === "governance", registryUpdateAuthorsAvailable: mode !== "old-authors", canManageRegistry: mode === "admin", desktopAuthAvailable: true, canPostBounties: false, canManageBounties: false
+        governanceAvailable: mode === "governance", registryUpdateAuthorsAvailable: mode !== "old-authors", canManageRegistry: mode === "admin", desktopAuthAvailable: true, canPostBounties: false, canManageBounties: mode === "bounty-admin"
       }));
     } else if(request.url==="/api/community/v2/governance/events/00000000-0000-4000-8000-000000000001"){
       response.end(JSON.stringify({event:governanceEventFixture,dependencies:[],checkpoint:{body:{logId:"fixture-log",keyId:"fixture-key",treeSize:2,rootHash:"e".repeat(64),lastEventHash:governanceEventFixture.hash,stateHash:"d".repeat(64),previousCheckpointHash:null,recordedAt:"2026-11-22T00:00:00Z"},signature:"public-signature"},assurance:{signatureType:"service",independentWitnesses:false,blockchainAnchored:false}}));
@@ -60,6 +61,7 @@ before(async () => {
     } else if (request.url?.startsWith("/api/community/v2/contributors")) {
       const q=new URL(request.url,"http://fixture").searchParams.get("q")||"";
       const contributor={slug:"contributor_"+"a".repeat(64),name:q.startsWith("𠮷")?q:"Public Researcher",login:"researcher"};
+      if(request.url.includes("/contributor_"+"b".repeat(64))){response.writeHead(404).end("{}");return;}
       if(request.url.includes("/contributor_")) {
         const empty=section=>({section,entries:[],page:1,hasMore:false,total:0,counts:{maintained:1,original:0,update:0}});
         response.end(JSON.stringify({contributor,sections:{maintained:{...empty("maintained"),entries:[{kind:"maintained",tool:managed}],total:1},original:empty("original"),update:empty("update")}}));
@@ -69,15 +71,15 @@ before(async () => {
       response.end(JSON.stringify({items:[managed],page:1,hasMore:false}));
     } else if (request.url === "/api/community/v2/me/profile") {
       if(mode==="profile-old"){response.writeHead(404).end("{}");return;}
-      const profile={displayName:"Jiapeng Zhang",contributor:{slug:"contributor_"+"a".repeat(64),name:"Jiapeng Zhang",login:"test-user"}};
+      const profile={displayName:mode === "new-member" ? null : "Jiapeng Zhang",contributor:{slug:"contributor_"+(mode === "new-member"?"b":"a").repeat(64),name:mode === "new-member" ? "New researcher" : "Jiapeng Zhang",login:"test-user"}};
       if(request.method==="PATCH") {let body="";request.on("data",chunk=>body+=chunk);request.on("end",()=>response.end(JSON.stringify({...profile,...JSON.parse(body)})));return;}
       response.end(JSON.stringify(profile));
     } else if (request.url?.startsWith("/api/community/v2/me/contributions")) {
       const params = new URL(request.url,"http://fixture").searchParams;
       const section = params.get("section") || "original";
       const submission = { ...pipeline, id: "00000000-0000-4000-8000-000000000003", name: "My submitted tool", type: section === "original" ? "original" : "update", label: "v1", repository: "https://github.com/example/tool", status: "published", contributor: { id: "123456", login: "test-user" }, createdAt: "2026-11-18T00:00:00Z", pipelineId: "cp_example", authors: [], maintainers: [] };
-      const entries = section === "maintained" ? [{kind:"maintained",tool:managed}] : [{kind:"submission",submission}];
-      response.end(JSON.stringify({ section, entries, page: Number(params.get("page") || 1), hasMore: section !== "maintained", total: 21, counts:{original:21,update:2,maintained:1} }));
+      const entries = mode === "new-member" || (mode === "submitter-only" && section === "maintained") ? [] : section === "maintained" ? [{kind:"maintained",tool:managed}] : [{kind:"submission",submission}];
+      response.end(JSON.stringify({ section, entries, page: Number(params.get("page") || 1), hasMore: section !== "maintained", total: mode === "new-member" ? 0 : 21, counts:mode === "new-member" ? {original:0,update:0,maintained:0} : mode === "submitter-only" ? {original:1,update:1,maintained:0} : {original:21,update:2,maintained:1} }));
     } else if (request.url === "/api/community/v2/catalog/cp_managed/management") {
       if (!["admin","maintainer","governance"].includes(mode)) {response.writeHead(403).end("{}");return;}
       response.end(JSON.stringify({item:managed,canAssignMaintainers:mode === "admin",maintainers:[{name:"Tool maintainer",...(mode === "admin" ? {contributorId:"123456"} : {})}]}));
@@ -288,15 +290,15 @@ test("already signed in users return safely without repeating OAuth", async () =
   assert.equal(good.status, 307);
   assert.equal(good.headers.get("location"), "/community/registry/submit?pipelineId=cp_example");
   const bad = await loginPage("apple", "?returnTo=https%3A%2F%2Fevil.example");
-  assert.equal(bad.headers.get("location"), "/community");
+  assert.equal(bad.headers.get("location"), "/community/account");
   const direct = await loginPage("google");
   assert.equal(direct.status, 307);
-  assert.equal(direct.headers.get("location"), "/community");
+  assert.equal(direct.headers.get("location"), "/community/account");
   const home = await fetch(base + "/community/sign-in", { headers: { cookie: "community_session=google" } });
-  assert.equal(new URL(home.url).pathname, "/");
+  assert.equal(new URL(home.url).pathname, "/community/account");
   const anonymous = await loginPage();
   const html = (await anonymous.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
-  assert.equal((html.match(/returnTo=%2Fcommunity&amp;provider=/g) ?? []).length, 3);
+  assert.equal((html.match(/returnTo=%2Fcommunity%2Faccount&amp;provider=/g) ?? []).length, 3);
 });
 
 test("session failure does not expose a submission form", async () => {
@@ -306,7 +308,8 @@ test("session failure does not expose a submission form", async () => {
 test("completed legacy PR callbacks still show the actual PR", async () => {
   const html = await page("legacy", "?pr=42");
   assert.match(html, /href="https:\/\/github.com\/CrossOmics\/pipeline-registry\/pull\/42"/);
-  assert.doesNotMatch(html, /<form/);
+  const forms=[...html.matchAll(/<form\b[^>]*>/g)].map(match=>match[0]);
+  assert.ok(forms.every(form=>form.includes('action="/api/community/auth/logout"')));
 });
 
 test("failed legacy authorization callbacks explain the outcome without restoring the old form", async () => {
@@ -324,7 +327,7 @@ test("Community root is the registry and keeps query filters", async () => {
   assert.match(html, /action="\/#registry"/);
   assert.match(html, /name="q"[^>]*value="example"/);
   assert.doesNotMatch(html, /<select name="type"/);
-  assert.match(html, /href="\/community\/sign-in\?returnTo=%2Fcommunity"/);
+  assert.match(html, /href="\/community\/sign-in\?returnTo=%2Fcommunity%2Faccount"/);
   assert.doesNotMatch(html, /href="\/tutorial|An Operating System/);
   const header = html.match(/<header\b[^>]*>[\s\S]*?<\/header>/)?.[0];
   const footer = html.match(/<footer\b[^>]*>[\s\S]*?<\/footer>/)?.[0];
@@ -627,7 +630,7 @@ test("maintenance ranking is a native Community route with current home navigati
   assert.match(html, /<h1>Maintenance ranking<\/h1>/);
   assert.match(html, /aria-current="page" href="\/community\/ranking"/);
   assert.match(html, /href="\/#registry"/);
-  assert.match(html, /href="\/community\/sign-in\?returnTo=%2Fcommunity"/);
+  assert.match(html, /href="\/community\/sign-in\?returnTo=%2Fcommunity%2Faccount"/);
   assert.match(html, /Not ranked/);
   assert.match(html, /How the score is computed/);
   assert.doesNotMatch(html, /href="https:\/\/crossomics.github.io\/pipeline-registry\/ranking/);
@@ -716,7 +719,7 @@ test("admin dashboard requires global permission and proxy rejects desktop crede
 
 
 test("public name settings use the self-profile route and survive an older backend",async()=>{
- const response=await fetch(base+"/community/mine",{headers:{cookie:"community_session=ready"}});
+ const response=await fetch(base+"/community/account/settings",{headers:{cookie:"community_session=ready"}});
  const html=(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
  assert.match(html,/Public display name/);assert.match(html,/Jiapeng Zhang/);
  const saved=await fetch(base+"/api/community/v2/me/profile",{method:"PATCH",headers:{cookie:"community_session=ready","content-type":"application/json",origin:base},body:JSON.stringify({displayName:"New public name"})});
@@ -724,9 +727,9 @@ test("public name settings use the self-profile route and survive an older backe
  const bearer=await fetch(base+"/api/community/v2/me/profile",{headers:{cookie:"community_session=ready",authorization:"Bearer desktop"}});assert.equal(bearer.status,403);
  const wrongMethod=await fetch(base+"/api/community/v2/me/profile",{method:"POST",body:"{}"});assert.equal(wrongMethod.status,405);
  const extra=await fetch(base+"/api/community/v2/me/profile/another-user");assert.equal(extra.status,404);
- const old=await fetch(base+"/community/mine",{headers:{cookie:"community_session=profile-old"}});
+ const old=await fetch(base+"/community/account/settings",{headers:{cookie:"community_session=profile-old"}});
  const oldHtml=(await old.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
- assert.match(oldHtml,/public name settings are temporarily unavailable/i);assert.match(oldHtml,/My Contributions/);
+ assert.match(oldHtml,/public name settings are temporarily unavailable/i);assert.match(oldHtml,/Profile settings/);
 });
 
 
@@ -739,4 +742,84 @@ test("contributor search accepts complete supplementary names and explains overl
  const invalid=await fetch(base+"/community/contributors?"+new URLSearchParams({q:"a".repeat(121)}));
  const invalidHtml=(await invalid.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
  assert.match(invalidHtml,/120 characters/);assert.doesNotMatch(invalidHtml,/directory is temporarily unavailable/);
+});
+
+
+async function accountPage(path,mode="ready"){
+ const response=await fetch(base+path,{headers:{cookie:"community_session="+mode},redirect:"manual"});
+ return {response,html:(await response.text()).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "")};
+}
+
+test("account home, settings and security require sign-in with exact return destinations",async()=>{
+ for(const path of ["/community/account","/community/account/settings","/community/account/security"]){
+  const {response}=await accountPage(path,"anonymous");assert.equal(response.status,307,path);
+  assert.equal(response.headers.get("location"),"/community/sign-in?"+new URLSearchParams({returnTo:path}));
+ }
+ const {html}=await accountPage("/community/account","session-error");
+ assert.match(html,/account.*temporarily unavailable/i);assert.doesNotMatch(html,/name="displayName"|Generate access token/);
+});
+
+test("signed-in account home unifies personal destinations and public profile without placing settings in contributions",async()=>{
+ const {response,html}=await accountPage("/community/account");assert.equal(response.status,200);
+ assert.match(html,/Account home/);assert.match(html,/Jiapeng Zhang/);
+ for(const path of ["/community/mine","/community/registry/submissions","/community/account/settings","/community/account/security"])assert.ok(html.includes('href="'+path+'"'),path);
+ assert.match(html,/aria-label="Account navigation"/);assert.match(html,/aria-label="Account menu"/);
+ assert.match(html,/View public profile/);assert.match(html,/contributor_aaaaaaaa/);
+ const mine=await accountPage("/community/mine?originalPage=2&updatePage=3");
+ assert.match(mine.html,/aria-label="Account navigation"/);assert.doesNotMatch(mine.html,/name="displayName"|Generate access token|Contributor ID/);
+ assert.match(mine.html,/originalPage=3/);assert.match(mine.html,/updatePage=4/);
+});
+
+test("sign-in settings identify this session and distinguish site methods from connected accounts",async()=>{
+ for(const [mode,provider] of [["ready","GitHub"],["google","Google"],["apple","Apple"],["profile-old","GitHub"],["provider-disabled","GitHub"]]){
+  const {response,html}=await accountPage("/community/account/security",mode);assert.equal(response.status,200);
+  assert.match(html,new RegExp('<dt>Current sign-in method</dt><dd>'+provider+'</dd>'));
+  assert.match(html,/Available on this site|Not available on this site/);
+  assert.match(html,/Generate access token/);assert.doesNotMatch(html,/Connect Google|Connect Apple|Linked account|member-0123456789abcdef/);
+ }
+});
+
+test("account navigation gates each administration shortcut without granting permission",async()=>{
+ for(const mode of ["ready","google","admin","bounty-admin"]){
+  const {html}=await accountPage("/community/account",mode);
+  assert.equal(html.includes('href="/community/admin"'),mode === "admin");
+  assert.equal(html.includes('href="/community/registry/submissions?all=1"'),mode === "admin");
+  assert.equal(html.includes('Request management'),mode === "bounty-admin");
+ }
+ const denied=await accountPage("/community/admin","ready");assert.match(denied.html,/Administrator access required/);assert.doesNotMatch(denied.html,/Manage registered tools/);
+});
+
+test("every member has a private home even without a public profile and old profile APIs degrade gracefully",async()=>{
+ const fresh=await accountPage("/community/account","new-member");assert.equal(fresh.response.status,200);
+ assert.match(fresh.html,/Account home/);assert.match(fresh.html,/first public contribution|public activity/i);
+ assert.doesNotMatch(fresh.html,/View public profile|href="\/community\/contributors\/contributor_b/);
+ const old=await accountPage("/community/account","profile-old");assert.equal(old.response.status,200);assert.match(old.html,/test-user/);assert.match(old.html,/public profile.*unavailable/i);
+});
+
+test("public personal home shows only public contribution summaries and identity",async()=>{
+ const {response,html}=await accountPage("/community/contributors/contributor_"+"a".repeat(64),"anonymous");assert.equal(response.status,200);
+ assert.match(html,/Public contribution summary/);assert.match(html,/Public Researcher/);
+ assert.doesNotMatch(html,/Account navigation|name="displayName"|Generate access token|Contributor ID|google:|reviewer_id/);
+});
+
+
+test("account home previews work for submitters without maintenance assignments",async()=>{
+ const {html}=await accountPage("/community/account","submitter-only");
+ assert.match(html,/My submitted tool/);assert.doesNotMatch(html,/Nothing in this group yet/);
+});
+test("sign-in method availability is independent of the current session",async()=>{
+ const {html}=await accountPage("/community/account/security","provider-disabled");
+ const github=html.match(/<li><strong>GitHub<\/strong><span>([\s\S]*?)<\/span>/)?.[1]?.replace(/<!--.*?-->/g,"");
+ assert.match(github,/Current session/);assert.match(github,/Not available on this site/);
+});
+
+
+test("account pages use compact workspace chrome while public pages retain Community navigation",async()=>{
+ const {html}=await accountPage("/community/account");
+ assert.doesNotMatch(html,/aria-label="Breadcrumb"|aria-label="Community"/);
+ assert.match(html,/aria-label="Account navigation"/);
+ assert.match(html,/<h1>Jiapeng Zhang<\/h1>/);
+ assert.match(html,/Your contribution summary/);assert.match(html,/View public profile/);
+ const pub=await accountPage("/community/contributors","anonymous");
+ assert.match(pub.html,/aria-label="Breadcrumb"/);assert.match(pub.html,/aria-label="Community"/);
 });

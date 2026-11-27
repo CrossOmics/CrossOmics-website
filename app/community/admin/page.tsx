@@ -1,3 +1,4 @@
+import AccountFrame from "../account/AccountFrame";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { communitySession, adminTools } from "@/lib/community/service";
@@ -13,7 +14,7 @@ export default async function Administration({searchParams}: {searchParams:Promi
   const q = typeof query.q === "string" ? query.q : "";
   const data = await adminTools({q,page:query.page});
   const pageHref = (page:number) => "/community/admin?" + new URLSearchParams({q,page:String(page)});
-  return <>
+  return <AccountFrame>
     <header className="community-heading"><Link className="community-link" href="/community/mine">← My Contributions</Link><h1>Administration</h1>
       <p>Manage registered tools and their community maintainers.</p><div className="community-actions"><span className="community-tag">Super Administrator</span><Link className="community-secondary" href="/community/registry/submissions?all=1">Review submissions</Link></div></header>
     <section className="community-section"><h2>Manage registered tools</h2>
@@ -28,5 +29,5 @@ export default async function Administration({searchParams}: {searchParams:Promi
           {data.hasMore && <Link className="community-secondary" href={pageHref(data.page+1)}>Next page</Link>}</nav>}
       </>}
     </section>
-  </>;
+  </AccountFrame>;
 }
