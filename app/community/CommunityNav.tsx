@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import AccountMenu from "./AccountMenu";
+import type { AccountCapabilities } from "@/lib/community/account-links";
 import { NAV } from "@/lib/nav";
 import { usePathname } from "next/navigation";
 import { communitySignInPath } from "@/lib/community/return-path";
 
 
-export default function CommunityNav({ signedIn }: { signedIn: boolean }) {
+export default function CommunityNav({ signedIn, accountName = "My account", ...capabilities }: { signedIn: boolean; accountName?: string } & AccountCapabilities) {
   const path = usePathname();
-  // This allowed OAuth return path redirects to the Community home at /.
-  const signInHref = communitySignInPath("/community");
+  const signInHref = communitySignInPath("/community/account");
   return (
     <nav className="community-nav" aria-label="Community">
       <div className="community-nav-links">
@@ -21,7 +22,7 @@ export default function CommunityNav({ signedIn }: { signedIn: boolean }) {
       </div>
       <div className="community-nav-actions">
         {signedIn ? (
-          <Link href="/community/mine" className="community-secondary" aria-current={path === "/community/mine" ? "page" : undefined}>My Contributions</Link>
+          <AccountMenu name={accountName} {...capabilities} />
         ) : (
           <Link href={signInHref} className="community-secondary">Sign in</Link>
         )}

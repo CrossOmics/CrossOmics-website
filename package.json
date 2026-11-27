@@ -9,9 +9,9 @@
     "lint": "next lint",
     "test:community": "node --test tests/community.mjs",
     "test:registry-submit": "node --test tests/registry-submit.mjs tests/form-copy.mjs tests/site-links.mjs tests/registry-metadata.mjs tests/lineage.mjs tests/update-verification.mjs",
-    "test:registry": "node --test tests/community-registry.mjs tests/repository-lineage.mjs tests/contributor-profile.mjs tests/public-name.mjs",
+    "test:registry": "node --test tests/community-registry.mjs tests/repository-lineage.mjs tests/contributor-profile.mjs tests/public-name.mjs tests/account-menu.mjs",
     "test:governance": "node --test tests/governance.mjs tests/governance-forms.mjs",
-    "test": "node --test tests/community-registry.mjs tests/repository-lineage.mjs tests/contributor-profile.mjs tests/public-name.mjs tests/registry-submit.mjs tests/form-copy.mjs tests/site-links.mjs tests/registry-metadata.mjs tests/lineage.mjs tests/update-verification.mjs tests/governance.mjs tests/governance-forms.mjs"
+    "test": "node --test tests/community-registry.mjs tests/repository-lineage.mjs tests/contributor-profile.mjs tests/public-name.mjs tests/account-menu.mjs tests/registry-submit.mjs tests/form-copy.mjs tests/site-links.mjs tests/registry-metadata.mjs tests/lineage.mjs tests/update-verification.mjs tests/governance.mjs tests/governance-forms.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

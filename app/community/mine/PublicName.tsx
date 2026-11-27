@@ -41,6 +41,6 @@ export default function PublicName({ profile }: { profile: MyPublicProfile | nul
         <div className="community-actions"><button className="community-primary" type="submit" disabled={busy}>{busy ? "Saving…" : "Save public name"}</button><span role="status">{status}</span></div>
         {error && <p role="alert">{error}</p>}
       </form>
-    </> : <p>Public name settings are temporarily unavailable. Your contribution history is still available below.</p>}
+    </> : <p>Public name settings are temporarily unavailable. Your other account pages remain available.</p>}
   </section>;
 }

@@ -34,6 +34,7 @@ export const communitySession = cache(async function () {
   const session = await communityData<{
     contributor: Contributor | null;
     signInAvailable: boolean;
+    signInProvider?: SignInProvider | null;
     sessionDurationDays?: number;
     signInProviders?: SignInProvider[];
     registrySubmissionAvailable?: boolean;
@@ -51,6 +52,7 @@ export const communitySession = cache(async function () {
   const fallback: SignInProvider[] = session.signInAvailable ? ["github"] : [];
   return {
     contributor: session.contributor,
+    signInProvider: session.signInProvider && ["github","google","apple"].includes(session.signInProvider) ? session.signInProvider : null,
     sessionDurationDays: Number.isInteger(session.sessionDurationDays) && session.sessionDurationDays! >= 1 && session.sessionDurationDays! <= 90
       ? session.sessionDurationDays! : 7,
     providers: session.signInProviders ?? fallback,
@@ -241,7 +243,7 @@ export async function adminTools(filters: { q?: string; page?: string }) {
 
 
 export type MyPublicProfile = { displayName: string | null; contributor: PublicContributor };
-export async function myPublicProfile() {
+export const myPublicProfile = cache(async function myPublicProfile() {
   try { return await communityData<MyPublicProfile>("me/profile", true, "v2"); }
   catch { return null; }
-}
+});
